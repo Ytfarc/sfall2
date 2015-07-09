@@ -18,15 +18,15 @@
 
 #include "main.h"
 
-#include "HookScripts.h"
-#include "ScriptExtender.h"
-#include "FalloutEngine.h"
-#include "PartyControl.h"
-#include "Inventory.h"
-//#include "vector9x.cpp"
-#include <vector>
 #include <string>
+#include <vector>
+#include "Define.h"
+#include "FalloutEngine.h"
+#include "HookScripts.h"
+#include "Inventory.h"
 #include "Logging.h"
+#include "PartyControl.h"
+#include "ScriptExtender.h"
 
 #define MAXDEPTH (8)
 static const int numHooks = 25;
@@ -535,13 +535,13 @@ static void __declspec(naked) BarterPriceHook() {
   mov args[0], eax;
   mov args[4], edx;
   call _barter_compute_value;
-  mov edx, ds:[0x59E944];
+  mov edx, ds:[_btable]
   mov args[8], eax;
   mov args[12], edx;
   xchg eax, edx;
   call _item_caps_total;
   mov args[16], eax;
-  mov eax, ds:[0x59E944];
+  mov eax, ds:[_btable]
   call _item_total_cost;
   mov args[20], eax;
   mov eax, edx;

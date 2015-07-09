@@ -252,8 +252,7 @@ static void __declspec(naked) SetCritterBaseStat() {
   //set the new value
   mov edx, esp;
   mov eax, [eax+0x64];
-  mov ebx, 0x4A2108;
-  call ebx;
+  call proto_ptr_
   mov eax, [esp];
   add eax, 0x20;
   mov ds:[eax + esi*4 + 4], edi;
@@ -318,8 +317,7 @@ static void __declspec(naked) SetCritterExtraStat() {
   //set the new value
   mov edx, esp;
   mov eax, [eax+0x64];
-  mov ebx, 0x4A2108;
-  call ebx;
+  call proto_ptr_
   mov eax, [esp];
   add eax, 0x20;
   mov ds:[eax + esi*4 + 0x90], edi;
@@ -372,8 +370,7 @@ static void __declspec(naked) GetCritterBaseStat() {
   //set the new value
   mov edx, esp;
   mov eax, [eax+0x64];
-  mov ebx, 0x4A2108;
-  call ebx;
+  call proto_ptr_
   mov eax, [esp];
   add eax, 0x20;
   mov edx, ds:[eax + edi*4 + 4];
@@ -436,8 +433,7 @@ static void __declspec(naked) GetCritterExtraStat() {
   //set the new value
   mov edx, esp;
   mov eax, [eax+0x64];
-  mov ebx, 0x4A2108;
-  call ebx;
+  call proto_ptr_
   mov eax, [esp];
   add eax, 0x20;
   mov edx, ds:[eax + edi*4 + 0x90];
@@ -501,8 +497,7 @@ static void __declspec(naked) set_critter_skill_points() {
   //set the new value
   mov eax, [eax+0x64];
   mov edx, esp;
-  mov ebx, 0x4A2108;
-  call ebx;
+  call proto_ptr_
   mov eax, [esp];
   mov [eax+0x13c+esi*4], edi;
 end:
@@ -542,8 +537,7 @@ static void __declspec(naked) get_critter_skill_points() {
   //get the value
   mov eax, [eax+0x64];
   mov edx, esp;
-  mov ebx, 0x4A2108;
-  call ebx;
+  call proto_ptr_
   mov eax, [esp];
   mov edx, [eax+0x13c+esi*4];
   jmp end;
@@ -583,7 +577,7 @@ static void __declspec(naked) get_available_skill_points() {
  __asm {
   pushad;
   mov ecx, eax;
-  mov edx, dword ptr ds:[0x6681AC];
+  mov edx, dword ptr ds:[_curr_pc_stat]
   call SetResult;
   mov edx, 0xc001;
   mov eax, ecx;
@@ -647,7 +641,7 @@ end:
   retn;
  }
 }
-#define COMBAT_FREE_MOVE_ADR 0x56D39C
+
 static void __declspec(naked) SetCritterAP() {
  __asm {
   //Store registers
@@ -678,7 +672,7 @@ static void __declspec(naked) SetCritterAP() {
   cmp ecx, eax;
   jne end;
   mov eax, ebx;
-  mov edx, ds:[COMBAT_FREE_MOVE_ADR];
+  mov edx, ds:[_combat_free_move]
   call intface_update_move_points_;
 end:
   //Restore registers and return

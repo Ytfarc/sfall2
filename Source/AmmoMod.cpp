@@ -566,7 +566,7 @@ end:
 
 static void __declspec(naked) item_w_damage_hook() {
  __asm {
-  cmp  ecx, dword ptr ds:[_obj_dude]        // _obj_dude
+  cmp  ecx, dword ptr ds:[_obj_dude]
   jne  skip
   mov  edx, PERK_bonus_hth_damage
   mov  eax, ecx
@@ -582,7 +582,7 @@ skip:
 static void __declspec(naked) item_w_damage_hook1() {
  __asm {
   call stat_level_
-  cmp  ecx, dword ptr ds:[_obj_dude]        // _obj_dude
+  cmp  ecx, dword ptr ds:[_obj_dude]
   jne  skip
   push eax
   mov  edx, PERK_bonus_hth_damage
@@ -599,7 +599,7 @@ skip:
 static void __declspec(naked) display_stats_hook() {
  __asm {
   mov  edx, PERK_bonus_hth_damage
-  mov  eax, dword ptr ds:[0x59E86C]         // _stack
+  mov  eax, dword ptr ds:[_stack]
   call perk_level_
   shl  eax, 1
   add  dword ptr [esp+4*4], eax             // min_dmg

@@ -35,7 +35,6 @@ DWORD* itemButtonItems = (DWORD*)(0x5970F8);
 */
 
 // PROTO FUNCTIONS
-const DWORD proto_ptr_ = 0x4A2108; // eax - PID, edx - int** - pointer to a pointer to a proto struct
 const DWORD item_w_max_ammo_ = 0x478674; // eax - object
 const DWORD item_w_cur_ammo_ = 0x4786A0; // eax - object
 
@@ -43,8 +42,6 @@ const DWORD item_w_cur_ammo_ = 0x4786A0; // eax - object
 const DWORD ai_can_use_weapon_ = 0x4298EC;  // (TGameObj *aCritter<eax>, int aWeapon<edx>, int a2Or3<ebx>) returns 1 or 0
 
 // UI FUNCTIONS
-const DWORD isPartyMember_ = 0x494FC4; // eax - object
-const DWORD intface_redraw_ = 0x45EB98;
 const DWORD interface_disable_ = 0x45EAFC;
 const DWORD interface_enable_ = 0x45EA64;
 const DWORD intface_toggle_items_ = 0x45F404;
@@ -60,7 +57,6 @@ const DWORD obj_move_to_tile_ = 0x48A568;  // int aObj<eax>, int aTile<edx>, int
 
 const DWORD obj_find_first_at_tile_ = 0x48B5A8; //  <eax>(int elevation<eax>, int tile<edx>)
 const DWORD obj_find_next_at_tile_ = 0x48B608; // no args
-const DWORD critter_is_dead_ = 0x42DD18; // eax - critter
 
 // ANIMATION
 const DWORD tile_refresh_rect_ = 0x4B12C0; // (int elevation<edx>, unkown<ecx>)
@@ -80,28 +76,28 @@ const DWORD register_object_turn_towards_ = 0x414C50; // int aObj<eax>, int aTil
 int __stdcall ItemGetType(TGameObj* item) {
  __asm {
   mov eax, item;
-  call item_get_type_;
+  call item_get_type_
  }
 }
 
 int _stdcall IsPartyMember(TGameObj* obj) {
  __asm {
   mov eax, obj;
-  call isPartyMember_;
+  call isPartyMember_
  }
 }
 
 TGameObj* GetInvenWeaponLeft(TGameObj* obj) {
  __asm {
   mov eax, obj;
-  call inven_left_hand_;
+  call inven_left_hand_
  }
 }
 
 TGameObj* GetInvenWeaponRight(TGameObj* obj) {
  __asm {
   mov eax, obj;
-  call inven_right_hand_;
+  call inven_right_hand_
  }
 }
 
@@ -111,7 +107,7 @@ char* GetProtoPtr(DWORD pid) {
  __asm {
   mov eax, pid;
   lea edx, proto;
-  call proto_ptr_;
+  call proto_ptr_
  }
  return proto;
 }
@@ -164,10 +160,13 @@ const DWORD buf_to_buf_ = 0x4D36D4;
 const DWORD Check4Keys_ = 0x43F73C;
 const DWORD combat_should_end_ = 0x422C60;
 const DWORD combat_turn_ = 0x42299C;
+const DWORD credits_ = 0x42C860;
 const DWORD critter_body_type_ = 0x42DDC4;
 const DWORD critter_can_obj_dude_rest_ = 0x42E564;
+const DWORD critter_is_dead_ = 0x42DD18;
 const DWORD critter_name_ = 0x42D0A8;
 const DWORD critter_pc_set_name_ = 0x42D138;
+const DWORD critterClearObjDrugs_ = 0x42DA54;
 const DWORD db_fclose_ = 0x4C5EB4;
 const DWORD dialog_out_ = 0x41CF20;
 const DWORD display_inventory_ = 0x46FDF4;
@@ -183,14 +182,17 @@ const DWORD gmouse_is_scrolling_ = 0x44B54C;
 const DWORD gsnd_build_weapon_sfx_name_ = 0x451760;
 const DWORD gsound_play_sfx_file_ = 0x4519A8;
 const DWORD insert_withdrawal_ = 0x47A290;
+const DWORD intface_redraw_ = 0x45EB98;
 const DWORD intface_update_hit_points_ = 0x45EBD8;
 const DWORD intface_update_items_ = 0x45EFEC;
 const DWORD intface_update_move_points_ = 0x45EE0C;
+const DWORD inven_display_msg_ = 0x472D24;
 const DWORD inven_left_hand_ = 0x471BBC;
 const DWORD inven_right_hand_ = 0x471B70;
 const DWORD inven_unwield_ = 0x472A54;
 const DWORD inven_wield_ = 0x472758;
 const DWORD inven_worn_ = 0x471C08;
+const DWORD isPartyMember_ = 0x494FC4;
 const DWORD item_add_force_ = 0x4772B8;
 const DWORD item_c_curr_size_ = 0x479A20;
 const DWORD item_c_max_size_ = 0x479A00;
@@ -200,6 +202,7 @@ const DWORD item_get_type_ = 0x477AFC;
 const DWORD item_move_all_ = 0x4776AC;
 const DWORD item_mp_cost_ = 0x478040;
 const DWORD item_remove_mult_ = 0x477490;
+const DWORD item_size_ = 0x477B68;
 const DWORD item_total_weight_ = 0x477E98;
 const DWORD item_w_anim_code_ = 0x478DA8;
 const DWORD item_w_anim_weap_ = 0x47860C;
@@ -214,6 +217,10 @@ const DWORD obj_change_fid_ = 0x48AA3C;
 const DWORD obj_connect_ = 0x489EC4;
 const DWORD obj_destroy_ = 0x49B9A0;
 const DWORD obj_dist_ = 0x48BBD4;
+const DWORD obj_find_first_at_ = 0x48B48C;
+const DWORD obj_find_next_at_ = 0x48B510;
+const DWORD obj_outline_object_ = 0x48C2B4;
+const DWORD obj_remove_outline_ = 0x48C2F0;
 const DWORD obj_use_book_ = 0x49B9F0;
 const DWORD obj_use_power_on_car_ = 0x49BDE8;
 const DWORD partyMemberCopyLevelInfo_ = 0x495EA8;
@@ -230,11 +237,13 @@ const DWORD perks_dialog_ = 0x43C4F0;
 const DWORD pip_back_ = 0x497B64;
 const DWORD pip_print_ = 0x497A40;
 const DWORD PipStatus_ = 0x497BD8;
+const DWORD proto_ptr_ = 0x4A2108;
 const DWORD queue_clear_type_ = 0x4A2790;
 const DWORD queue_find_first_ = 0x4A295C;
 const DWORD queue_find_next_ = 0x4A2994;
 const DWORD roll_random_ = 0x4A30C0;
 const DWORD RestorePlayer_ = 0x43A8BC;
+const DWORD scr_exec_map_update_scripts_ = 0x4A67E4;
 const DWORD scr_write_ScriptNode_ = 0x4A5704;
 const DWORD skill_dec_point_ = 0x4AA8C4;
 const DWORD skill_get_tags_ = 0x4AA508;

@@ -27,7 +27,7 @@ static void __declspec(naked) GetPerkOwed() {
  __asm {
   pushad;
   mov ecx, eax;
-  movzx edx, byte ptr ds:[0x570A29];
+  movzx edx, byte ptr ds:[_free_perk];
   call SetResult;
   mov edx, 0xc001;
   mov eax, ecx;
@@ -49,7 +49,7 @@ static void __declspec(naked) SetPerkOwed() {
   and eax, 0xff;
   cmp eax, 250;
   jg end;
-  mov byte ptr ds:[0x570A29], al
+  mov byte ptr ds:[_free_perk], al
 end:
   popad
   retn;
@@ -85,7 +85,7 @@ static void __declspec(naked) GetPerkAvailable() {
   cmp eax, 119;
   jge fail;
   mov edx, eax;
-  mov eax, _obj_dude
+  mov eax, ds:[_obj_dude]
   mov ebx, 0x00496B44;
   call ebx;
   mov edx, eax;

@@ -18,8 +18,9 @@
 
 #include "main.h"
 
-#include "Version.h"
 #include <stdio.h>
+#include "FalloutEngine.h"
+#include "Version.h"
 
 static DWORD InCredits=0;
 static DWORD CreditsLine=0;
@@ -79,8 +80,7 @@ static void _stdcall ShowCreditsHook() {
  CreditsLine=0;
  __asm {
   mov eax, creditsFile;
-  mov ebx, 0x42C860;
-  call ebx;
+  call credits_
  }
  InCredits=0;
 }

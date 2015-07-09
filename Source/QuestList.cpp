@@ -17,6 +17,8 @@
  */
 
 #include "main.h"
+
+#include "Define.h"
 #include "FalloutEngine.h"
 
 static DWORD zone_number = 0;
@@ -32,7 +34,7 @@ static void __declspec(naked) StartPipboy_hook() {
   pushad
   push 0
   mov  edx, 49                              // INVUPOUT.FRM
-  mov  eax, 6
+  mov  eax, ObjType_Intrface
   xor  ecx, ecx
   xor  ebx, ebx
   call art_id_
@@ -45,7 +47,7 @@ static void __declspec(naked) StartPipboy_hook() {
   xchg ebp, eax
   push 0
   mov  edx, 50                              // INVUPIN.FRM
-  mov  eax, 6
+  mov  eax, ObjType_Intrface
   xor  ecx, ecx
   xor  ebx, ebx
   call art_id_
@@ -58,7 +60,7 @@ static void __declspec(naked) StartPipboy_hook() {
   xchg edi, eax
   push 0
   mov  edx, 53                              // INVUPDS.FRM
-  mov  eax, 6
+  mov  eax, ObjType_Intrface
   xor  ecx, ecx
   xor  ebx, ebx
   call art_id_
@@ -84,9 +86,9 @@ static void __declspec(naked) StartPipboy_hook() {
   push ebx                                  // Height
   mov  edx, QuestsScrollButtonsX            // Xpos
   mov  ebx, QuestsScrollButtonsY            // Ypos
-  mov  eax, ds:[0x6644C4]                   // WinRef = _pip_win
+  mov  eax, ds:[_pip_win]                   // WinRef
   call win_register_button_
-  mov  ds:[0x5190E4], eax                   // _inven_scroll_up_bid
+  mov  ds:[_inven_scroll_up_bid], eax
   cmp  eax, -1
   je   noUpButton
   mov  edi, eax
@@ -100,7 +102,7 @@ noUpButton:
 // load new texture for second (down) button
   push 0
   mov  edx, 51                              // INVDNOUT.FRM
-  mov  eax, 6
+  mov  eax, ObjType_Intrface
   xor  ecx, ecx
   xor  ebx, ebx
   call art_id_
@@ -113,7 +115,7 @@ noUpButton:
   xchg ebp, eax
   push 0
   mov  edx, 52                              // INVDNIN.FRM
-  mov  eax, 6
+  mov  eax, ObjType_Intrface
   xor  ecx, ecx
   xor  ebx, ebx
   call art_id_
@@ -126,7 +128,7 @@ noUpButton:
   xchg edi, eax
   push 0
   mov  edx, 54                              // INVDNDS.FRM
-  mov  eax, 6
+  mov  eax, ObjType_Intrface
   xor  ecx, ecx
   xor  ebx, ebx
   call art_id_
@@ -152,9 +154,9 @@ noUpButton:
   push ebx                                  // Height
   mov  edx, QuestsScrollButtonsX            // Xpos
   add  ebx, QuestsScrollButtonsY            // Ypos
-  mov  eax, ds:[0x6644C4]                   // WinRef = _pip_win
+  mov  eax, ds:[_pip_win]                   // WinRef
   call win_register_button_
-  mov  ds:[0x5190E8], eax                   // _inven_scroll_dn_bid
+  mov  ds:[_inven_scroll_dn_bid], eax
   cmp  eax, -1
   je   noDownButton
   mov  edi, eax
@@ -174,11 +176,11 @@ noDownButton:
 static const DWORD pipboy_hook_End = 0x49708D;
 static void __declspec(naked) pipboy_hook() {
  __asm {
-  cmp  byte ptr ds:[0x66452A], 0            // _stat_flag
+  cmp  byte ptr ds:[_stat_flag], 0
   je   end
   cmp  zone_number, 0
   je   end
-  mov  eax, ds:[0x664520]                   // _view_page
+  mov  eax, ds:[_view_page]
   cmp  ebx, 0x149                           // Page Up?
   jne  notPgUp
   test eax, eax
@@ -190,11 +192,11 @@ endZone:
 notPgUp:
   cmp  ebx, 0x151                           // Page Down?
   jne  checkClickBug
-  cmp  eax, ds:[0x66445C]                   // _holopages
+  cmp  eax, ds:[_holopages]
   je   noKey
   inc  eax
 click:
-  mov  ds:[0x664520], eax                   // _view_page
+  mov  ds:[_view_page], eax
   mov  eax, 0x50CC50                        // 'ib1p1xx1'
   call gsound_play_sfx_file_
   mov  ebx, zone_number
@@ -207,7 +209,7 @@ checkClickBug:
 noKey:
   xor  ebx, ebx
 end:
-  mov  edx, 0x664450                        // _mouse_y
+  mov  edx, _mouse_y
   jmp  pipboy_hook_End
  }
 }
@@ -216,14 +218,14 @@ static const DWORD pipboy_hook1_End = 0x4971B8;
 static void __declspec(naked) pipboy_hook1() {
  __asm {
   push eax
-  mov  edx, ds:[0x664508]                   // _crnt_func
+  mov  edx, ds:[_crnt_func]
   test edx, edx
   jnz  end
   cmp  zone_number, 0
   mov  zone_number, ebx
-  mov  ds:[0x66445C], edx                   // _holopages
+  mov  ds:[_holopages], edx
   jne  end
-  mov  eax, ds:[0x5190E4]                   // _inven_scroll_up_bid
+  mov  eax, ds:[_inven_scroll_up_bid]
   cmp  eax, -1
   je   end
   call win_enable_button_
@@ -242,12 +244,12 @@ static void __declspec(naked) PipStatus_hook() {
   mov  ax, [esp+0x4A4]                      // Количество строк + 1
   dec  eax                                  // Количество строк
   shl  eax, 1                               // На каждую строку по две линии
-  mov  ecx, ds:[0x664514]                   // _cursor_line
+  mov  ecx, ds:[_cursor_line]
   add  ecx, eax                             // Номер линии после вывода текста
-  cmp  ecx, ds:[0x664524]                   // _bottom_line
+  cmp  ecx, ds:[_bottom_line]
   jl   currentPage                          // Все строки вписываются
-  mov  dword ptr ds:[0x664514], 3           // _cursor_line
-  inc  dword ptr ds:[0x66445C]              // _holopages
+  mov  dword ptr ds:[_cursor_line], 3
+  inc  dword ptr ds:[_holopages]
   mov  eax, 20
   sub  dword ptr [esp+0x490], eax
   dec  dword ptr [esp+0x494]                // Номер текущего квеста
@@ -255,10 +257,10 @@ static void __declspec(naked) PipStatus_hook() {
   dec  dword ptr [esp+0x4A0]                // Номер квеста в списке квестов
   jmp  noWrite
 currentPage:
-  mov  eax, ds:[0x664520]                   // _view_page
-  cmp  eax, ds:[0x66445C]                   // _holopages
+  mov  eax, ds:[_view_page]
+  cmp  eax, ds:[_holopages]
   je   end
-  mov  ds:[0x664514], ecx                   // _cursor_line
+  mov  ds:[_cursor_line], ecx
 noWrite:
   mov  word ptr [esp+0x4A4], 1              // Количество строк
 end:
@@ -271,11 +273,11 @@ static void __declspec(naked) DownButton() {
  __asm {
   push eax
   push edx
-  mov  eax, ds:[0x5190E8]                   // _inven_scroll_dn_bid
+  mov  eax, ds:[_inven_scroll_dn_bid]
   cmp  eax, -1
   je   end
-  mov  edx, ds:[0x664520]                   // _view_page
-  cmp  edx, ds:[0x66445C]                   // _holopages
+  mov  edx, ds:[_view_page]
+  cmp  edx, ds:[_holopages]
   je   disableButton
   call win_enable_button_
   jmp  end
@@ -292,18 +294,18 @@ static void __declspec(naked) PipStatus_hook1() {
  __asm {
   call DownButton
   call pip_back_
-  mov  eax, ds:[0x66445C]                   // _holopages
+  mov  eax, ds:[_holopages]
   test eax, eax
   jz   end
   push edx
   inc  eax
   push eax
   mov  ebx, 212                             // 'из'
-  mov  edx, 0x664338                        // _pipmesg
-  mov  eax, 0x664348                        // _pipboy_message_file
+  mov  edx, _pipmesg
+  mov  eax, _pipboy_message_file
   call getmsg_
   push eax
-  mov  eax, ds:[0x664520]                   // _view_page
+  mov  eax, ds:[_view_page]
   inc  eax
   push eax
   push 0x50CD30                             // '%d %s %d'
@@ -313,8 +315,8 @@ static void __declspec(naked) PipStatus_hook1() {
   add  esp, 0x14
   xor  ebx, ebx
   inc  ebx
-  mov  ds:[0x664514], ebx                   // _cursor_line
-  mov  bl, ds:[0x6A3CB0]                    // GreenColor
+  mov  ds:[_cursor_line], ebx
+  mov  bl, ds:[_GreenColor]
   mov  edx, 0x20
   lea  eax, [esp+0x8]
   call pip_print_
@@ -337,13 +339,13 @@ static void __declspec(naked) DisableButtons() {
   push eax
   xor  eax, eax
   mov  zone_number, eax
-  mov  ds:[0x66445C], eax                   // _holopages
-  mov  eax, ds:[0x5190E4]                   // _inven_scroll_up_bid
+  mov  ds:[_holopages], eax
+  mov  eax, ds:[_inven_scroll_up_bid]
   cmp  eax, -1
   je   noUpButton
   call win_disable_button_
 noUpButton:
-  mov  eax, ds:[0x5190E8]                   // _inven_scroll_dn_bid
+  mov  eax, ds:[_inven_scroll_dn_bid]
   cmp  eax, -1
   je   noDownButton
   call win_disable_button_

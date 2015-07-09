@@ -300,7 +300,7 @@ static void __declspec(naked) Combat_p_procFix() {
  __asm {
   push eax;
 
-  mov eax,dword ptr ds:[0x510944];
+  mov eax,dword ptr ds:[_combat_state]
   cmp eax,3;
   jnz end_cppf;
 
@@ -522,7 +522,7 @@ static void __declspec(naked) CorpseHitFix2() {
  __asm {
   push eax;
   mov eax, [eax];
-  call critter_is_dead_; // found some object, check if it's a dead critter
+  call critter_is_dead_ // found some object, check if it's a dead critter
   test eax, eax;
   pop eax;
   jz really_end; // if not, allow breaking the loop (will return this object)
@@ -542,7 +542,7 @@ static const DWORD CorpseHitFix2_continue_loop2 = 0x48BA0B;
 static void __declspec(naked) CorpseHitFix2b() {
  __asm {
   mov eax, [edx];
-  call critter_is_dead_;
+  call critter_is_dead_
   test eax, eax;
   jz really_end; 
   jmp CorpseHitFix2_continue_loop2;
@@ -570,7 +570,7 @@ retry:
   call _combat_ai;
   pop  edx
 process:
-  cmp dword ptr ds:[0x51093C], 0;
+  cmp dword ptr ds:[_combat_turn_running], 0
   jle next;
   call _process_bk;
   jmp process;
@@ -686,7 +686,7 @@ static void __declspec(naked) NPCStage6Fix1() {
   mov eax,0xcc;    // set record size to 204 bytes
   imul eax,edx;    // multiply by number of NPC records in party.txt
   call mem_malloc;   // malloc the necessary memory
-  mov edx,dword ptr ds:[0x519d9c]; // retrieve number of NPC records in party.txt
+  mov edx,dword ptr ds:[_partyMemberMaxCount]; // retrieve number of NPC records in party.txt
   mov ebx,0xcc;    // set record size to 204 bytes
   imul ebx,edx;    // multiply by number of NPC records in party.txt
   jmp NPCStage6Fix1End;   // call memset to set all malloc'ed memory to 0
@@ -848,7 +848,7 @@ static void __declspec(naked) get_input_str_hook() {
  __asm {
   push ecx
   mov  cl, XltKey
-  test byte ptr ds:[0x51E2EA], cl           // kb_lock_flags
+  test byte ptr ds:[_kb_lock_flags], cl
   jz   end
   mov  ecx, offset XltTable
   and  eax, 0xFF
@@ -864,7 +864,7 @@ static void __declspec(naked) get_input_str2_hook() {
  __asm {
   push edx
   mov  dl, XltKey
-  test byte ptr ds:[0x51E2EA], dl           // kb_lock_flags
+  test byte ptr ds:[_kb_lock_flags], dl
   jz   end
   mov  edx, offset XltTable
   and  eax, 0xFF
@@ -931,18 +931,18 @@ notFour:
 static void __declspec(naked) FirstTurnAndNoEnemy() {
  __asm {
   xor  eax, eax
-  test byte ptr ds:[0x510944], 1            // _combat_state
+  test byte ptr ds:[_combat_state], 1
   jz   end                                  // Не в бою
-  cmp  dword ptr ds:[0x510940], eax         // _combatNumTurns
+  cmp  dword ptr ds:[_combatNumTurns], eax
   jne  end                                  // Это не первый ход
   call combat_should_end_
   test eax, eax                             // Враги есть?
   jz   end                                  // Да
   pushad
-  mov  ecx, ds:[0x56D37C]                   // _list_total
-  mov  edx, ds:[_obj_dude]                  // _obj_dude
+  mov  ecx, ds:[_list_total]
+  mov  edx, ds:[_obj_dude]
   mov  edx, [edx+0x50]                      // team_num группы поддержки игрока
-  mov  edi, ds:[0x56D390]                   // _combat_list
+  mov  edi, ds:[_combat_list]
 loopCritter:
   mov  eax, [edi]                           // eax = персонаж
   mov  ebx, [eax+0x50]                      // team_num группы поддержки персонажа
@@ -976,7 +976,7 @@ static void __declspec(naked) FirstTurnCheckDist() {
   pop  eax
   jle  end                                  // Нет
   lea  edx, cantdothat
-  mov  eax, 0x6647FC                        // _proto_main_msg_file
+  mov  eax, _proto_main_msg_file
   call message_search_
   cmp  eax, 1
   jne  skip
@@ -1054,7 +1054,7 @@ end:
 
 static void __declspec(naked) FakeCombatFix3() {
  __asm {
-  cmp  dword ptr ds:[_obj_dude], eax        // _obj_dude
+  cmp  dword ptr ds:[_obj_dude], eax
   jne  end
   push eax
   call FirstTurnAndNoEnemy
@@ -1122,8 +1122,8 @@ static const DWORD SaveGame_hook_End = 0x47B9A6;
 static void __declspec(naked) SaveGame_hook() {
  __asm {
   pushad
-  mov  ecx, dword ptr ds:[0x5193B8]         // _slot_cursor
-  mov  dword ptr ds:[0x614808], eax         // _flptr
+  mov  ecx, dword ptr ds:[_slot_cursor]
+  mov  dword ptr ds:[_flptr], eax
   test eax, eax
   jz   end                                  // Это пустой слот, можно записывать
   call db_fclose_
@@ -1145,24 +1145,24 @@ nextSlot:
   inc  ecx
   cmp  ecx, AutoQuickSave                   // Последний слот+1?
   ja   firstSlot                            // Да
-  mov  dword ptr ds:[0x5193B8], ecx         // _slot_cursor
+  mov  dword ptr ds:[_slot_cursor], ecx
   popad
   jmp  SaveGame_hook_Next
 firstSlot:
   xor  ecx, ecx
 end:
-  mov  dword ptr ds:[0x5193B8], ecx         // _slot_cursor
+  mov  dword ptr ds:[_slot_cursor], ecx
   mov  eax, ecx
   shl  eax, 4
   add  eax, ecx
   shl  eax, 3
-  add  eax, 0x613D30+0x3D                   // eax->_LSData[_slot_cursor].Comment
+  add  eax, _LSData+0x3D                    // eax->_LSData[_slot_cursor].Comment
   push eax
   call createComment
   popad
   xor  ebx, ebx
   inc  ebx
-  mov  dword ptr ds:[0x5193BC], ebx         // _quick_done
+  mov  dword ptr ds:[_quick_done], ebx
   dec  ebx
   jmp  SaveGame_hook_End
  }
@@ -1185,11 +1185,11 @@ skip:
   push eax
   mov  eax, offset LvlMsg
   push eax
-  mov  edx, 7                               // STAT_max_hit_points
+  mov  edx, STAT_max_hit_points
   mov  eax, ebx                             // _dialog_target
   call stat_level_
   push eax
-  mov  edx, 35                              // STAT_current_hp
+  mov  edx, STAT_current_hp
   mov  eax, ebx                             // eax=_dialog_target
   call stat_level_
   push eax
@@ -1203,9 +1203,9 @@ skip:
   mov  edx, 2                               // type = зависимость
   call queue_find_first_
   test eax, eax
-  mov  al, byte ptr ds:[0x6A3CB0]           // GreenColor
+  mov  al, byte ptr ds:[_GreenColor]
   jz   end
-  mov  al, byte ptr ds:[0x6AB4D0]           // RedColor
+  mov  al, byte ptr ds:[_RedColor]
 end:
   and  eax, 0xFF
   jmp  partyMemberCurLevel_End
@@ -1217,13 +1217,13 @@ static const DWORD partyMemberAC_End = 0x44923D;
 static void __declspec(naked) partyMemberAC() {
  __asm {
   mov  ecx, eax                             // _dialog_target
-  mov  edx, 9                               // STAT_ac
+  mov  edx, STAT_ac
   call stat_level_
   push eax
   mov  eax, offset AcMsg
   push eax
   xchg ecx, eax                             // eax=_dialog_target
-  mov  edx, 8                               // STAT_max_move_points
+  mov  edx, STAT_max_move_points
   call stat_level_
   push eax
   push ebx
@@ -1276,7 +1276,7 @@ end:
 static void __declspec(naked) display_print_with_linebreak() {
  __asm {
   push edi
-  mov  edi, 0x43186C                        // display_print_
+  mov  edi, display_print_
   call print_with_linebreak
   pop  edi
   retn
@@ -1286,7 +1286,7 @@ static void __declspec(naked) display_print_with_linebreak() {
 static void __declspec(naked) inven_display_msg_with_linebreak() {
  __asm {
   push edi
-  mov  edi, 0x472D24                        // inven_display_msg_
+  mov  edi, inven_display_msg_
   call print_with_linebreak
   pop  edi
   retn
@@ -1358,7 +1358,7 @@ static void __declspec(naked) SliderBtn_hook1() {
 static void __declspec(naked) stat_level_hook() {
  __asm {
   call stat_get_bonus_
-  cmp  esi, 6                               // Проверяем только силу-удачу
+  cmp  esi, STAT_lu                         // Проверяем только силу-удачу
   ja   end
 //  test eax, eax                             // А есть хоть какой [+/-]бонус?
 //  jz   end                                  // Нет

@@ -26,16 +26,16 @@
 
 struct sGlobalVar 
 {
-	__int64 id;
-	int val;
+ __int64 id;
+ int val;
 };
 
-#define SCRIPT_PROC_MAX		(27)
+#define SCRIPT_PROC_MAX  (27)
 typedef struct  
 {
-	DWORD ptr;
-	DWORD procLookup[SCRIPT_PROC_MAX+1];
-	char initialized;
+ DWORD ptr;
+ DWORD procLookup[SCRIPT_PROC_MAX+1];
+ char initialized;
 } sScriptProgram;
 
 void ScriptExtenderSetup();
@@ -90,17 +90,16 @@ static const DWORD SetResult=0x4674DC;
 static const DWORD SetResultType=0x46748C;
 static const DWORD pushShortStack=0x46736C; // sometimes used instead of "SetResult"
 // variables
-static const DWORD combat_state = 0x510944; // DWORD global variable, use "test byte ptr ds:combat_state, 1" to check if combat is on
 static char reg_anim_combat_check = 1;
 extern DWORD isGlobalScriptLoading;
 
 // types for script variables
-#define VAR_TYPE_INT	(0xC001)
-#define VAR_TYPE_FLOAT	(0xA001)
-#define VAR_TYPE_STR	(0x9801)
-#define VAR_TYPE_STR2	(0x9001)
+#define VAR_TYPE_INT (0xC001)
+#define VAR_TYPE_FLOAT (0xA001)
+#define VAR_TYPE_STR (0x9801)
+#define VAR_TYPE_STR2 (0x9001)
 
 // script procs
-#define start_proc			 (1)
-#define map_enter_p_proc	(15)
-#define map_update_proc		(23)
+#define start_proc    (1)
+#define map_enter_p_proc (15)
+#define map_update_proc  (23)

@@ -722,9 +722,9 @@ next:
   call GetStringVar;
   push eax;
   push ds:[0x519DBC];
-  push ds:[0x519DA0];
+  push ds:[_partyMemberPidList]
   push ds:[0x519DA8];
-  push ds:[0x519D9C];
+  push ds:[_partyMemberMaxCount]
   push ds:[0x519DAC];
   call get_npc_level2;
   mov edx, eax;
@@ -1204,7 +1204,6 @@ static void __declspec(naked) NBCreateChar() {
  }
 }
 
-static const DWORD proto_ptr=0x4A2108;
 static void __declspec(naked) get_proto_data() {
  __asm {
   pushad;
@@ -1225,7 +1224,7 @@ static void __declspec(naked) get_proto_data() {
   cmp si, 0xc001;
   jnz fail;
   mov edx, esp;
-  call proto_ptr;
+  call proto_ptr_
   mov eax, [esp];
   test eax, eax;
   jz fail;
@@ -1273,7 +1272,7 @@ static void __declspec(naked) set_proto_data() {
   jnz end;
   //mov eax, [eax+0x64];
   mov edx, esp;
-  call proto_ptr;
+  call proto_ptr_
   mov eax, [esp];
   test eax, eax;
   jz end;
@@ -1658,7 +1657,7 @@ static void __declspec(naked) tile_under_cursor() {
   lea edx, [esp];
   lea eax, [esp+4];
   call _mouse_get_position;
-  mov ebx, dword ptr ds:[0x519578];
+  mov ebx, dword ptr ds:[_map_elevation]
   mov edx, [esp];
   mov eax, [esp+4];
   call _tile_num;
@@ -1710,12 +1709,10 @@ end:
  }
 }
 
-static const DWORD sneak_working = 0x56D77C; // DWORD var
 static void __declspec(naked) op_sneak_success() {
  _OP_BEGIN(ebp)
  __asm {
-  mov eax, sneak_working
-  mov eax, [eax]
+  mov eax, ds:[_sneak_working]
  }
  _RET_VAL_INT(ebp)
  _OP_END

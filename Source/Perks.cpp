@@ -119,17 +119,17 @@ static void __declspec(naked) LevelUpHook() {
 notskilled:
   mov ecx, 3;
 afterskilled:
-  mov eax, ds:[0x6681B0]; //Get players level
+  mov eax, ds:[_Level_] //Get players level
   inc eax;
   xor edx, edx;
   div ecx;
   test edx, edx;
   jnz end;
-  inc byte ptr ds:[0x570A29]; //Increment the number of perks owed
+  inc byte ptr ds:[_free_perk]; //Increment the number of perks owed
 end:
   pop ebx;
   pop ecx;
-  mov edx, ds:[0x6681B0];
+  mov edx, ds:[_Level_]
   retn;
  }
 }
@@ -624,13 +624,13 @@ static DWORD Educated, Lifegiver, Tag_, Mutate_;
 static void __declspec(naked) editor_design_hook() {
  __asm {
   call SavePlayer_
-  mov  eax, ds:[0x57082C]                   // Educated
+  mov  eax, ds:[_Educated]
   mov  Educated, eax
-  mov  eax, ds:[0x570854]                   // Lifegiver
+  mov  eax, ds:[_Lifegiver]
   mov  Lifegiver, eax
-  mov  eax, ds:[0x5708B0]                   // Tag_
+  mov  eax, ds:[_Tag_]
   mov  Tag_, eax
-  mov  eax, ds:[0x5708B4]                   // Mutate_
+  mov  eax, ds:[_Mutate_]
   mov  Mutate_, eax
   retn
  }
@@ -639,13 +639,13 @@ static void __declspec(naked) editor_design_hook() {
 static void __declspec(naked) editor_design_hook2() {
  __asm {
   mov  eax, Educated
-  mov  ds:[0x57082C], eax                   // Educated
+  mov  ds:[_Educated], eax
   mov  eax, Lifegiver
-  mov  ds:[0x570854], eax                   // Lifegiver
+  mov  ds:[_Lifegiver], eax
   mov  eax, Tag_
-  mov  ds:[0x5708B0], eax                   // Tag_
+  mov  ds:[_Tag_], eax
   mov  eax, Mutate_
-  mov  ds:[0x5708B4], eax                   // Mutate_
+  mov  ds:[_Mutate_], eax
   call RestorePlayer_
   retn
  }
@@ -654,23 +654,23 @@ static void __declspec(naked) editor_design_hook2() {
 static void __declspec(naked) perks_dialog_hook() {
  __asm {
   call ListSkills_
-  mov  ebx, ds:[_obj_dude]                  // _obj_dude
+  mov  ebx, ds:[_obj_dude]
   mov  eax, ebx
-  mov  edx, 18                              // PERK_educated
+  mov  edx, PERK_educated
   call perk_level_
-  mov  dword ptr ds:[0x57082C], eax         // Educated
+  mov  dword ptr ds:[_Educated], eax
   mov  eax, ebx
-  mov  edx, 28                              // PERK_lifegiver
+  mov  edx, PERK_lifegiver
   call perk_level_
-  mov  dword ptr ds:[0x570854], eax         // Lifegiver
+  mov  dword ptr ds:[_Lifegiver], eax
   mov  eax, ebx
-  mov  edx, 51                              // PERK_tag
+  mov  edx, PERK_tag
   call perk_level_
-  mov  dword ptr ds:[0x5708B0], eax         // Tag_
+  mov  dword ptr ds:[_Tag_], eax
   mov  eax, ebx
-  mov  edx, 52                              // PERK_mutate
+  mov  edx, PERK_mutate
   call perk_level_
-  mov  dword ptr ds:[0x5708B4], eax         // Mutate_
+  mov  dword ptr ds:[_Mutate_], eax
   retn
  }
 }
@@ -679,7 +679,7 @@ static const DWORD perk_can_add_hook_End = 0x496889;
 static const DWORD perk_can_add_hook_End1 = 0x496891;
 static void __declspec(naked) perk_can_add_hook() {
  __asm {
-  mov  esi, dword ptr ds:[0x51C120]         // _perkLevelDataList
+  mov  esi, dword ptr ds:[_perkLevelDataList]
   mov  esi, dword ptr [esi+edx*4]
   imul esi, esi, 3
   add  esi, dword ptr [ecx+0x10]

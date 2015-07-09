@@ -870,7 +870,7 @@ void PrintText(char *DisplayText, BYTE ColourIndex, DWORD Xpos, DWORD Ypos, DWOR
      mov ecx, ToWidth
      mov eax, ToSurface
      add eax, posOffset
-     call dword ptr ds:[0x51E3B8]
+     call dword ptr ds:[_text_to_buf]
   }
 }
 
@@ -879,7 +879,7 @@ void PrintText(char *DisplayText, BYTE ColourIndex, DWORD Xpos, DWORD Ypos, DWOR
 DWORD GetTextHeight() {
   DWORD TxtHeight;
   __asm {
-     call dword ptr ds:[0x51E3BC]//get text height
+     call dword ptr ds:[_text_height]//get text height
      mov TxtHeight, eax
   }
   return TxtHeight;
@@ -903,7 +903,7 @@ DWORD GetCharWidth(char CharVal) {
   DWORD charWidth;
  __asm {
     mov al, CharVal
-    call dword ptr ds:[0x51E3C4]
+    call dword ptr ds:[_text_char_width]
     mov charWidth, eax
  }
 return charWidth;
@@ -1390,10 +1390,10 @@ void _stdcall RefreshPCArt() {
 
 
     mov eax, dword ptr ds:[_obj_dude]//PC state struct
-    mov dword ptr ds:[0x519058], eax//inventory temp pointer to PC state struct
-    mov eax,dword ptr ds:[0x519058]
+    mov dword ptr ds:[_inven_dude], eax//inventory temp pointer to PC state struct
+    mov eax,dword ptr ds:[_inven_dude]
     lea edx,dword ptr ds:[eax+0x2C]
-    mov dword ptr ds:[0x59E960],edx//PC inventory
+    mov dword ptr ds:[_pud],edx//PC inventory
 
 
     xor eax,eax
@@ -1434,7 +1434,7 @@ void _stdcall RefreshPCArt() {
     inc ebx //itemNum++
     add edx,0x8 //itemListOffset + itemsize
  LoopStart:
-    mov eax, dword ptr ds:[0x59E960]//PC inventory
+    mov eax, dword ptr ds:[_pud]//PC inventory
     cmp ebx, dword ptr ds:[eax]//size of item list
  JL CheckNextItem
 
@@ -1445,7 +1445,7 @@ void _stdcall RefreshPCArt() {
 
     //copy new FrmID to hero state struct
     mov edx, dword ptr ds:[0x59E95C]
-    mov eax, dword ptr ds:[0x519058]
+    mov eax, dword ptr ds:[_inven_dude]
     mov dword ptr ds:[eax+0x20],edx
   //  call obj_change_fid_
 

@@ -19,9 +19,10 @@
 #include "main.h"
 
 #include <stdio.h>
+#include "Define.h"
 #include "FalloutEngine.h"
-#include "SuperSave.h"
 #include "HeroAppearance.h"
+#include "SuperSave.h"
 
 //extern
 DWORD LSPageOffset=0;
@@ -424,7 +425,7 @@ static void __declspec(naked) draw_page_text(void) {
 static void __declspec(naked) AddPageOffset01(void) {
 
   __asm {
-  mov eax, dword ptr ds:[0x5193B8]//list position 0-9
+  mov eax, dword ptr ds:[_slot_cursor]//list position 0-9
   add eax, LSPageOffset//add page num offset
   ret
  }

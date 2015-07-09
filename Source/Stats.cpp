@@ -114,7 +114,7 @@ static void __declspec(naked) GetLevelXPHook() {
 }
 static void __declspec(naked) GetNextLevelXPHook() {
  __asm {
-  mov eax, ds:[0x6681B0];
+  mov eax, ds:[_Level_]
   jmp GetLevelXPHook;
  }
 }
@@ -148,7 +148,6 @@ standard:
  }
 }
 
-static const DWORD proto_ptr=0x4A2108;
 static int StatFormulas[33*2];
 static int StatShifts[33*7];
 static double StatMulti[33*7];
@@ -164,7 +163,7 @@ static void __declspec(naked) _stdcall ProtoPtr(DWORD pid, int** proto) {
  __asm {
   mov eax, [esp+4];
   mov edx, [esp+8];
-  call proto_ptr;
+  call proto_ptr_
   retn 8;
  }
 }

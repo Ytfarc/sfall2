@@ -17,6 +17,8 @@
  */
 
 #include "main.h"
+
+#include "Define.h"
 #include "version.h"
 
 static DWORD MainMenuYOffset;
@@ -34,8 +36,8 @@ static void __declspec(naked) MainMenuButtonYHook() {
 
 static void __declspec(naked) MainMenuTextYHook() {
  __asm {
-  add eax, MainMenuTextOffset;
-  jmp dword ptr ds:[0x51E3B8];
+  add  eax, MainMenuTextOffset
+  jmp  dword ptr ds:[_text_to_buf]
  }
 }
 
@@ -74,7 +76,7 @@ static void __declspec(naked) MainMenuTextHook() {
   dec ecx; //xpos
   add edi, 12;
   push edi; //ypos
-  mov eax, dword ptr ds:[0x5194F0];//winptr
+  mov eax, dword ptr ds:[_main_window];//winptr
   call _win_print;
   jmp MainMenuTextRet;
  }

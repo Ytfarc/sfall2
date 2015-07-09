@@ -19,6 +19,7 @@
 #include "main.h"
 
 #include <stdio.h>
+#include "Define.h"
 #include "Elevators.h"
 #include "FalloutEngine.h"
 
@@ -79,7 +80,7 @@ static void __declspec(naked) elevator_select_hook3() {
  __asm {
   lea  esi, Menus
   mov  eax, [esi+edi*4]
-  mov  eax, [0x43EA1C+eax*4]                // _btncnt
+  mov  eax, [_btncnt+eax*4]
   jmp  elevator_select_hook3_End
  }
 }
@@ -89,7 +90,7 @@ static void __declspec(naked) elevator_select_hook4() {
  __asm {
   lea  edx, Menus
   mov  eax, [edx+edi*4]
-  mov  eax, [0x43EA1C+eax*4]                // _btncnt
+  mov  eax, [_btncnt+eax*4]
   jmp  elevator_select_hook4_End
  }
 }
@@ -99,7 +100,7 @@ static void __declspec(naked) elevator_select_hook5() {
  __asm {
   lea  eax, Menus
   mov  eax, [eax+edi*4]
-  mov  eax, [0x43EA1C+eax*4]                // _btncnt
+  mov  eax, [_btncnt+eax*4]
   jmp  elevator_select_hook5_End
  }
 }

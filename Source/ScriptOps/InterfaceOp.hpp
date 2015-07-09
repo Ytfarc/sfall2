@@ -234,7 +234,7 @@ static void __declspec(naked) resume_game() {
 static void __declspec(naked) create_message_window() {
    __asm {
    pushad
-   mov ebx, dword ptr ds:[0x51E3B0];
+   mov ebx, dword ptr ds:[_curr_font_num]
    cmp ebx, 0x65;
    je end;
 
@@ -431,8 +431,7 @@ falloutfunc:
   mov eax, dword ptr ds:[_obj_dude];
   mov edx, esp;
   mov eax, [eax+0x64];
-  mov edi, 0x4A2108;
-  call edi;
+  call proto_ptr_
   mov edx, 1;
   shl edx, cl;
   mov ecx, [esp];

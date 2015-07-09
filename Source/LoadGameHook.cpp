@@ -166,12 +166,12 @@ static DWORD _stdcall combatSaveTest() {
   DWORD ap;
   DWORD bonusmove;
   __asm {
-   mov edx, 8;
+   mov edx, STAT_max_move_points
    mov eax, ds:[_obj_dude];
    call stat_level_
    mov ap, eax;
    mov eax, ds:[_obj_dude];
-   mov edx, 3;
+   mov edx, PERK_bonus_move
    call perk_level_
    mov bonusmove, eax;
   }

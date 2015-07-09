@@ -879,17 +879,15 @@ static void __declspec(naked) FreeProgramHook() {
  }
 }
 
-static const DWORD obj_find_first_at_ = 0x48B48C;
-static const DWORD obj_find_next_at_ = 0x48B510;
 static void __declspec(naked) obj_outline_all_items_on_() {
  __asm {
   pushad
-  mov  eax, dword ptr ds:[0x519578]         // _map_elevation
+  mov  eax, dword ptr ds:[_map_elevation]
   call obj_find_first_at_
   test eax, eax
   jz   end
 loopObject:
-  cmp  eax, ds:[0x518D94]                   // _outlined_object
+  cmp  eax, ds:[_outlined_object]
   je   nextObject
   xchg ecx, eax
   mov  eax, [ecx+0x20]
@@ -923,12 +921,12 @@ end:
 static void __declspec(naked) obj_outline_all_items_off_() {
  __asm {
   pushad
-  mov  eax, dword ptr ds:[0x519578]         // _map_elevation
+  mov  eax, dword ptr ds:[_map_elevation]
   call obj_find_first_at_
   test eax, eax
   jz   end
 loopObject:
-  cmp  eax, ds:[0x518D94]                   // _outlined_object
+  cmp  eax, ds:[_outlined_object]
   je   nextObject
   xchg ebx, eax
   mov  eax, [ebx+0x20]
@@ -950,7 +948,6 @@ end:
  }
 }
 
-static const DWORD obj_outline_object_ = 0x48C2B4;
 static void __declspec(naked) gmouse_bk_process_hook() {
  __asm {
   test eax, eax
@@ -964,7 +961,6 @@ end:
  }
 }
 
-static const DWORD obj_remove_outline_ = 0x48C2F0;
 static void __declspec(naked) obj_remove_outline_hook() {
  __asm {
   call obj_remove_outline_
@@ -972,7 +968,7 @@ static void __declspec(naked) obj_remove_outline_hook() {
   jnz  end
   cmp  highlightingToggled, 1
   jne  end
-  mov  ds:[0x518D94], eax                   // _outlined_object
+  mov  ds:[_outlined_object], eax
   call obj_outline_all_items_on_
 end:
   retn

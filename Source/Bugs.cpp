@@ -9,12 +9,12 @@ DWORD WeightOnBody = 0;
 static void __declspec(naked) determine_to_hit_func_hook() {
  __asm {
   call stat_level_                          // Perception|Восприятие
-  cmp  edi, dword ptr ds:[_obj_dude]        // _obj_dude
+  cmp  edi, dword ptr ds:[_obj_dude]
   jne  end
   xchg ecx, eax
   mov  eax, edi                             // _obj_dude
   mov  edx, PERK_sharpshooter
-  call perk_level_                          // Sharpshooter|Меткий стрелок
+  call perk_level_
   shl  eax, 1
   add  eax, ecx
 end:
@@ -26,18 +26,18 @@ static void __declspec(naked) pipboy_hook() {
  __asm {
   cmp  ebx, 0x210                           // Кнопка НАЗАД?
   je   end
-  cmp  byte ptr ds:[0x664529], 0            // _holo_flag
+  cmp  byte ptr ds:[_holo_flag], 0
   jne  end
   xor  ebx, ebx                             // Нет человека - нет проблемы (c) :-p
 end:
-  mov  eax, ds:[0x664508]                   // _crnt_func
+  mov  eax, ds:[_crnt_func]
   retn
  }
 }
 
 static void __declspec(naked) PipAlarm_hook() {
  __asm {
-  mov  ds:[0x664508], eax                   // _crnt_func
+  mov  ds:[_crnt_func], eax
   mov  eax, 0x400
   call PipStatus_
   mov  eax, 0x50CC04                        // 'iisxxxx1'
@@ -73,9 +73,9 @@ static const DWORD protinst_default_use_item_hook_End1 = 0x49C3C5;
 static void __declspec(naked) protinst_default_use_item_hook() {
  __asm {
   mov  eax, dword ptr [edx+0x64]            // eax = target pid
-  cmp  eax, 33555441                        // PID_DRIVABLE_CAR
+  cmp  eax, PID_DRIVABLE_CAR
   je   itsCar
-  cmp  eax, 455                             // PID_CAR_TRUNK
+  cmp  eax, PID_CAR_TRUNK
   jne  noCar
 itsCar:
   mov  eax, ebx
@@ -123,7 +123,7 @@ loopQueue:
   call queue_find_next_
   jmp  loopQueue
 skip:
-  mov  eax, dword ptr ds:[_obj_dude]        // _obj_dude
+  mov  eax, dword ptr ds:[_obj_dude]
   call queue_find_first_
 end:
   jmp  item_d_check_addict_hook_End
@@ -132,9 +132,9 @@ end:
 
 static void __declspec(naked) remove_jet_addict() {
  __asm {
-  cmp  eax, dword ptr ds:[0x59E98C]         // _wd_obj
+  cmp  eax, dword ptr ds:[_wd_obj]
   jne  end
-  cmp  dword ptr [edx+0x4], 259             // queue_addict.drug_pid == PID_JET?
+  cmp  dword ptr [edx+0x4], PID_JET         // queue_addict.drug_pid == PID_JET?
   jne  end
   xor  eax, eax
   inc  eax                                  // Удалить из очереди
@@ -154,7 +154,7 @@ static void __declspec(naked) item_d_take_drug_hook() {
   mov  eax, esi
   call perform_withdrawal_end_
 skip:
-  mov  dword ptr ds:[0x59E98C], esi         // _wd_obj
+  mov  dword ptr ds:[_wd_obj], esi
   mov  eax, 2                               // type = зависимость
   mov  edx, offset remove_jet_addict
   call queue_clear_type_
@@ -185,7 +185,7 @@ static void __declspec(naked) item_d_load_hook() {
   sub  esp, 4
   mov  [ebp], edi                           // edi->queue_drug
   mov  ecx, 7
-  mov  esi, 0x5191CC+12                     // _drugInfoList+12
+  mov  esi, _drugInfoList+12
 loopDrug:
   cmp  dword ptr [esi+8], 0                 // drugInfoList.numeffects
   je   nextDrug
@@ -246,11 +246,11 @@ static void __declspec(naked) partyMemberIncLevels_hook() {
   cmp  eax, -1
   je   end
   pushad
-  mov  dword ptr ds:[0x518438], ebx         // _critterClearObj
-  mov  edx, 0x42DA54                        // critterClearObjDrugs_
+  mov  dword ptr ds:[_critterClearObj], ebx
+  mov  edx, critterClearObjDrugs_
   call queue_clear_type_
   mov  ecx, 8
-  mov  edi, 0x5191CC                        // _drugInfoList
+  mov  edi, _drugInfoList
   mov  esi, ebx
 loopAddict:
   mov  eax, dword ptr [edi]                 // eax = drug pid
@@ -358,7 +358,7 @@ noArmor:
   mov  eax, [esp+0x1C+0x4]
   test eax, eax
   jnz  haveWeapon
-  cmp  dword ptr ds:[0x51884C], eax         // _dialog_target_is_party
+  cmp  dword ptr ds:[_dialog_target_is_party], eax
   jne  end                                  // это собутыльник
   mov  eax, [esp+0x18+0x4]
   test eax, eax
@@ -367,7 +367,7 @@ haveWeapon:
   call item_weight_
   add  WeightOnBody, eax
 end:
-  mov  ebx, 467                             // PID_JESSE_CONTAINER
+  mov  ebx, PID_JESSE_CONTAINER
   retn
  }
 }
@@ -404,7 +404,7 @@ end:
 static const DWORD inven_pickup_hook_End = 0x470EC9;
 static void __declspec(naked) inven_pickup_hook() {
  __asm {
-  mov  edx, ds:[0x59E960]                   // _pud
+  mov  edx, ds:[_pud]
   mov  edx, [edx]                           // itemsCount
   dec  edx
   sub  edx, eax
@@ -447,7 +447,7 @@ foundRect:
   mov  inven_pickup_loop, -1
   mov  edx, [esp+0x40]                      // inventory_offset
   add  edx, eax
-  mov  eax, ds:[0x59E960]                   // _pud
+  mov  eax, ds:[_pud]
   push eax
   mov  eax, [eax]                           // itemsCount
   test eax, eax
@@ -509,7 +509,7 @@ end:
 static void __declspec(naked) display_stats_hook() {
  __asm {
   mov  edx, PERK_bonus_ranged_damage
-  mov  eax, dword ptr ds:[0x59E86C]         // _stack
+  mov  eax, dword ptr ds:[_stack]
   call perk_level_
   shl  eax, 1
   add  dword ptr [esp+4*4], eax             // min_dmg
@@ -522,7 +522,7 @@ static void __declspec(naked) PipStatus_hook() {
  __asm {
   call AddHotLines_
   xor  eax, eax
-  mov  dword ptr ds:[0x6644F8], eax         // _hot_line_count
+  mov  dword ptr ds:[_hot_line_count], eax
   retn
  }
 }
