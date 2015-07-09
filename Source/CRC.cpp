@@ -19,8 +19,8 @@
 #include "main.h"
 
 #include <stdio.h>
-#include "version.h"
 #include "Logging.h"
+#include "version.h"
 
 static const DWORD ExpectedSize=0x00122800;
 static const DWORD ExpectedCRC[]= {0xe1680293, 0xef34f989};

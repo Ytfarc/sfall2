@@ -19,513 +19,514 @@
 #pragma once
 
 #include "main.h"
+
 #include "FileSystem.h"
 #include "ScriptExtender.h"
 
 //file system functions
 static void __declspec(naked) fs_create() {
-	__asm {
-		pushad;
-		mov edi, eax;
-		call GetArgType;
-		mov ebx, eax;
-		mov eax, edi;
-		call GetArg;
-		mov esi, eax;
-		mov eax, edi;
-		call GetArgType;
-		mov edx, eax;
-		mov eax, edi;
-		call GetArg;
-		cmp dx, 0x9001;
-		jz next;
-		cmp dx, 0x9801;
-		jnz fail;
+ __asm {
+  pushad;
+  mov edi, eax;
+  call GetArgType;
+  mov ebx, eax;
+  mov eax, edi;
+  call GetArg;
+  mov esi, eax;
+  mov eax, edi;
+  call GetArgType;
+  mov edx, eax;
+  mov eax, edi;
+  call GetArg;
+  cmp dx, 0x9001;
+  jz next;
+  cmp dx, 0x9801;
+  jnz fail;
 next:
-		cmp bx, 0xc001;
-		jnz fail;
-		mov ebx, eax;
-		mov eax, edi;
-		call GetStringVar;
-		push esi;
-		push eax;
-		call FScreate;
-		mov edx, eax;
-		jmp end;
+  cmp bx, 0xc001;
+  jnz fail;
+  mov ebx, eax;
+  mov eax, edi;
+  call GetStringVar;
+  push esi;
+  push eax;
+  call FScreate;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, edi;
-		call SetResult;
-		mov eax, edi;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, edi;
+  call SetResult;
+  mov eax, edi;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_copy() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		mov ecx, eax;
-		mov eax, ebp;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0x9001;
-		jz next;
-		cmp di, 0x9801;
-		jnz fail;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  mov ecx, eax;
+  mov eax, ebp;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0x9001;
+  jz next;
+  cmp di, 0x9801;
+  jnz fail;
 next:
-		cmp si, 0x9001;
-		jz next2;
-		cmp si, 0x9801;
-		jnz fail;
+  cmp si, 0x9001;
+  jz next2;
+  cmp si, 0x9801;
+  jnz fail;
 next2:
-		mov ebx, eax;
-		mov edx, esi;
-		mov eax, ebp;
-		call GetStringVar;
-		mov esi, eax;
-		mov ebx, ecx;
-		mov edx, edi;
-		mov eax, ebp;
-		call GetStringVar;
-		push eax;
-		push esi;
-		call FScopy;
-		jmp end;
+  mov ebx, eax;
+  mov edx, esi;
+  mov eax, ebp;
+  call GetStringVar;
+  mov esi, eax;
+  mov ebx, ecx;
+  mov edx, edi;
+  mov eax, ebp;
+  call GetStringVar;
+  push eax;
+  push esi;
+  call FScopy;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_find() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0x9001;
-		jz next;
-		cmp di, 0x9801;
-		jnz fail;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0x9001;
+  jz next;
+  cmp di, 0x9801;
+  jnz fail;
 next:
-		mov ebx, eax;
-		mov edx, edi;
-		mov eax, ebp;
-		call GetStringVar;
-		push eax;
-		call FSfind;
-		mov edx, eax;
-		jmp end;
+  mov ebx, eax;
+  mov edx, edi;
+  mov eax, ebp;
+  call GetStringVar;
+  push eax;
+  call FSfind;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_write_byte() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		mov ecx, eax;
-		mov eax, ebp;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz end;
-		cmp si, 0xc001;
-		jnz end;
-		push ecx;
-		push eax;
-		call FSwrite_byte;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  mov ecx, eax;
+  mov eax, ebp;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz end;
+  cmp si, 0xc001;
+  jnz end;
+  push ecx;
+  push eax;
+  call FSwrite_byte;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_write_short() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		mov ecx, eax;
-		mov eax, ebp;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz end;
-		cmp si, 0xc001;
-		jnz end;
-		push ecx;
-		push eax;
-		call FSwrite_short;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  mov ecx, eax;
+  mov eax, ebp;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz end;
+  cmp si, 0xc001;
+  jnz end;
+  push ecx;
+  push eax;
+  call FSwrite_short;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_write_int() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		mov ecx, eax;
-		mov eax, ebp;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz end;
-		cmp si, 0xc001;
-		jz next;
-		cmp si, 0xa001;
-		jnz end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  mov ecx, eax;
+  mov eax, ebp;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz end;
+  cmp si, 0xc001;
+  jz next;
+  cmp si, 0xa001;
+  jnz end;
 next:
-		push ecx;
-		push eax;
-		call FSwrite_int;
+  push ecx;
+  push eax;
+  call FSwrite_int;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_write_string() {
-	__asm {
-		pushad;
-		mov edi, eax;
-		call GetArgType;
-		mov ebx, eax;
-		mov eax, edi;
-		call GetArg;
-		mov esi, eax;
-		mov eax, edi;
-		call GetArgType;
-		mov edx, eax;
-		mov eax, edi;
-		call GetArg;
-		mov ebp, eax;
-		cmp bx, 0x9001;
-		jz next;
-		cmp bx, 0x9801;
-		jnz end;
+ __asm {
+  pushad;
+  mov edi, eax;
+  call GetArgType;
+  mov ebx, eax;
+  mov eax, edi;
+  call GetArg;
+  mov esi, eax;
+  mov eax, edi;
+  call GetArgType;
+  mov edx, eax;
+  mov eax, edi;
+  call GetArg;
+  mov ebp, eax;
+  cmp bx, 0x9001;
+  jz next;
+  cmp bx, 0x9801;
+  jnz end;
 next:
-		cmp dx, 0xc001;
-		jnz end;
-		mov edx, ebx;
-		mov ebx, esi;
-		mov eax, edi;
-		call GetStringVar;
-		push eax;
-		push ebp;
-		call FSwrite_string;
+  cmp dx, 0xc001;
+  jnz end;
+  mov edx, ebx;
+  mov ebx, esi;
+  mov eax, edi;
+  call GetStringVar;
+  push eax;
+  push ebp;
+  call FSwrite_string;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_write_bstring() {
-	__asm {
-		pushad;
-		mov edi, eax;
-		call GetArgType;
-		mov ebx, eax;
-		mov eax, edi;
-		call GetArg;
-		mov esi, eax;
-		mov eax, edi;
-		call GetArgType;
-		mov edx, eax;
-		mov eax, edi;
-		call GetArg;
-		mov ebp, eax;
-		cmp bx, 0x9001;
-		jz next;
-		cmp bx, 0x9801;
-		jnz end;
+ __asm {
+  pushad;
+  mov edi, eax;
+  call GetArgType;
+  mov ebx, eax;
+  mov eax, edi;
+  call GetArg;
+  mov esi, eax;
+  mov eax, edi;
+  call GetArgType;
+  mov edx, eax;
+  mov eax, edi;
+  call GetArg;
+  mov ebp, eax;
+  cmp bx, 0x9001;
+  jz next;
+  cmp bx, 0x9801;
+  jnz end;
 next:
-		cmp dx, 0xc001;
-		jnz end;
-		mov edx, ebx;
-		mov ebx, esi;
-		mov eax, edi;
-		call GetStringVar;
-		push eax;
-		push ebp;
-		call FSwrite_bstring;
+  cmp dx, 0xc001;
+  jnz end;
+  mov edx, ebx;
+  mov ebx, esi;
+  mov eax, edi;
+  call GetStringVar;
+  push eax;
+  push ebp;
+  call FSwrite_bstring;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_read_byte() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz fail;
-		push eax;
-		call FSread_byte;
-		mov edx, eax;
-		jmp end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz fail;
+  push eax;
+  call FSread_byte;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_read_short() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz fail;
-		push eax;
-		call FSread_short;
-		mov edx, eax;
-		jmp end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz fail;
+  push eax;
+  call FSread_short;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_read_int() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz fail;
-		push eax;
-		call FSread_int;
-		mov edx, eax;
-		jmp end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz fail;
+  push eax;
+  call FSread_int;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_read_float() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz fail;
-		push eax;
-		call FSread_int;
-		mov edx, eax;
-		jmp end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz fail;
+  push eax;
+  call FSread_int;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xa001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xa001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_delete() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz end
-		push eax;
-		call FSdelete;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz end
+  push eax;
+  call FSdelete;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_size() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz fail;
-		push eax;
-		call FSsize;
-		mov edx, eax;
-		jmp end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz fail;
+  push eax;
+  call FSsize;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_pos() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz fail;
-		push eax;
-		call FSpos;
-		mov edx, eax;
-		jmp end;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz fail;
+  push eax;
+  call FSpos;
+  mov edx, eax;
+  jmp end;
 fail:
-		xor edx, edx;
-		dec edx;
+  xor edx, edx;
+  dec edx;
 end:
-		mov eax, ebp;
-		call SetResult;
-		mov eax, ebp;
-		mov edx, 0xc001;
-		call SetResultType;
-		popad;
-		retn;
-	}
+  mov eax, ebp;
+  call SetResult;
+  mov eax, ebp;
+  mov edx, 0xc001;
+  call SetResultType;
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_seek() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		mov ecx, eax;
-		mov eax, ebp;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz end;
-		cmp si, 0xc001;
-		jnz end;
-		push ecx;
-		push eax;
-		call FSseek;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  mov ecx, eax;
+  mov eax, ebp;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz end;
+  cmp si, 0xc001;
+  jnz end;
+  push ecx;
+  push eax;
+  call FSseek;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) fs_resize() {
-	__asm {
-		pushad;
-		mov ebp, eax;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ebp;
-		call GetArg;
-		mov ecx, eax;
-		mov eax, ebp;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ebp;
-		call GetArg;
-		cmp di, 0xc001;
-		jnz end;
-		cmp si, 0xc001;
-		jnz end;
-		push ecx;
-		push eax;
-		call FSresize;
+ __asm {
+  pushad;
+  mov ebp, eax;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ebp;
+  call GetArg;
+  mov ecx, eax;
+  mov eax, ebp;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ebp;
+  call GetArg;
+  cmp di, 0xc001;
+  jnz end;
+  cmp si, 0xc001;
+  jnz end;
+  push ecx;
+  push eax;
+  call FSresize;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }

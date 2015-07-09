@@ -19,9 +19,9 @@
 #pragma once
 
 #include "main.h"
+
 #include "input.h"
 #include "ScriptExtender.h"
-
 
 // input_functions
 static void __declspec(naked) InputFuncsAvailable() {

@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "FalloutEngine.h"
-#include "Version.h"
+#include "version.h"
 
 static DWORD InCredits=0;
 static DWORD CreditsLine=0;

@@ -19,12 +19,12 @@
 #pragma once
 
 #include "main.h"
+
+#include "AI.h"
+#include "HeroAppearance.h"
 #include "KillCounter.h"
 #include "Knockback.h"
 #include "movies.h"
-#include "HeroAppearance.h"
-#include "AI.h"
-
 #include "ScriptExtender.h"
 
 /*
@@ -557,12 +557,9 @@ static void __declspec(naked) GetActiveHand() {
 }
 static void __declspec(naked) ToggleActiveHand() {
  __asm {
-  push ebx;
-  mov eax, 1;
-  mov ebx, 0x0045F404;
-  call ebx;
-  pop ebx;
-  retn;
+  xor  eax, eax
+  inc  eax
+  jmp  intface_toggle_items_
  }
 }
 

@@ -18,12 +18,11 @@
 
 #include "main.h"
 
+#include <hash_map>
 #include "AI.h"
 #include "Define.h"
 #include "FalloutEngine.h"
 #include "SafeWrite.h"
-
-#include <hash_map>
 
 typedef stdext::hash_map<DWORD, DWORD> :: const_iterator iter;
 

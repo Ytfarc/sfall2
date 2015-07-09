@@ -18,10 +18,10 @@
 
 #include "main.h"
 
+#include <vector>
 #include "Define.h"
 #include "FalloutEngine.h"
 #include "PartyControl.h"
-#include <vector>
 
 DWORD IsControllingNPC = 0;
 static DWORD HiddenArmor = 0;

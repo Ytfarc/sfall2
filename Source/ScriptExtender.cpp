@@ -16,23 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "main.h"
+
 #include <hash_map>
 #include <set>
 #include <string>
-
-#include "main.h"
-#include "FalloutEngine.h"
-#include "ScriptExtender.h"
 #include "Arrays.h"
-#include "HookScripts.h"
-#include "input.h"
-#include "LoadGameHook.h"
-#include "version.h"
-#include "numbers.h"
-#include "Logging.h"
 #include "BarBoxes.h"
 #include "Console.h"
 #include "Explosions.h"
+#include "FalloutEngine.h"
+#include "HookScripts.h"
+#include "input.h"
+#include "LoadGameHook.h"
+#include "Logging.h"
+#include "numbers.h"
+#include "ScriptExtender.h"
+#include "version.h"
 
 void _stdcall HandleMapUpdateForScripts(DWORD procId);
 
@@ -181,8 +181,6 @@ DWORD AvailableGlobalScriptTypes=0;
 bool isGameLoading;
 
 TScript OverrideScriptStruct;
-
-static TGameObj** obj_dude_ptr = (TGameObj**)0x6610B8;
 
 //eax contains the script pointer, edx contains the opcode*4
 

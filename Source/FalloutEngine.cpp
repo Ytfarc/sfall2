@@ -18,133 +18,7 @@
 
 #include "main.h"
 
-#include "Logging.h"
 #include "FalloutEngine.h"
-
-// global variables
-TGameObj** obj_dude_ptr = (TGameObj**)(0x6610B8);
-TGameObj** inven_dude_ptr = (TGameObj**)(0x519058);
-DWORD* activeUIHand_ptr = (DWORD*)(0x518F78); // 0 - left, 1 - right
-DWORD* dude_traits = (DWORD*)(0x66BE40); // 2 of them
-DWORD* itemCurrentItem = (DWORD*)(0x518F78); 
-DWORD* itemButtonItems = (DWORD*)(0x5970F8);
-
-/**
- ENGINE FUNCTIONS OFFSETS
- const names should end with underscore
-*/
-
-// PROTO FUNCTIONS
-const DWORD item_w_max_ammo_ = 0x478674; // eax - object
-const DWORD item_w_cur_ammo_ = 0x4786A0; // eax - object
-
-// AI FUNCTIONS
-const DWORD ai_can_use_weapon_ = 0x4298EC;  // (TGameObj *aCritter<eax>, int aWeapon<edx>, int a2Or3<ebx>) returns 1 or 0
-
-// UI FUNCTIONS
-const DWORD interface_disable_ = 0x45EAFC;
-const DWORD interface_enable_ = 0x45EA64;
-const DWORD intface_toggle_items_ = 0x45F404;
-const DWORD intface_item_reload_ = 0x460B20;
-const DWORD intface_toggle_item_state_ = 0x45F4E0;
-const DWORD intface_use_item_ = 0x45F5EC;
-
-// OBJECTS manipulation
-const DWORD obj_set_light_ = 0x48AC90; // <eax>(int aObj<eax>, signed int aDist<edx>, int a3<ecx>, int aIntensity<ebx>)
-const DWORD obj_new_ = 0x489A84;  // int aObj*<eax>, int aPid<ebx>
-const DWORD obj_turn_off_ = 0x48AE68;  // int aObj<eax>, int ???<edx>
-const DWORD obj_move_to_tile_ = 0x48A568;  // int aObj<eax>, int aTile<edx>, int aElev<ebx>
-
-const DWORD obj_find_first_at_tile_ = 0x48B5A8; //  <eax>(int elevation<eax>, int tile<edx>)
-const DWORD obj_find_next_at_tile_ = 0x48B608; // no args
-
-// ANIMATION
-const DWORD tile_refresh_rect_ = 0x4B12C0; // (int elevation<edx>, unkown<ecx>)
-const DWORD register_object_animate_ = 0x4149D0;  // int aObj<eax>, int aAnim<edx>, int delay<ebx>
-const DWORD register_object_animate_and_hide_ = 0x414B7C;  // int aObj<eax>, int aAnim<edx>, int delay<ebx>
-const DWORD register_object_must_erase_ = 0x414E20;  // int aObj<eax>
-const DWORD register_object_change_fid_ = 0x41518C;  // int aObj<eax>, int aFid<edx>, int aDelay<ebx>
-const DWORD register_object_light_ = 0x415334; // <eax>(int aObj<eax>, int aRadius<edx>, int aDelay<ebx>)
-const DWORD register_object_funset_ = 0x4150A8; // int aObj<eax>, int ???<edx>, int aDelay<ebx> - not really sure what this does
-const DWORD register_object_take_out_ = 0x415238; // int aObj<eax>, int aHoldFrame<edx> - hold frame ID (1 - spear, 2 - club, etc.)
-const DWORD register_object_turn_towards_ = 0x414C50; // int aObj<eax>, int aTile<edx>
-
-// WRAPPERS
-// please, use CamelCase for those
-
-
-int __stdcall ItemGetType(TGameObj* item) {
- __asm {
-  mov eax, item;
-  call item_get_type_
- }
-}
-
-int _stdcall IsPartyMember(TGameObj* obj) {
- __asm {
-  mov eax, obj;
-  call isPartyMember_
- }
-}
-
-TGameObj* GetInvenWeaponLeft(TGameObj* obj) {
- __asm {
-  mov eax, obj;
-  call inven_left_hand_
- }
-}
-
-TGameObj* GetInvenWeaponRight(TGameObj* obj) {
- __asm {
-  mov eax, obj;
-  call inven_right_hand_
- }
-}
-
-
-char* GetProtoPtr(DWORD pid) {
- char* proto;
- __asm {
-  mov eax, pid;
-  lea edx, proto;
-  call proto_ptr_
- }
- return proto;
-}
-
-char AnimCodeByWeapon(TGameObj* weapon) {
- if (weapon != NULL) {
-  char* proto = GetProtoPtr(weapon->pid);
-  if (proto && *(int*)(proto + 32) == 3) {
-   return (char)(*(int*)(proto + 36)); 
-  }
- }
- return 0;
-}
-
-
-void DisplayConsoleMessage(const char* msg) {
- __asm {
-  mov eax, msg;
-  call display_print_
- }
-}
-
-static DWORD mesg_buf[4] = {0, 0, 0, 0};
-const char* _stdcall GetMessageStr(DWORD fileAddr, DWORD messageId)
-{
- DWORD buf = (DWORD)mesg_buf;
- const char* result;
- __asm {
-  mov eax, fileAddr
-  mov ebx, messageId
-  mov edx, buf
-  call getmsg_
-  mov result, eax
- }
- return result;
-}
-
 
 const DWORD action_get_an_object_ = 0x412134;
 const DWORD action_loot_container_ = 0x4123E8;
@@ -183,9 +57,12 @@ const DWORD gsnd_build_weapon_sfx_name_ = 0x451760;
 const DWORD gsound_play_sfx_file_ = 0x4519A8;
 const DWORD insert_withdrawal_ = 0x47A290;
 const DWORD intface_redraw_ = 0x45EB98;
+const DWORD intface_toggle_item_state_ = 0x45F4E0;
+const DWORD intface_toggle_items_ = 0x45F404;
 const DWORD intface_update_hit_points_ = 0x45EBD8;
 const DWORD intface_update_items_ = 0x45EFEC;
 const DWORD intface_update_move_points_ = 0x45EE0C;
+const DWORD intface_use_item_ = 0x45F5EC;
 const DWORD inven_display_msg_ = 0x472D24;
 const DWORD inven_left_hand_ = 0x471BBC;
 const DWORD inven_right_hand_ = 0x471B70;
@@ -206,6 +83,8 @@ const DWORD item_size_ = 0x477B68;
 const DWORD item_total_weight_ = 0x477E98;
 const DWORD item_w_anim_code_ = 0x478DA8;
 const DWORD item_w_anim_weap_ = 0x47860C;
+const DWORD item_w_cur_ammo_ = 0x4786A0;
+const DWORD item_w_max_ammo_ = 0x478674;
 const DWORD item_w_try_reload_ = 0x478768;
 const DWORD item_weight_ = 0x477B88;
 const DWORD ListSkills_ = 0x436154;
@@ -218,9 +97,12 @@ const DWORD obj_connect_ = 0x489EC4;
 const DWORD obj_destroy_ = 0x49B9A0;
 const DWORD obj_dist_ = 0x48BBD4;
 const DWORD obj_find_first_at_ = 0x48B48C;
+const DWORD obj_find_first_at_tile_ = 0x48B5A8;
 const DWORD obj_find_next_at_ = 0x48B510;
+const DWORD obj_find_next_at_tile_ = 0x48B608;
 const DWORD obj_outline_object_ = 0x48C2B4;
 const DWORD obj_remove_outline_ = 0x48C2F0;
+const DWORD obj_set_light_ = 0x48AC90;
 const DWORD obj_use_book_ = 0x49B9F0;
 const DWORD obj_use_power_on_car_ = 0x49BDE8;
 const DWORD partyMemberCopyLevelInfo_ = 0x495EA8;
@@ -241,8 +123,16 @@ const DWORD proto_ptr_ = 0x4A2108;
 const DWORD queue_clear_type_ = 0x4A2790;
 const DWORD queue_find_first_ = 0x4A295C;
 const DWORD queue_find_next_ = 0x4A2994;
-const DWORD roll_random_ = 0x4A30C0;
+const DWORD register_object_animate_ = 0x4149D0;
+const DWORD register_object_animate_and_hide_ = 0x414B7C;
+const DWORD register_object_change_fid_ = 0x41518C;
+const DWORD register_object_funset_ = 0x4150A8;
+const DWORD register_object_light_ = 0x415334;
+const DWORD register_object_must_erase_ = 0x414E20;
+const DWORD register_object_take_out_ = 0x415238;
+const DWORD register_object_turn_towards_ = 0x414C50;
 const DWORD RestorePlayer_ = 0x43A8BC;
+const DWORD roll_random_ = 0x4A30C0;
 const DWORD scr_exec_map_update_scripts_ = 0x4A67E4;
 const DWORD scr_write_ScriptNode_ = 0x4A5704;
 const DWORD skill_dec_point_ = 0x4AA8C4;
@@ -255,6 +145,7 @@ const DWORD stat_get_bonus_ = 0x4AF474;
 const DWORD stat_level_ = 0x4AEF48;
 const DWORD SavePlayer_ = 0x43A7DC;
 const DWORD text_font_ = 0x4D58DC;
+const DWORD tile_refresh_rect_ = 0x4B12C0;
 const DWORD tile_scroll_to_ = 0x4B3924;
 const DWORD trait_get_ = 0x4B3B54;
 const DWORD trait_set_ = 0x4B3B48;
@@ -266,3 +157,32 @@ const DWORD win_get_buf_ = 0x4D78B0;
 const DWORD win_register_button_ = 0x4D8260;
 const DWORD win_register_button_disable_ = 0x4D8674;
 const DWORD _word_wrap_ = 0x4BC6F0;
+
+int __stdcall ItemGetType(TGameObj* item) {
+ __asm {
+  mov eax, item
+  call item_get_type_
+ }
+}
+
+void DisplayConsoleMessage(const char* msg) {
+ __asm {
+  mov eax, msg
+  call display_print_
+ }
+}
+
+static DWORD mesg_buf[4] = {0, 0, 0, 0};
+const char* _stdcall GetMessageStr(DWORD fileAddr, DWORD messageId)
+{
+ DWORD buf = (DWORD)mesg_buf;
+ const char* result;
+ __asm {
+  mov eax, fileAddr
+  mov ebx, messageId
+  mov edx, buf
+  call getmsg_
+  mov result, eax
+ }
+ return result;
+}

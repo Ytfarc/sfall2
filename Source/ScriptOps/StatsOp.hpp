@@ -19,11 +19,12 @@
 #pragma once
 
 #include "main.h"
-#include "stats.h"
+
 #include "criticals.h"
-#include "skills.h"
 #include "Knockback.h"
 #include "ScriptExtender.h"
+#include "skills.h"
+#include "stats.h"
 
 // stat_funcs
 static void __declspec(naked) SetPCBaseStat() {

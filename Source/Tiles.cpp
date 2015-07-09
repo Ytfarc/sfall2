@@ -18,11 +18,11 @@
 
 #include "main.h"
 
-#include "Tiles.h"
+#include <math.h>
 #include <stdio.h>
 #include "FalloutEngine.h"
 #include "FileSystem.h"
-#include <math.h>
+#include "Tiles.h"
 
 struct sArt {
  DWORD flags;

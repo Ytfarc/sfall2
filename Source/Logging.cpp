@@ -17,11 +17,11 @@
  */
 
 #include "main.h"
+
 #include "logging.h"
 
 #ifdef TRACE
 
-#include "main.h"
 #include <fstream>
 
 using namespace std;
@@ -30,22 +30,22 @@ static int DebugTypes=0;
 static ofstream Log;
 
 void dlog(const char* a, int type) {
-	if(type!=DL_MAIN&&!(type&DebugTypes)) return;
-	Log << a;
-	Log.flush();
+ if(type!=DL_MAIN&&!(type&DebugTypes)) return;
+ Log << a;
+ Log.flush();
 }
 void dlogr(const char* a, int type) {
-	if(type!=DL_MAIN&&!(type&DebugTypes)) return;
-	Log << a << "\r\n";
-	Log.flush();
+ if(type!=DL_MAIN&&!(type&DebugTypes)) return;
+ Log << a << "\r\n";
+ Log.flush();
 }
 
 void LoggingInit() {
-	Log.open("sfall-log.txt", ios_base::out | ios_base::trunc);
-	if(GetPrivateProfileIntA("Debugging", "Init", 0, ".\\ddraw.ini")) DebugTypes|=DL_INIT;
-	if(GetPrivateProfileIntA("Debugging", "Hook", 0, ".\\ddraw.ini")) DebugTypes|=DL_HOOK;
-	if(GetPrivateProfileIntA("Debugging", "Script", 0, ".\\ddraw.ini")) DebugTypes|=DL_SCRIPT;
-	if(GetPrivateProfileIntA("Debugging", "Criticals", 0, ".\\ddraw.ini")) DebugTypes|=DL_CRITICALS;
+ Log.open("sfall-log.txt", ios_base::out | ios_base::trunc);
+ if(GetPrivateProfileIntA("Debugging", "Init", 0, ".\\ddraw.ini")) DebugTypes|=DL_INIT;
+ if(GetPrivateProfileIntA("Debugging", "Hook", 0, ".\\ddraw.ini")) DebugTypes|=DL_HOOK;
+ if(GetPrivateProfileIntA("Debugging", "Script", 0, ".\\ddraw.ini")) DebugTypes|=DL_SCRIPT;
+ if(GetPrivateProfileIntA("Debugging", "Criticals", 0, ".\\ddraw.ini")) DebugTypes|=DL_CRITICALS;
 }
 
 #endif
@@ -54,14 +54,14 @@ void dlog_f(const char *format, int type, ...) {
 
 #ifdef TRACE
 
-	int i;
-	va_list arg;
-	char buf[1024];
-	va_start(arg, format);
-	i = vsprintf(buf, format, arg);
-	va_end(arg);
-	Log << buf;
-	Log.flush();
+ int i;
+ va_list arg;
+ char buf[1024];
+ va_start(arg, format);
+ i = vsprintf(buf, format, arg);
+ va_end(arg);
+ Log << buf;
+ Log.flush();
 
 #endif
 

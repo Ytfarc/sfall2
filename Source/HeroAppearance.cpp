@@ -24,9 +24,7 @@
 #include "HeroAppearance.h"
 #include "ScriptExtender.h"
 
-
  bool AppModEnabled=false;//check if Appearance mod enabled for script fuctions
-
 
  //char scrn surfaces
  BYTE *NewButt01Surface=NULL;
@@ -1372,8 +1370,7 @@ void DrawPC(void) {
     mov edx, dword ptr ds:[_obj_dude]//dude critter struct
     lea eax, critRect//RECT*
     mov edx, dword ptr ds:[EDX+0x28]//map level the dude is on
- mov funcTemp, 0x4B12C0//draw rect area func
- call funcTemp
+ call tile_refresh_rect_                    //draw rect area func
   }
 
 }

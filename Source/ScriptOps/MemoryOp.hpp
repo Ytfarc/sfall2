@@ -19,319 +19,320 @@
 #pragma once
 
 #include "main.h"
+
 #include "ScriptExtender.h"
 
 // memory_reading_funcs
 static void __declspec(naked) ReadByte() {
-	__asm {
-		push ebx;
-		push ecx;
-		push edx;
-		mov ecx, eax;
-		mov ebx, 0x4674F0;
-		call ebx;
-		mov edx, eax;
-		mov eax, ecx;
-		mov ebx, 0x467500;
-		call ebx;
-		cmp dx, 0xC001;
-		jnz error;
-		movzx edx, byte ptr ds:[eax];
-		jmp result;
+ __asm {
+  push ebx;
+  push ecx;
+  push edx;
+  mov ecx, eax;
+  mov ebx, 0x4674F0;
+  call ebx;
+  mov edx, eax;
+  mov eax, ecx;
+  mov ebx, 0x467500;
+  call ebx;
+  cmp dx, 0xC001;
+  jnz error;
+  movzx edx, byte ptr ds:[eax];
+  jmp result;
 error:
-		mov edx, 0;
+  mov edx, 0;
 result:
-		mov eax, ecx;
-		mov ebx, 0x4674DC;
-		call ebx;
-		mov edx, 0xc001;
-		mov eax, ecx;
-		mov ebx, 0x46748C;
-		call ebx;
-		pop edx;
-		pop ecx;
-		pop ebx;
-		retn;
-	}
+  mov eax, ecx;
+  mov ebx, 0x4674DC;
+  call ebx;
+  mov edx, 0xc001;
+  mov eax, ecx;
+  mov ebx, 0x46748C;
+  call ebx;
+  pop edx;
+  pop ecx;
+  pop ebx;
+  retn;
+ }
 }
 static void __declspec(naked) ReadShort() {
-	__asm {
-		push ebx;
-		push ecx;
-		push edx;
-		mov ecx, eax;
-		mov ebx, 0x4674F0;
-		call ebx;
-		mov edx, eax;
-		mov eax, ecx;
-		mov ebx, 0x467500;
-		call ebx;
-		cmp dx, 0xC001;
-		jnz error;
-		movzx edx, word ptr ds:[eax];
-		jmp result;
+ __asm {
+  push ebx;
+  push ecx;
+  push edx;
+  mov ecx, eax;
+  mov ebx, 0x4674F0;
+  call ebx;
+  mov edx, eax;
+  mov eax, ecx;
+  mov ebx, 0x467500;
+  call ebx;
+  cmp dx, 0xC001;
+  jnz error;
+  movzx edx, word ptr ds:[eax];
+  jmp result;
 error:
-		mov edx, 0;
+  mov edx, 0;
 result:
-		mov eax, ecx;
-		mov ebx, 0x4674DC;
-		call ebx;
-		mov edx, 0xc001;
-		mov eax, ecx;
-		mov ebx, 0x46748C;
-		call ebx;
-		pop edx;
-		pop ecx;
-		pop ebx;
-		retn;
-	}
+  mov eax, ecx;
+  mov ebx, 0x4674DC;
+  call ebx;
+  mov edx, 0xc001;
+  mov eax, ecx;
+  mov ebx, 0x46748C;
+  call ebx;
+  pop edx;
+  pop ecx;
+  pop ebx;
+  retn;
+ }
 }
 static void __declspec(naked) ReadInt() {
-	__asm {
-		push ebx;
-		push ecx;
-		push edx;
-		mov ecx, eax;
-		mov ebx, 0x4674F0;
-		call ebx;
-		mov edx, eax;
-		mov eax, ecx;
-		mov ebx, 0x467500;
-		call ebx;
-		cmp dx, 0xC001;
-		jnz error;
-		mov edx, dword ptr ds:[eax];
-		jmp result;
+ __asm {
+  push ebx;
+  push ecx;
+  push edx;
+  mov ecx, eax;
+  mov ebx, 0x4674F0;
+  call ebx;
+  mov edx, eax;
+  mov eax, ecx;
+  mov ebx, 0x467500;
+  call ebx;
+  cmp dx, 0xC001;
+  jnz error;
+  mov edx, dword ptr ds:[eax];
+  jmp result;
 error:
-		mov edx, 0;
+  mov edx, 0;
 result:
-		mov eax, ecx;
-		mov ebx, 0x4674DC;
-		call ebx;
-		mov edx, 0xc001;
-		mov eax, ecx;
-		mov ebx, 0x46748C;
-		call ebx;
-		pop edx;
-		pop ecx;
-		pop ebx;
-		retn;
-	}
+  mov eax, ecx;
+  mov ebx, 0x4674DC;
+  call ebx;
+  mov edx, 0xc001;
+  mov eax, ecx;
+  mov ebx, 0x46748C;
+  call ebx;
+  pop edx;
+  pop ecx;
+  pop ebx;
+  retn;
+ }
 }
 static void __declspec(naked) ReadString() {
-	__asm {
-		push ebx;
-		push ecx;
-		push edx;
-		mov ecx, eax;
-		mov ebx, 0x4674F0;
-		call ebx;
-		mov edx, eax;
-		mov eax, ecx;
-		mov ebx, 0x467500;
-		call ebx;
-		cmp dx, 0xC001;
-		jnz error;
-		mov edx, eax;
-		jmp result;
+ __asm {
+  push ebx;
+  push ecx;
+  push edx;
+  mov ecx, eax;
+  mov ebx, 0x4674F0;
+  call ebx;
+  mov edx, eax;
+  mov eax, ecx;
+  mov ebx, 0x467500;
+  call ebx;
+  cmp dx, 0xC001;
+  jnz error;
+  mov edx, eax;
+  jmp result;
 error:
-		mov edx, 0;
+  mov edx, 0;
 result:
-		mov eax, ecx;
-		mov ebx, 0x4674DC;
-		call ebx;
-		mov edx, 0x9801;
-		mov eax, ecx;
-		mov ebx, 0x46748C;
-		call ebx;
-		pop edx;
-		pop ecx;
-		pop ebx;
-		retn;
-	}
+  mov eax, ecx;
+  mov ebx, 0x4674DC;
+  call ebx;
+  mov edx, 0x9801;
+  mov eax, ecx;
+  mov ebx, 0x46748C;
+  call ebx;
+  pop edx;
+  pop ecx;
+  pop ebx;
+  retn;
+ }
 }
 static void __declspec(naked) WriteByte() {
-	__asm {
-		pushad
-		mov ecx, eax;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ecx;
-		call GetArg;
-		mov edx, eax;
-		mov eax, ecx;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ecx;
-		call GetArg;
-		cmp di, 0xC001;
-		jnz end;
-		cmp si, 0xC001;
-		jnz end;
-		//mov byte ptr ds:[eax], dl;
-		and edx, 0xff;
-		push edx;
-		push eax;
-		call SafeWrite8;
+ __asm {
+  pushad
+  mov ecx, eax;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ecx;
+  call GetArg;
+  mov edx, eax;
+  mov eax, ecx;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ecx;
+  call GetArg;
+  cmp di, 0xC001;
+  jnz end;
+  cmp si, 0xC001;
+  jnz end;
+  //mov byte ptr ds:[eax], dl;
+  and edx, 0xff;
+  push edx;
+  push eax;
+  call SafeWrite8;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) WriteShort() {
-	__asm {
-		pushad;
-		mov ecx, eax;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ecx;
-		call GetArg;
-		mov edx, eax;
-		mov eax, ecx;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ecx;
-		call GetArg;
-		cmp di, 0xC001;
-		jnz end;
-		cmp si, 0xC001;
-		jnz end;
-		//mov word ptr ds:[eax], dx;
-		and edx, 0xffff;
-		push edx;
-		push eax;
-		call SafeWrite16;
+ __asm {
+  pushad;
+  mov ecx, eax;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ecx;
+  call GetArg;
+  mov edx, eax;
+  mov eax, ecx;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ecx;
+  call GetArg;
+  cmp di, 0xC001;
+  jnz end;
+  cmp si, 0xC001;
+  jnz end;
+  //mov word ptr ds:[eax], dx;
+  and edx, 0xffff;
+  push edx;
+  push eax;
+  call SafeWrite16;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void __declspec(naked) WriteInt() {
-	__asm {
-		pushad
-		mov ecx, eax;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ecx;
-		call GetArg;
-		mov edx, eax;
-		mov eax, ecx;
-		call GetArgType;
-		mov edi, eax;
-		mov eax, ecx;
-		call GetArg;
-		cmp di, 0xC001;
-		jnz end;
-		cmp si, 0xC001;
-		jnz end;
-		//mov dword ptr ds:[eax], edx;
-		push edx;
-		push eax;
-		call SafeWrite32;
+ __asm {
+  pushad
+  mov ecx, eax;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ecx;
+  call GetArg;
+  mov edx, eax;
+  mov eax, ecx;
+  call GetArgType;
+  mov edi, eax;
+  mov eax, ecx;
+  call GetArg;
+  cmp di, 0xC001;
+  jnz end;
+  cmp si, 0xC001;
+  jnz end;
+  //mov dword ptr ds:[eax], edx;
+  push edx;
+  push eax;
+  call SafeWrite32;
 end:
-		popad
-		retn;
-	}
+  popad
+  retn;
+ }
 }
 static void _stdcall WriteStringInternal(const char* str, char* addr) {
-	bool hitnull=false;
-	while(*str) {
-		if(!*addr) hitnull=true;
-		if(hitnull&&addr[1]) break;
-		*addr=*str;
-		addr++;
-		str++;
-	}
-	*addr=0;
+ bool hitnull=false;
+ while(*str) {
+  if(!*addr) hitnull=true;
+  if(hitnull&&addr[1]) break;
+  *addr=*str;
+  addr++;
+  str++;
+ }
+ *addr=0;
 }
 static void __declspec(naked) WriteString() {
-	__asm {
-		pushad;
-		mov ecx, eax;
-		call GetArgType;
-		mov esi, eax;
-		mov eax, ecx;
-		call GetArg;
-		mov edi, eax;
-		mov eax, ecx;
-		call GetArgType;
-		mov edx, eax;
-		mov eax, ecx;
-		call GetArg;
-		cmp dx, 0xC001;
-		jnz end;
-		cmp si, 0x9001;
-		jz next;
-		cmp si, 0x9801;
-		jnz end;
+ __asm {
+  pushad;
+  mov ecx, eax;
+  call GetArgType;
+  mov esi, eax;
+  mov eax, ecx;
+  call GetArg;
+  mov edi, eax;
+  mov eax, ecx;
+  call GetArgType;
+  mov edx, eax;
+  mov eax, ecx;
+  call GetArg;
+  cmp dx, 0xC001;
+  jnz end;
+  cmp si, 0x9001;
+  jz next;
+  cmp si, 0x9801;
+  jnz end;
 next:
-		mov ebx, edi;
-		mov edx, esi;
-		mov esi, eax;
-		mov eax, ecx;
-		call GetStringVar;
-		push esi;
-		push eax;
-		call WriteStringInternal;
-		jmp end;
+  mov ebx, edi;
+  mov edx, esi;
+  mov esi, eax;
+  mov eax, ecx;
+  call GetStringVar;
+  push esi;
+  push eax;
+  call WriteStringInternal;
+  jmp end;
 end:
-		popad;
-		retn;
-	}
+  popad;
+  retn;
+ }
 }
 static void _stdcall CallOffsetInternal(DWORD func, DWORD script) {
-	func=(func>>2) - 0x1d2;
-	bool ret=func>=5;
-	int argcount=func%5;
-	DWORD args[5];
-	DWORD illegalarg=0;
-	for(int i=argcount*4;i>=0;i-=4) {
-		__asm {
-			mov eax, script;
-			call GetArgType;
-			cmp ax, 0xc001;
-			jz legal;
-			inc illegalarg;
+ func=(func>>2) - 0x1d2;
+ bool ret=func>=5;
+ int argcount=func%5;
+ DWORD args[5];
+ DWORD illegalarg=0;
+ for(int i=argcount*4;i>=0;i-=4) {
+  __asm {
+   mov eax, script;
+   call GetArgType;
+   cmp ax, 0xc001;
+   jz legal;
+   inc illegalarg;
 legal:
-			mov eax, script;
-			call GetArg;
-			lea ecx, args;
-			add ecx, i;
-			mov [ecx], eax;
-		}
-	}
+   mov eax, script;
+   call GetArg;
+   lea ecx, args;
+   add ecx, i;
+   mov [ecx], eax;
+  }
+ }
 
-	if(illegalarg) {
-		args[0]=0;
-	} else {
-		__asm {
-			mov eax, args[1];
-			mov edx, args[2];
-			mov ebx, args[3];
-			mov ecx, args[4];
-			mov edi, args[0];
-			call edi;
-			mov args[0], eax;
-		}
-	}
-	if(ret) {
-		__asm {
-			mov eax, script;
-			mov edx, args[0];
-			call SetResult;
-			mov eax, script;
-			mov edx, 0xc001;
-			call SetResultType;
-		}
-	}
+ if(illegalarg) {
+  args[0]=0;
+ } else {
+  __asm {
+   mov eax, args[1];
+   mov edx, args[2];
+   mov ebx, args[3];
+   mov ecx, args[4];
+   mov edi, args[0];
+   call edi;
+   mov args[0], eax;
+  }
+ }
+ if(ret) {
+  __asm {
+   mov eax, script;
+   mov edx, args[0];
+   call SetResult;
+   mov eax, script;
+   mov edx, 0xc001;
+   call SetResultType;
+  }
+ }
 }
 static void __declspec(naked) CallOffset() {
-	__asm {
-		pushad;
-		push eax;
-		push edx;
-		call CallOffsetInternal;
-		popad;
-		retn;
-	}
+ __asm {
+  pushad;
+  push eax;
+  push edx;
+  call CallOffsetInternal;
+  popad;
+  retn;
+ }
 }

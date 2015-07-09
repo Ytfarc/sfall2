@@ -19,11 +19,11 @@
 #include "main.h"
 
 #include <stdio.h>
-#include "Input.h"
 #include "Bugs.h"
 #include "Define.h"
 #include "FalloutEngine.h"
 #include "HookScripts.h"
+#include "input.h"
 #include "Inventory.h"
 #include "LoadGameHook.h"
 

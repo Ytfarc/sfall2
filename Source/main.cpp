@@ -20,44 +20,45 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "timer.h"
-#include "version.h"
-#include "Define.h"
-#include "FalloutEngine.h"
-#include "Graphics.h"
-#include "LoadGameHook.h"
-#include "AmmoMod.h"
-#include "Logging.h"
-#include "ScriptExtender.h"
-#include "knockback.h"
-#include "perks.h"
-#include "KillCounter.h"
-#include "Elevators.h"
-#include "stats.h"
-#include "movies.h"
-#include "Criticals.h"
-#include "console.h"
-#include "FileSystem.h"
-#include "HeroAppearance.h"
-#include "Credits.h"
-#include "Tiles.h"
-#include "QuestList.h"
-#include "CRC.h"
-#include "Premade.h"
-#include "sound.h"
-#include "Reputations.h"
-#include "SuperSave.h"
-#include "BarBoxes.h"
-#include "AnimationsAtOnceLimit.h"
-#include "skills.h"
-#include "Inventory.h"
-#include "MainMenu.h"
+
 #include "AI.h"
-#include "PartyControl.h"
-#include "BurstMods.h"
-#include "Explosions.h"
+#include "AmmoMod.h"
+#include "AnimationsAtOnceLimit.h"
+#include "BarBoxes.h"
 #include "Books.h"
 #include "Bugs.h"
+#include "BurstMods.h"
+#include "console.h"
+#include "Credits.h"
+#include "Criticals.h"
+#include "CRC.h"
+#include "Define.h"
+#include "Elevators.h"
+#include "Explosions.h"
+#include "FalloutEngine.h"
+#include "FileSystem.h"
+#include "Graphics.h"
+#include "HeroAppearance.h"
+#include "Inventory.h"
+#include "KillCounter.h"
+#include "knockback.h"
+#include "LoadGameHook.h"
+#include "Logging.h"
+#include "MainMenu.h"
+#include "movies.h"
+#include "PartyControl.h"
+#include "perks.h"
+#include "Premade.h"
+#include "QuestList.h"
+#include "Reputations.h"
+#include "ScriptExtender.h"
+#include "skills.h"
+#include "sound.h"
+#include "stats.h"
+#include "SuperSave.h"
+#include "Tiles.h"
+#include "timer.h"
+#include "version.h"
 
 char ini[65];
 char translationIni[65];
@@ -509,7 +510,7 @@ static void __declspec(naked) ReloadHook() {
   xor ebx, ebx;
   mov eax, dword ptr ds:[_obj_dude];
   dec ebx;
-  call register_object_animate_;
+  call register_object_animate_
   call register_end_;
   pop edx;
   pop ebx;
@@ -781,8 +782,6 @@ fail:
  }
 }
 
-static const DWORD obj_find_first_at_tile=0x48B5A8;
-static const DWORD obj_find_next_at_tile=0x48B608;
 static void _stdcall explosion_crash_fix_hook2() {
  if(InCombat()) return;
  for(int elv=0;elv<3;elv++) {
@@ -791,7 +790,7 @@ static void _stdcall explosion_crash_fix_hook2() {
    __asm {
     mov edx, tile;
     mov eax, elv;
-    call obj_find_first_at_tile;
+    call obj_find_first_at_tile_
     mov obj, eax;
    }
    while(obj) {
@@ -803,7 +802,7 @@ static void _stdcall explosion_crash_fix_hook2() {
      obj[0x10]=0;
     }
     __asm {
-     call obj_find_next_at_tile;
+     call obj_find_next_at_tile_
      mov obj, eax;
     }
    }

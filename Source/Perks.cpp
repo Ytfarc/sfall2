@@ -18,10 +18,10 @@
 
 #include "main.h"
 
-#include "Vector9x.cpp"
 #include "Define.h"
 #include "FalloutEngine.h"
 #include "Perks.h"
+#include "Vector9x.cpp"
 
 //static const BYTE PerksUsed=121;
 

@@ -18,11 +18,11 @@
 
 #include "main.h"
 
+#include <math.h>
+#include <stdio.h>
 #include "Define.h"
 #include "FalloutEngine.h"
 #include "Stats.h"
-#include <math.h>
-#include <stdio.h>
 
 static DWORD StatMaximumsPC[0x23];
 static DWORD StatMinimumsPC[0x23];
