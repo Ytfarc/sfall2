@@ -2044,11 +2044,9 @@ static void DllMain2() {
   dlogr(" Done", DL_INIT);
  }
 
- if(GetPrivateProfileIntA("Misc", "JetAntidoteFix", 1, ini)) {
-  dlog("Applying Jet Antidote fix.", DL_INIT);
-  MakeCall(0x47A013, &JetAntidoteFix, true);
-  dlogr(" Done", DL_INIT);
- }
+ dlog("Applying Jet Antidote fix.", DL_INIT);
+ MakeCall(0x47A013, &JetAntidoteFix, true);
+ dlogr(" Done", DL_INIT);
 
  if(GetPrivateProfileIntA("Misc", "RemoveCriticalTimelimits", 0, ini)) {
   dlog("Removing critical time limits.", DL_INIT);
@@ -2106,12 +2104,10 @@ static void DllMain2() {
   break;
  }
 
- if(GetPrivateProfileIntA("Misc", "DodgyDoorsFix", 1, ini)) {
-  dlog("Applying Dodgy Door Fix.", DL_INIT);
-  SafeWrite16(0x4113D3, 0x9090);
-  MakeCall(0x4113D5, &DodgyDoorsFix, false);
-  dlogr(" Done", DL_INIT);
- }
+ dlog("Applying Dodgy Door Fix.", DL_INIT);
+ SafeWrite16(0x4113D3, 0x9090);
+ MakeCall(0x4113D5, &DodgyDoorsFix, false);
+ dlogr(" Done", DL_INIT);
 
  if(GetPrivateProfileIntA("Misc", "BoostScriptDialogLimit", 0, ini)) {
   const int scriptDialogCount=10000;

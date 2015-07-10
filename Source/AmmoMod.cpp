@@ -731,9 +731,7 @@ void AmmoModInit() {
   dlogr(" Done", DL_INIT);
  }
 
- if (GetPrivateProfileIntA("Misc", "SpecialUnarmedAttacksFix", 1, ini)) {
-  dlog("Applying Special Unarmed Attacks fix.", DL_INIT);
-  MakeCall(0x42394D, &UnarmedAttacksFix, true);
-  dlogr(" Done", DL_INIT);
- }
+ dlog("Applying Special Unarmed Attacks fix.", DL_INIT);
+ MakeCall(0x42394D, &UnarmedAttacksFix, true);
+ dlogr(" Done", DL_INIT);
 }
