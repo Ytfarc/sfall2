@@ -79,6 +79,8 @@
 #define _view_page               0x664520
 #define _wd_obj                  0x59E98C
 
+#define PID_ACTIVE_GEIGER_COUNTER    207
+#define PID_ACTIVE_STEALTH_BOY       210
 #define PID_ADVANCED_POWER_ARMOR     348
 #define PID_ADVANCED_POWER_ARMOR_MK2 349
 #define PID_BRIDGEKEEPERS_ROBE       524
