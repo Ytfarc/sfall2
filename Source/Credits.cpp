@@ -20,12 +20,13 @@
 
 #include <stdio.h>
 #include "FalloutEngine.h"
+#include "Logging.h"
 #include "version.h"
 
-static DWORD InCredits=0;
-static DWORD CreditsLine=0;
+static DWORD InCredits = 0;
+static DWORD CreditsLine = 0;
 
-static const char* ExtraLines[]={
+static const char* ExtraLines[] = {
  "#SFALL2 " VERSION_STRING,
  "",
  "sfall is free software, licensed under the GPL",
@@ -71,18 +72,16 @@ static const char* ExtraLines[]={
  "#FALLOUT 2",
  ""
 };
-static DWORD ExtraLineCount=sizeof(ExtraLines)/4;
+static DWORD ExtraLineCount = sizeof(ExtraLines)/4;
 
-static const char* creditsFile="credits.txt";
-
-static void _stdcall ShowCreditsHook() {
- InCredits=1;
- CreditsLine=0;
+static void __declspec(naked) credits_hook() {
  __asm {
-  mov eax, creditsFile;
+  mov  CreditsLine, 0
+  inc  InCredits
   call credits_
+  dec  InCredits
+  retn
  }
- InCredits=0;
 }
 
 static DWORD _stdcall CreditsNextLine(char* buf, DWORD* font, DWORD* colour) {
@@ -106,28 +105,29 @@ static DWORD _stdcall CreditsNextLine(char* buf, DWORD* font, DWORD* colour) {
  return 1;
 }
 
-static const DWORD _credits_get_next_line=0x42CE6C;
-static void __declspec(naked) CreditsNextLineHook() {
+static void __declspec(naked) credits_get_next_line_hook() {
  __asm {
-  pushad;
-  push ebx;
-  push edx;
-  push eax;
-  call CreditsNextLine;
-  test eax, eax;
-  jz fail;
-  popad;
-  xor eax, eax;
-  inc eax;
-  retn;
+  pushad
+  push ebx
+  push edx
+  push eax
+  call CreditsNextLine
+  test eax, eax
+  popad
+  jz   fail
+  xor  eax, eax
+  inc  eax
+  retn
 fail:
-  popad;
-  jmp _credits_get_next_line;
+  jmp credits_get_next_line_
  }
 }
 
 void CreditsInit() {
- HookCall(0x480C49, &ShowCreditsHook);
- HookCall(0x43F881, &ShowCreditsHook);
- HookCall(0x42CB49, &CreditsNextLineHook);
+ if (!GetPrivateProfileIntA("Debugging", "NoCredits", 0, ini)) {
+  dlogr("Applying credits patch", DL_INIT);
+  HookCall(0x480C49, &credits_hook);
+  HookCall(0x43F881, &credits_hook);
+  HookCall(0x42CB49, &credits_get_next_line_hook);
+ }
 }

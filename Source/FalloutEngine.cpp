@@ -35,6 +35,7 @@ const DWORD Check4Keys_ = 0x43F73C;
 const DWORD combat_should_end_ = 0x422C60;
 const DWORD combat_turn_ = 0x42299C;
 const DWORD credits_ = 0x42C860;
+const DWORD credits_get_next_line_ = 0x42CE6C;
 const DWORD critter_body_type_ = 0x42DDC4;
 const DWORD critter_can_obj_dude_rest_ = 0x42E564;
 const DWORD critter_is_dead_ = 0x42DD18;

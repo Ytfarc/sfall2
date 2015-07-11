@@ -1037,8 +1037,7 @@ static void __declspec(naked) display_table_inventories_hook1() {
 static void __declspec(naked) display_table_inventories_hook2() {
  __asm {
   mov  dword ptr [edx+4], 4                 // WinRect.y_start = 4
-  call win_draw_rect_
-  retn
+  jmp  win_draw_rect_
  }
 }
 
@@ -1083,8 +1082,7 @@ static void __declspec(naked) gdProcess_hook() {
   xchg edx, eax                             // edx=указатель на объект (броню), eax=_dialog_target
   call inven_wield_
 noArmor:
-  call gdialog_barter_cleanup_tables_
-  retn
+  jmp  gdialog_barter_cleanup_tables_
  }
 }
 
@@ -1106,7 +1104,7 @@ static void __declspec(naked) SetDefaultAmmo() {
   xchg edx, eax
   mov  ebx, eax
   call item_get_type_
-  cmp  eax, 3                               // Это item_type_weapon?
+  cmp  eax, item_type_weapon                // Это item_type_weapon?
   jne  end                                  // Нет
   cmp  dword ptr [ebx+0x3C], 0              // Есть патроны в оружии?
   jne  end                                  // Да
@@ -1136,11 +1134,10 @@ static void __declspec(naked) inven_action_cursor_hook() {
  }
 }
 
-static void __declspec(naked) item_add_mult_hook1() {
+static void __declspec(naked) item_add_mult_hook() {
  __asm {
   call SetDefaultAmmo
-  call item_add_force_
-  retn
+  jmp  item_add_force_
  }
 }
 
@@ -1467,7 +1464,7 @@ void InventoryInit() {
 
  if (GetPrivateProfileIntA("Misc", "StackEmptyWeapons", 0, ini)) {
   MakeCall(0x4736C6, &inven_action_cursor_hook, true);
-  HookCall(0x4772AA, &item_add_mult_hook1);
+  HookCall(0x4772AA, &item_add_mult_hook);
  }
 
 // Не вызывать окошко выбора количества при перетаскивании патронов в оружие

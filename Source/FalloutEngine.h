@@ -34,6 +34,7 @@ extern const DWORD Check4Keys_;
 extern const DWORD combat_should_end_;
 extern const DWORD combat_turn_;
 extern const DWORD credits_;
+extern const DWORD credits_get_next_line_;
 extern const DWORD critter_body_type_;
 extern const DWORD critter_can_obj_dude_rest_;
 extern const DWORD critter_is_dead_;

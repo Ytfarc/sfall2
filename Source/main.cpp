@@ -1919,7 +1919,6 @@ static void DllMain2() {
  dlogr("Running TilesInit().", DL_INIT);
  TilesInit();
 
- dlogr("Applying main menu text patch", DL_INIT);
  CreditsInit();
 
  char xltcodes[512];
