@@ -90,7 +90,7 @@ static void _stdcall ResetState(DWORD onLoad) {
 }
 
 void GetSavePath(char* buf, int type) {
- int saveid = *(int*)0x005193B8 + 1 +LSPageOffset;//add SuperSave Page offset
+ int saveid = *(int*)_slot_cursor + 1 +LSPageOffset;//add SuperSave Page offset
  char buf2[6];
  //Fallout saving is independent of working directory
  struct sPath {
@@ -99,10 +99,10 @@ void GetSavePath(char* buf, int type) {
   int b;
   sPath* next;
  };
- sPath* spath=*(sPath**)0x006B24D0;
+ sPath* spath=*(sPath**)_paths;
  while(spath->a&&spath->next) spath=spath->next;
 
- //strcpy_s(buf, MAX_PATH, **(char***)0x006B24D0);
+ //strcpy_s(buf, MAX_PATH, **(char***)_paths);
  strcpy_s(buf, MAX_PATH, spath->path);
  strcat_s(buf, MAX_PATH, "\\savegame\\slot");
  _itoa_s(saveid, buf2, 10);
@@ -175,7 +175,7 @@ static DWORD _stdcall combatSaveTest() {
    call perk_level_
    mov bonusmove, eax;
   }
-  if(*(DWORD*)(*(DWORD*)0x6610B8 + 0x40) != ap || bonusmove*2!=*(DWORD*)0x0056D39C) {
+  if(*(DWORD*)(*(DWORD*)_obj_dude + 0x40) != ap || bonusmove*2!=*(DWORD*)_combat_free_move) {
    DisplayConsoleMessage(SaveFailMsg);
    return 0;
   }
@@ -195,8 +195,7 @@ static void __declspec(naked) SaveGame() {
   mov eax, edx;
 
   or InLoop, SAVEGAME;
-  mov ebx, 0x0047B88C;
-  call ebx;
+  call SaveGame_
   and InLoop, (-1^SAVEGAME);
   cmp eax, 1;
   jne end;
@@ -256,8 +255,7 @@ static void __declspec(naked) LoadSlot() {
   call LoadGame2_Before;
   popad;
   push ebx;
-  mov ebx, 0x0047DC68;
-  call ebx;
+  call LoadSlot_
   pop ebx;
   retn;
  }
@@ -269,8 +267,7 @@ static void __declspec(naked) LoadGame() {
   push ecx;
   push edx;
   or InLoop, LOADGAME;
-  mov ebx, 0x0047C640;
-  call ebx;
+  call LoadGame_
   /*push eax;
   push 0x0000101f;
   push 0x0045E949;
@@ -319,10 +316,7 @@ static void __declspec(naked) NewGame() {
   pushad;
   call NewGame2;
   popad;
-  push ebx;
-  mov ebx, 0x00480E48;
-  call ebx;
-  pop ebx;
+  call main_game_loop_
   retn;
  }
 }
@@ -334,118 +328,89 @@ static void __declspec(naked) MainMenu() {
   call ResetState;
   call LoadHeroAppearance;
   popad;
-  push ebx;
-  mov ebx, 0x00481AEC;
-  call ebx;
-  pop ebx;
+  call main_menu_loop_
   retn;
  }
 }
 static void __declspec(naked) WorldMapHook() {
  __asm {
-  push ebx;
   or InLoop, WORLDMAP;
   xor eax, eax;
-  mov ebx, 0x004BFE10;
-  call ebx;
+  call wmWorldMapFunc_
   and InLoop, (-1^WORLDMAP);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) WorldMapHook2() {
  __asm {
-  push ebx;
   or InLoop, WORLDMAP;
-  mov ebx, 0x004BFE10;
-  call ebx;
+  call wmWorldMapFunc_
   and InLoop, (-1^WORLDMAP);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) CombatHook() {
  __asm {
-  push ebx;
   pushad;
   call AICombatStart;
   popad
   or InLoop, COMBAT;
-  mov ebx, 0x00422D2C;
-  call ebx;
+  call combat_
   pushad;
   call AICombatEnd;
   popad
   and InLoop, (-1^COMBAT);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) PlayerCombatHook() {
  __asm {
-  push ebx;
   or InLoop, PCOMBAT;
-  mov ebx, 0x004227F4;
-  call ebx;
+  call combat_input_
   and InLoop, (-1^PCOMBAT);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) EscMenuHook() {
  __asm {
-  push ebx;
   or InLoop, ESCMENU;
-  mov ebx, 0x0048FC50;
-  call ebx;
+  call do_optionsFunc_
   and InLoop, (-1^ESCMENU);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) EscMenuHook2() {
  //Bloody stupid watcom compiler optimizations...
  __asm {
-  push ebx;
   or InLoop, ESCMENU;
-  mov ebx, 0x0048FC48;
-  call ebx;
+  call do_options_
   and InLoop, (-1^ESCMENU);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) OptionsMenuHook() {
  __asm {
-  push ebx;
   or InLoop, OPTIONS;
-  mov ebx, 0x00490798;
-  call ebx;
+  call do_prefscreen_
   and InLoop, (-1^OPTIONS);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) HelpMenuHook() {
  __asm {
-  push ebx;
   or InLoop, HELP;
-  mov ebx, 0x00443F74;
-  call ebx;
+  call game_help_
   and InLoop, (-1^HELP);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) CharacterHook() {
  __asm {
-  push ebx;
   or InLoop, CHARSCREEN;
   pushad;
   call PerksEnterCharScreen;
   popad;
-  mov ebx, 0x00431DF8;
-  call ebx;
+  call editor_design_
   pushad;
   test eax, eax;
   jz success;
@@ -456,62 +421,46 @@ success:
 end:
   popad;
   and InLoop, (-1^CHARSCREEN);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) DialogHook() {
  __asm {
-  push ebx;
   or InLoop, DIALOG;
-  mov ebx, 0x004465C0;
-  call ebx;
+  call gdProcess_
   and InLoop, (-1^DIALOG);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) PipboyHook() {
  __asm {
-  push ebx;
   or InLoop, PIPBOY;
-  mov ebx, 0x00497004;
-  call ebx;
+  call pipboy_
   and InLoop, (-1^PIPBOY);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) SkilldexHook() {
  __asm {
-  push ebx;
   or InLoop, SKILLDEX;
-  mov ebx, 0x004ABFD0;
-  call ebx;
+  call skilldex_select_
   and InLoop, (-1^SKILLDEX);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) InventoryHook() {
  __asm {
-  push ebx;
   or InLoop, INVENTORY;
-  mov ebx, 0x0046E7B0;
-  call ebx;
+  call handle_inventory_
   and InLoop, (-1^INVENTORY);
-  pop ebx;
   retn;
  }
 }
 static void __declspec(naked) AutomapHook() {
  __asm {
-  push ebx;
   or InLoop, AUTOMAP;
-  mov ebx, 0x0041B8BC;
-  call ebx;
+  call automap_
   and InLoop, (-1^AUTOMAP);
-  pop ebx;
   retn;
  }
 }

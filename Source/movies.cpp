@@ -21,6 +21,7 @@
 #include <d3d9.h>
 #include <dshow.h>
 #include <Vmr9.h>
+#include "FalloutEngine.h"
 #include "Graphics.h"
 #include "Logging.h"
 #include "movies.h"
@@ -236,8 +237,7 @@ DWORD CreateDSGraph(wchar_t* path,IDirect3DTexture9** tex,sDSTexture* result) {
 static DWORD PlayFrameHook3() {
  __asm {
   xor eax, eax;
-  mov edx, 0x4C9CF0; //windows message pump
-  call edx;
+  call GNW95_process_message_               //windows message pump
  }
  PlayMovieFrame();
  if(GetAsyncKeyState(VK_ESCAPE)) return 0;

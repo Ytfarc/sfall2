@@ -24,6 +24,7 @@
 #include "Arrays.h"
 #include "BarBoxes.h"
 #include "Console.h"
+#include "Define.h"
 #include "Explosions.h"
 #include "FalloutEngine.h"
 #include "HookScripts.h"
@@ -100,17 +101,6 @@ static const char* _stdcall GetOpArgStr(int num) {
   : "";
 }
 
-// common useful functions offsets, related to scripting engine
-static const DWORD exec_script_proc_ = 0x4A4810; // unsigned int aScriptID<eax>, int aProcId<edx>
-static const DWORD scr_find_obj_from_program_ = 0x4A39AC; // eax - *program - finds self_obj by program pointer (has nice additional effect - creates fake object for a spatial script)
-static const DWORD loadProgram_ = 0x4A3B74; // loads script from scripts/ folder by file name and returns pointer to it: char* <eax> - file name (w/o extension)
-static const DWORD interpret_ = 0x46CCA4; // <eax> - programPtr, <edx> - ??? (-1)
-static const DWORD interpreFindProcedure_ = 0x46DCD0; // get proc number (different for each script) by name: *<eax> - scriptPtr, char* <edx> - proc name
-static const DWORD runProgram_ = 0x46E154; // eax - programPtr, called once for each program after first loaded - hooks program to game and UI events
-static const DWORD _procTableStrs = 0x51C758; // table of procId (from define.h) => procName map
-static const DWORD runProcedure_ = 0x46DD2C; // <eax> - programPtr, <edx> - procNumber
-static const DWORD interpretFreeProgram_ = 0x467614; // <eax> - program ptr, frees it from memory and from scripting engine
-
 #include "ScriptOps\AsmMacros.h"
 #include "ScriptOps\ScriptArrays.hpp"
 #include "ScriptOps\ScriptUtils.hpp"
@@ -184,11 +174,11 @@ TScript OverrideScriptStruct;
 
 //eax contains the script pointer, edx contains the opcode*4
 
-//To read a value, mov the script pointer to eax, call 0x4674F0, eax now contains the value type
-//mov the script pointer to eax, call 0x467500, eax now contains the value
+//To read a value, mov the script pointer to eax, call interpretPopShort_, eax now contains the value type
+//mov the script pointer to eax, call interpretPopLong_, eax now contains the value
 
-//To return a value, move it to edx, mov the script pointer to eax, call 0x4674DC
-//mov the value type to edx, mov the script pointer to eax, call 0x46748C
+//To return a value, move it to edx, mov the script pointer to eax, call interpretPushLong_
+//mov the value type to edx, mov the script pointer to eax, call interpretPushShort_
 
 
 
@@ -207,12 +197,10 @@ static void __declspec(naked) SetGlobalScriptRepeat() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -240,12 +228,10 @@ static void __declspec(naked) SetGlobalScriptType() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -265,12 +251,10 @@ static void __declspec(naked) GetGlobalScriptTypes() {
   push edx;
   mov edx, AvailableGlobalScriptTypes;
   mov ecx, eax;
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -300,19 +284,15 @@ static void __declspec(naked) SetGlobalVar() {
   push edi;
   push esi;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   mov esi, eax;
   mov eax, edi;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -326,8 +306,7 @@ static void __declspec(naked) SetGlobalVar() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push esi;
   push eax;
   call SetGlobalVar2;
@@ -361,12 +340,10 @@ static void __declspec(naked) GetGlobalVarInt() {
   push esi;
   xor edx, edx;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp si, 0x9001;
   jz next;
   cmp si, 0x9801;
@@ -381,19 +358,16 @@ next:
   mov edx, esi;
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push eax;
   call GetGlobalVar2;
   mov edx, eax;
 end:
   mov eax, edi;
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, edi;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop esi;
   pop edi;
   pop edx;
@@ -411,12 +385,10 @@ static void __declspec(naked) GetGlobalVarFloat() {
   push esi;
   xor edx, edx;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp si, 0x9001;
   jz next;
   cmp si, 0x9801;
@@ -431,19 +403,16 @@ next:
   mov edx, esi;
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push eax;
   call GetGlobalVar2;
   mov edx, eax;
 end:
   mov eax, edi;
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xa001;
   mov eax, edi;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop esi;
   pop edi;
   pop edx;
@@ -453,8 +422,6 @@ end:
  }
 }
 
-
-
 static void __declspec(naked) GetSfallArg() {
  __asm {
   pushad;
@@ -463,10 +430,10 @@ static void __declspec(naked) GetSfallArg() {
   pop ecx;
   mov edx, eax;
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -486,10 +453,10 @@ static void __declspec(naked) GetSfallArgs() {
   pop ecx;
   mov edx, eax;
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -498,16 +465,16 @@ static void __declspec(naked) SetSfallArg() {
  __asm {
   pushad;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   mov edx, eax;
   mov eax, ecx;
-  call GetArgType;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   cmp si, 0xc001;
@@ -526,10 +493,10 @@ static void __declspec(naked) SetSfallReturn() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xc001;
   jnz end;
   push eax;
@@ -547,10 +514,10 @@ static void __declspec(naked) InitHook() {
   push edx;
   mov ecx, eax;
   mov edx, InitingHookScripts;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   retn;
@@ -571,10 +538,10 @@ static void __declspec(naked) set_self() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   push eax;
@@ -589,10 +556,10 @@ static void __declspec(naked) register_hook() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   push -1;
@@ -627,10 +594,10 @@ static void __declspec(naked) sfall_ver_major() {
   push ecx;
   mov edx, VERSION_MAJOR;
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop ecx;
   pop edx;
   retn;
@@ -642,10 +609,10 @@ static void __declspec(naked) sfall_ver_minor() {
   push ecx;
   mov edx, VERSION_MINOR;
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop ecx;
   pop edx;
   retn;
@@ -657,10 +624,10 @@ static void __declspec(naked) sfall_ver_build() {
   push ecx;
   mov edx, VERSION_BUILD;
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop ecx;
   pop edx;
   retn;
@@ -669,9 +636,9 @@ static void __declspec(naked) sfall_ver_build() {
 
 
 //END OF SCRIPT FUNCTIONS
-static const DWORD scr_find_sid_from_program=0x4A390C + 5;
-static const DWORD scr_ptr=0x4A5E34 + 5;
-static const DWORD scr_find_obj_from_program=0x4A39AC + 7;
+static const DWORD scr_find_sid_from_program=scr_find_sid_from_program_ + 5;
+static const DWORD scr_ptr=scr_ptr_ + 5;
+static const DWORD scr_find_obj_from_program=scr_find_obj_from_program_ + 7;
 
 DWORD _stdcall FindSidHook2(DWORD script) {
  stdext::hash_map<DWORD, TGameObj*>::iterator overrideIt = selfOverrideMap.find(script);
@@ -802,7 +769,6 @@ static DWORD __stdcall CreateGlobalExportedVar(DWORD scr, const char* name) {
  globalExportedVars[str] = sExportedVar(); // add new
  return 1;
 }
-static const DWORD findVar_ = 0x4410AC;
 /* 
  when fetching/storing into exported variables, first search in our own hash table instead, then (if not found), resume normal search
 
@@ -853,7 +819,7 @@ static void __declspec(naked) Export_Export_FindVar_Hook() {
 
 proceedNormal:
   popad;
-  call findVar_;  // else - proceed normal
+  call findVar_  // else - proceed normal
   jmp Export_Export_FindVar_back1;
  }
 }
@@ -863,7 +829,7 @@ static void _stdcall FreeProgramHook2(DWORD progPtr) {
  if (isGameLoading || (sfallProgsMap.find(progPtr) == sfallProgsMap.end())) { // only delete non-sfall scripts or when actually loading the game
   __asm {
    mov eax, progPtr;
-   call interpretFreeProgram_;
+   call interpretFreeProgram_
   }
  }
 }
@@ -1319,7 +1285,7 @@ DWORD GetScriptProcByName(DWORD scriptPtr, const char* procName) {
  __asm {
   mov edx, procName;
   mov eax, scriptPtr;
-  call interpreFindProcedure_;
+  call interpretFindProcedure_
   mov result, eax;
  }
  return result;
@@ -1329,7 +1295,7 @@ void LoadScriptProgram(sScriptProgram &prog, const char* fileName) {
  DWORD scriptPtr;
  __asm {
   mov eax, fileName;
-  call loadProgram_;
+  call loadProgram_
   mov scriptPtr, eax;
  }
  if (scriptPtr) {
@@ -1350,10 +1316,10 @@ void InitScriptProgram(sScriptProgram &prog) {
  if (prog.initialized == 0) {
   __asm {
    mov eax, progPtr;
-   call runProgram_;
+   call runProgram_
    mov edx, -1;
    mov eax, progPtr;
-   call interpret_;
+   call interpret_
   }
   prog.initialized = 1;
  }
@@ -1451,7 +1417,7 @@ void RunScriptProcByNum(DWORD sptr, DWORD procNum) {
  __asm {
   mov edx, procNum;
   mov eax, sptr;
-  call runProcedure_;
+  call executeProcedure_
  }
 }
 void RunScriptProc(sScriptProgram* prog, const char* procName) {
@@ -1504,19 +1470,17 @@ static void RunGlobalScripts1() {
    if(!highlightingToggled) {
     if(MotionSensorMode&4) {
      DWORD scanner;
-     static const DWORD _inven_pid_is_carried_ptr=0x471CA0;
-     static const DWORD _item_m_dec_charges=0x4795A4;
      __asm {
       mov eax, ds:[_obj_dude];
-      mov edx, 59;
-      call _inven_pid_is_carried_ptr;
+      mov edx, PID_MOTION_SENSOR
+      call inven_pid_is_carried_ptr_
       mov scanner, eax;
      }
      if(scanner) {
       if(MotionSensorMode&2) {
        __asm {
         mov eax, scanner;
-        call _item_m_dec_charges; //Returns -1 if the item has no charges
+        call item_m_dec_charges_ //Returns -1 if the item has no charges
         inc eax;
         mov highlightingToggled, eax;
        }
@@ -1570,7 +1534,7 @@ void _stdcall HandleMapUpdateForScripts(DWORD procId) {
    DWORD progPtr = it->second.ptr;
    __asm {
     mov eax, progPtr;
-    call runProgram_;
+    call runProgram_
    }
   }
  }

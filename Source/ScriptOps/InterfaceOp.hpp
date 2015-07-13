@@ -31,12 +31,10 @@ static void __declspec(naked) InputFuncsAvailable() {
   push edx;
   mov ecx, eax;
   mov edx, 1; //They're always available from 2.9 on
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -49,12 +47,10 @@ static void __declspec(naked) KeyPressed() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz fail;
   push ecx;
@@ -67,12 +63,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, ecx;
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -85,12 +79,10 @@ static void __declspec(naked) funcTapKey() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   test eax, eax;
@@ -113,12 +105,12 @@ static void __declspec(naked) get_mouse_x() {
    push ecx;
    push edx;
    mov ecx, eax;
-   mov edx, ds:[0x6AC7A8];
-   add edx, ds:[0x6AC7D0];
-   call SetResult;
+   mov edx, ds:[_mouse_x_]
+   add edx, ds:[_mouse_hotx]
+   call interpretPushLong_
    mov eax, ecx;
    mov edx, 0xc001;
-   call SetResultType
+   call interpretPushShort_
    pop edx;
    pop ecx;
    retn;
@@ -131,12 +123,12 @@ static void __declspec(naked) get_mouse_y() {
    push ecx;
    push edx;
    mov ecx, eax;
-   mov edx, ds:[0x6AC7A4];
-   add edx, ds:[0x6AC7CC];
-   call SetResult;
+   mov edx, ds:[_mouse_y_]
+   add edx, ds:[_mouse_hoty]
+   call interpretPushLong_
    mov eax, ecx;
    mov edx, 0xc001;
-   call SetResultType
+   call interpretPushShort_
    pop edx;
    pop ecx;
    retn;
@@ -149,11 +141,11 @@ static void __declspec(naked) get_mouse_buttons() {
    push ecx;
    push edx;
    mov ecx, eax;
-   mov edx, ds:[0x0051E2AC];
-   call SetResult;
+   mov edx, ds:[_last_buttons]
+   call interpretPushLong_
    mov eax, ecx;
    mov edx, 0xc001;
-   call SetResultType
+   call interpretPushShort_
    pop edx;
    pop ecx;
    retn;
@@ -166,11 +158,11 @@ static void __declspec(naked) get_window_under_mouse() {
    push ecx;
    push edx;
    mov ecx, eax;
-   mov edx, ds:[0x0051E404];
-   call SetResult;
+   mov edx, ds:[_last_button_winID]
+   call interpretPushLong_
    mov eax, ecx;
    mov edx, 0xc001;
-   call SetResultType
+   call interpretPushShort_
    pop edx;
    pop ecx;
    retn;
@@ -183,10 +175,10 @@ static void __declspec(naked) get_screen_width() {
    push edx;
    mov ecx, eax;
    mov edx, ds:[0x4CAD6B];
-   call SetResult;
+   call interpretPushLong_
    mov eax, ecx;
    mov edx, 0xc001;
-   call SetResultType
+   call interpretPushShort_
    pop edx;
    pop ecx;
    retn;
@@ -199,10 +191,10 @@ static void __declspec(naked) get_screen_height() {
    push edx;
    mov ecx, eax;
    mov edx, ds:[0x4CAD66];
-   call SetResult;
+   call interpretPushLong_
    mov eax, ecx;
    mov edx, 0xc001;
-   call SetResultType
+   call interpretPushShort_
    pop edx;
    pop ecx;
    retn;
@@ -210,24 +202,16 @@ static void __declspec(naked) get_screen_height() {
 }
 //Stop game, the same effect as open charsscreen or inventory
 static void __declspec(naked) stop_game() {
-   __asm {
-   push ebx;
-   mov ebx, 0x00482104;
-   call ebx;
-   pop ebx;
-   retn;
-   }
+ __asm {
+  jmp  map_disable_bk_processes_
+ }
 }
 
 //Resume the game when it is stopped
 static void __declspec(naked) resume_game() {
-   __asm {
-   push ebx;
-   mov ebx, 0x004820C0;
-   call ebx;
-   pop ebx;
-   retn;
-   }
+ __asm {
+  jmp  map_enable_bk_processes_
+ }
 }
 
 //Create a message window with given string
@@ -239,10 +223,10 @@ static void __declspec(naked) create_message_window() {
    je end;
 
    mov ecx, eax;
-   call GetArgType;
+   call interpretPopShort_
    mov edx, eax;
    mov eax, ecx;
-   call GetArg;
+   call interpretPopLong_
    cmp dx, 0x9001;
    jz next;
    cmp dx, 0x9801;
@@ -250,13 +234,13 @@ static void __declspec(naked) create_message_window() {
 next:
    mov ebx, eax;
    mov eax, ecx;
-   call GetStringVar;
+   call interpretGetString_
    mov esi, eax
 
    mov ecx, eax;
    mov eax, 3;
    push 1;
-   mov al, ds:0x006AB718;
+   mov al, ds:[0x006AB718];
    push eax;
    push 0;
    push eax;
@@ -279,13 +263,11 @@ static void __declspec(naked) GetViewportX() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov edx, ds:[0x51DE2C];
-  mov ebx, 0x4674DC;
-  call ebx;
+  mov  edx, ds:[_wmWorldOffsetX]
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -298,13 +280,11 @@ static void __declspec(naked) GetViewportY() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov edx, ds:[0x51DE30];
-  mov ebx, 0x4674DC;
-  call ebx;
+  mov  edx, ds:[_wmWorldOffsetY]
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -317,15 +297,13 @@ static void __declspec(naked) SetViewportX() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
-  mov ds:[0x51DE2C], eax
+  mov  ds:[_wmWorldOffsetX], eax
 end:
   pop edx;
   pop ecx;
@@ -339,15 +317,13 @@ static void __declspec(naked) SetViewportY() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
-  mov ds:[0x51DE30], eax
+  mov  ds:[_wmWorldOffsetY], eax
 end:
   pop edx;
   pop ecx;
@@ -356,15 +332,14 @@ end:
  }
 }
 
-static const DWORD _refresh_box_bar_win=0x4614CC;
 static void __declspec(naked) ShowIfaceTag() {
  __asm {
   pushad;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   cmp eax, 3;
@@ -373,7 +348,7 @@ static void __declspec(naked) ShowIfaceTag() {
   je falloutfunc;
   push eax;
   call AddBox;
-  call _refresh_box_bar_win;
+  call refresh_box_bar_win_
   jmp end;
 falloutfunc:
   call pc_flag_on_
@@ -386,10 +361,10 @@ static void __declspec(naked) HideIfaceTag() {
  __asm {
   pushad;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   cmp eax, 3;
@@ -398,7 +373,7 @@ static void __declspec(naked) HideIfaceTag() {
   je falloutfunc;
   push eax;
   call RemoveBox;
-  call _refresh_box_bar_win;
+  call refresh_box_bar_win_
   jmp end;
 falloutfunc:
   call pc_flag_off_
@@ -412,10 +387,10 @@ static void __declspec(naked) IsIfaceTagActive() {
   pushad;
   sub esp, 4;
   mov ebx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ebx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz fail;
   cmp eax, 3;
@@ -428,7 +403,7 @@ static void __declspec(naked) IsIfaceTagActive() {
   jmp end;
 falloutfunc:
   mov ecx, eax;
-  mov eax, dword ptr ds:[_obj_dude];
+  mov eax, dword ptr ds:[_obj_dude]
   mov edx, esp;
   mov eax, [eax+0x64];
   call proto_ptr_
@@ -445,10 +420,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, ebx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   add esp, 4;
   popad;
   retn;

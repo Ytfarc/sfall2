@@ -25,17 +25,16 @@
 
 //script control functions
 
-static const DWORD scr_remove=0x4A61D4;
 static void __declspec(naked) RemoveScript() {
  __asm {
   push ebx;
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xc001;
   jnz end;
   test eax, eax;
@@ -44,7 +43,7 @@ static void __declspec(naked) RemoveScript() {
   mov eax, [eax+0x78];
   cmp eax, 0xffffffff;
   jz end;
-  call scr_remove;
+  call scr_remove_
   mov dword ptr [edx+0x78], 0xffffffff;
 end:
   pop edx;
@@ -54,23 +53,20 @@ end:
  }
 }
 
-static const DWORD obj_new_sid_inst=0x49AAC0;
-static const DWORD exec_script_proc=0x4A4810;
-//static const DWORD obj_new_sid_inst=0x49A9B4;
 static void __declspec(naked) SetScript() {
  __asm {
   pushad;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   mov ebx, eax;
   mov eax, ecx;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xc001;
   jnz end;
   cmp di, 0xc001;
@@ -82,7 +78,7 @@ static void __declspec(naked) SetScript() {
   jz newscript
   push eax;
   mov eax, esi;
-  call scr_remove;
+  call scr_remove_
   pop eax;
   mov dword ptr [eax+0x78], 0xffffffff;
 newscript:
@@ -101,23 +97,20 @@ execMapEnter:
   inc edx; // 4 - "critter" type script
 notCritter:
   dec ebx;
-  call obj_new_sid_inst;
+  call obj_new_sid_inst_
   mov eax, [ecx+0x78];
   mov edx, 1; // start
-  call exec_script_proc;
+  call exec_script_proc_
   cmp esi, 1; // run map enter?
   jnz end;
   mov eax, [ecx+0x78];
   mov edx, 0xf; // map_enter_p_proc
-  call exec_script_proc;
+  call exec_script_proc_
 end:
   popad;
   retn;
  }
 }
-
-static const DWORD scr_new_=0x4A5F28; // eax - script index from scripts lst, edx - type (0 - system, 1 - spatials, 2 - time, 3 - items, 4 - critters)
-static const DWORD scr_ptr_=0x4A5E34; // eax - scriptId, edx - **TScript (where to store script pointer)
 
 static void _stdcall op_create_spatial2() {
  DWORD scriptIndex = GetOpArgInt(0),
@@ -129,7 +122,7 @@ static void _stdcall op_create_spatial2() {
  __asm {
   lea eax, scriptId;
   mov edx, 1;
-  call scr_new_;
+  call scr_new_
   mov tmp, eax;
  }
  if (tmp == -1)
@@ -137,7 +130,7 @@ static void _stdcall op_create_spatial2() {
  __asm {
   mov eax, scriptId;
   lea edx, scriptPtr;
-  call scr_ptr_;
+  call scr_ptr_
   mov tmp, eax;
  }
  if (tmp == -1)
@@ -150,7 +143,7 @@ static void _stdcall op_create_spatial2() {
  __asm {
   mov eax, scriptId;
   mov edx, 1; // start_p_proc
-  call exec_script_proc_; 
+  call exec_script_proc_
   mov eax, scriptPtr;
   mov eax, [eax + 0x18]; // program pointer
   call scr_find_obj_from_program_;
@@ -181,10 +174,10 @@ static void __declspec(naked) GetScript() {
   pushad;
   mov ecx, eax;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xc001;
   jnz fail;
   test eax, eax;
@@ -199,10 +192,10 @@ fail:
   dec edx;
 end:
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -212,16 +205,16 @@ static void __declspec(naked) set_critter_burst_disable() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   mov ecx, eax;
   mov eax, ebp;
-  call GetArgType;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   cmp si, 0xc001;
@@ -238,10 +231,10 @@ static void __declspec(naked) get_weapon_ammo_pid() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz fail;
   test eax, eax;
@@ -253,10 +246,10 @@ fail:
   dec edx;
 end:
   mov eax, ebp;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -265,16 +258,16 @@ static void __declspec(naked) set_weapon_ammo_pid() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   mov ecx, eax;
   mov eax, ebp;
-  call GetArgType;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   cmp si, 0xc001;
@@ -291,10 +284,10 @@ static void __declspec(naked) get_weapon_ammo_count() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz fail;
   test eax, eax;
@@ -306,10 +299,10 @@ fail:
   dec edx;
 end:
   mov eax, ebp;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -318,16 +311,16 @@ static void __declspec(naked) set_weapon_ammo_count() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   mov ecx, eax;
   mov eax, ebp;
-  call GetArgType;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   cmp si, 0xc001;
@@ -340,17 +333,6 @@ end:
   retn;
  }
 }
-
-static const DWORD obj_blocking_at_ = 0x48B848; // <eax>(int aExcludeObject<eax> /* can be 0 */, signed int aTile<edx>, int aElevation<ebx>)
-static const DWORD obj_shoot_blocking_at_ = 0x48B930; // 
-static const DWORD obj_ai_blocking_at_ = 0x48BA20; // 
-static const DWORD obj_scroll_blocking_at_ = 0x48BB44; // 
-static const DWORD obj_sight_blocking_at = 0x48BB88; // 
-static const DWORD make_straight_path_func_ = 0x4163C8; // (TGameObj *aObj<eax>, int aTileFrom<edx>, int a3<ecx>, signed int aTileTo<ebx>, TGameObj **aObjResult, int a5, int (*a6)(void))
-// (int aObjFrom<eax>, int aTileFrom<edx>, char* aPathPtr<ecx>, int aTileTo<ebx>, int a5, int (__fastcall *a6)(_DWORD, _DWORD)) 
-// - path is saved in ecx as a sequence of tile directions (0..5) to move on each step,
-// - returns path length
-static const DWORD make_path_func_ = 0x415EFC; 
 
 static DWORD _stdcall obj_blocking_at_wrapper(DWORD obj, DWORD tile, DWORD elevation, DWORD func) {
  DWORD retval;
@@ -374,7 +356,7 @@ static DWORD _stdcall make_straight_path_func_wrapper(DWORD obj, DWORD tileFrom,
   push func;
   push a6;
   push result;
-  call make_straight_path_func_;
+  call make_straight_path_func_
   mov retval, eax;
  }
  return retval;
@@ -395,7 +377,7 @@ static DWORD getBlockingFunc(DWORD type) {
   case BLOCKING_TYPE_AI: 
    return obj_ai_blocking_at_;
   case BLOCKING_TYPE_SIGHT: 
-   return obj_sight_blocking_at;
+   return obj_sight_blocking_at_;
   //case 4: 
   // return obj_scroll_blocking_at_;
    
@@ -438,7 +420,7 @@ static void _stdcall op_make_path2() {
   mov ebx, tileTo;
   push func;
   push a5;
-  call make_path_func_;
+  call make_path_func_
   mov pathLength, eax;
  }
  arr = TempArray(pathLength, 0);
@@ -451,7 +433,6 @@ static void _stdcall op_make_path2() {
 static void __declspec(naked) op_make_path() {
  _WRAP_OPCODE(3, op_make_path2)
 }
-
 
 static void _stdcall op_obj_blocking_at2() {
  DWORD tile = GetOpArgInt(0),
@@ -495,18 +476,15 @@ static void __declspec(naked) op_tile_get_objects() {
  _WRAP_OPCODE(2, op_tile_get_objects2)
 }
 
-static const DWORD partyMemberListPtr = 0x519DA8; // each struct - 4 integers, first integer - objPtr
-static const DWORD partyMemberCount = 0x519DAC;
-
 static void _stdcall op_get_party_members2() {
  DWORD obj, mode = GetOpArgInt(0), isDead;
- int i, actualCount = *(DWORD*)partyMemberCount;
+ int i, actualCount = *(DWORD*)_partyMemberCount;
  DWORD arrayId = TempArray(0, 4);
- DWORD* partyMemberList = *(DWORD**)partyMemberListPtr;
+ DWORD* partyMemberList = *(DWORD**)_partyMemberList;
  for (i = 0; i < actualCount; i++) {
   obj = partyMemberList[i*4];
   if (mode == 0) { // mode 0 will act just like op_party_member_count in fallout2
-   if ((*(DWORD*)(obj + 100) >> 24) != 1)  // obj type != critter
+   if ((*(DWORD*)(obj + 100) >> 24) != ObjType_Critter)  // obj type != critter
     continue;
    __asm {
     mov eax, obj;
@@ -526,7 +504,6 @@ static void _stdcall op_get_party_members2() {
 static void __declspec(naked) op_get_party_members() {
  _WRAP_OPCODE(1, op_get_party_members2)
 }
-
 
 static void __declspec(naked) op_art_exists() {
  _OP_BEGIN(ebp)

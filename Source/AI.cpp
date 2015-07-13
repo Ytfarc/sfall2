@@ -46,8 +46,6 @@ static void _stdcall CombatAttackHook(DWORD source, DWORD target) {
  targets[source]=target;
 }
 
-//static const DWORD _ai_attack=0x42A748;
-static const DWORD _combat_attack=0x422F3C;
 static void __declspec(naked) combat_attack_hook() {
  _asm {
   pushad;
@@ -55,7 +53,7 @@ static void __declspec(naked) combat_attack_hook() {
   push eax;
   call CombatAttackHook;
   popad;
-  jmp _combat_attack;
+  jmp  combat_attack_
  }
 }
 

@@ -106,11 +106,11 @@ static void __declspec(naked) elevator_select_hook5() {
 }
 
 void ResetElevators() {
- memcpy(Elevators, (void*)0x43EA7C, sizeof(sElevator)*24);
+ memcpy(Elevators, (void*)_retvals, sizeof(sElevator)*24);
  memset(&Elevators[24], 0, sizeof(sElevator)*(ElevatorCount-24));
  for (int i = 0; i < 24; i++) Menus[i] = i;
  for (int i = 24; i < ElevatorCount; i++) Menus[i] = 0;
- memcpy(intotals, (void*)0x43E95C, sizeof(intotal)*24);
+ memcpy(intotals, (void*)_intotal, sizeof(intotal)*24);
  char section[4], buf[64], imgnum[8];
  if (File) {
   for (int i = 0; i < 24; i++) {

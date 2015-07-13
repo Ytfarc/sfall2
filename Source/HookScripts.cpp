@@ -101,7 +101,6 @@ static void _stdcall RunHookScript(DWORD hook) {
  }
 }
 
-static const DWORD ToHitAddr=0x4243A8;
 static void __declspec(naked) ToHitHook() {
  __asm {
   hookbegin(4);
@@ -110,7 +109,7 @@ static void __declspec(naked) ToHitHook() {
   mov args[12], ecx;
   push [esp+8];
   push [esp+8];
-  call ToHitAddr;
+  call determine_to_hit_func_
   mov args[0], eax;
   pushad;
   push 0;
@@ -160,14 +159,13 @@ end:
  }
 }
 
-static const DWORD item_w_mp_cost_=0x478B24;
 static void __declspec(naked) CalcApCostHook() {
  __asm {
   hookbegin(4);
   mov args[0], eax;
   mov args[4], edx;
   mov args[8], ebx;
-  call item_w_mp_cost_;
+  call item_w_mp_cost_
   mov args[12], eax;
   pushad;
   push 2;
@@ -203,9 +201,6 @@ end:
  }
 }
 
-static const DWORD ObjPidNewAddr=0x489C9C;
-static const DWORD ObjEraseObjectAddr=0x48B0FC;
-static const DWORD DeathAnimAddr=0x41060C;
 static void __declspec(naked) CalcDeathAnimHook() {
  __asm {
   hookbegin(4);
@@ -233,7 +228,7 @@ weapend:
   mov edx, rets[0];
   mov args[0], edx;
   mov eax, esp;
-  call ObjPidNewAddr;
+  call obj_pid_new_
   add esp, 4;
   cmp eax, 0xffffffff;
   jz end1;
@@ -248,7 +243,7 @@ end1:
   push ebx;
   mov eax, args[4];
   mov ebx, args[24];
-  call DeathAnimAddr;
+  call pick_death_
   mov args[16], eax;
   mov eax, args[16];
   mov ArgCount, 5;
@@ -268,18 +263,17 @@ skip2:
   jz aend;
   mov eax, args[24];
   xor edx, edx;
-  call ObjEraseObjectAddr;
+  call obj_erase_object_
 aend:
   pop eax;
   hookend;
   retn 8;
  }
 }
-static const DWORD check_death_=0x410814;
 static void __declspec(naked) CalcDeathAnimHook2() {
  __asm {
   hookbegin(5);
-  call check_death_; // call original function
+  call check_death_ // call original function
   mov args[0], -1; // weaponPid, -1
   mov ebx, [esp+60]
   mov args[4], ebx; // attacker
@@ -301,13 +295,12 @@ skip:
   retn;
  }
 }
-static const DWORD CombatDamageAddr=0x4247B8;
 static void __declspec(naked) CombatDamageHook() {
  __asm {
   push edx;
   push ebx;
   push eax;
-  call CombatDamageAddr;
+  call compute_damage_
   pop edx;
 
   //zero damage insta death criticals fix
@@ -373,12 +366,11 @@ end:
   retn;
  }
 }
-static const DWORD critter_kill=0x42DA64;
 static void __declspec(naked) OnDeathHook() {
  __asm {
   hookbegin(1);
   mov args[0], eax;
-  call critter_kill;
+  call critter_kill_
   pushad;
   push 6;
   call RunHookScript;
@@ -387,12 +379,11 @@ static void __declspec(naked) OnDeathHook() {
   retn;
  }
 }
-static const DWORD OnDeathHook2Ret=0x4944DC;
 static void __declspec(naked) OnDeathHook2() {
  __asm {
   hookbegin(1);
   mov args[0], esi;
-  call OnDeathHook2Ret;
+  call partyMemberRemove_
   pushad;
   push 6;
   call RunHookScript;
@@ -402,7 +393,6 @@ static void __declspec(naked) OnDeathHook2() {
  }
 }
 
-static const DWORD _qsort=0x4F05B6;
 static void __declspec(naked) FindTargetHook() {
  __asm {
   hookbegin(5);
@@ -421,7 +411,7 @@ static void __declspec(naked) FindTargetHook() {
   popad;
   cmp cRet, 4;
   jge cont;
-  call _qsort;
+  call qsort_
   jmp end;
 cont:
   mov edi, rets[0];
@@ -437,7 +427,6 @@ end:
   retn;
  }
 }
-static const DWORD _protinst_use_item_on=0x49C3CC;
 static void __declspec(naked) UseObjOnHook() {
  __asm {
   hookbegin(3);
@@ -453,7 +442,7 @@ static void __declspec(naked) UseObjOnHook() {
   mov eax, rets[0];
   jmp end
 defaulthandler:
-  call _protinst_use_item_on;
+  call protinst_use_item_on_
 end:
   hookend;
   retn;
@@ -481,7 +470,6 @@ end:
   retn;
  }
 }
-static const DWORD protinst_use_item_=0x49BF38;
 static void __declspec(naked) UseObjHook() {
  __asm {
   hookbegin(2);
@@ -498,7 +486,7 @@ static void __declspec(naked) UseObjHook() {
   mov eax, rets[0];
   jmp end;
 defaulthandler:
-  call protinst_use_item_;
+  call protinst_use_item_
 end:
   hookend;
   retn;
@@ -526,23 +514,20 @@ static void __declspec(naked) RemoveObjHook() {
   jmp RemoveObjHookRet;
  }
 }
-static const DWORD _barter_compute_value=0x474B2C;
-static const DWORD _item_caps_total=0x47A6A8;
-static const DWORD _item_total_cost=0x477DAC;
 static void __declspec(naked) BarterPriceHook() {
  __asm {
   hookbegin(6);
   mov args[0], eax;
   mov args[4], edx;
-  call _barter_compute_value;
+  call barter_compute_value_
   mov edx, ds:[_btable]
   mov args[8], eax;
   mov args[12], edx;
   xchg eax, edx;
-  call _item_caps_total;
+  call item_caps_total_
   mov args[16], eax;
   mov eax, ds:[_btable]
-  call _item_total_cost;
+  call item_total_cost_
   mov args[20], eax;
   mov eax, edx;
   pushad;
@@ -557,13 +542,12 @@ end:
   retn;
  }
 }
-static const DWORD _critter_compute_ap_from_distance=0x42E62C;
 static void __declspec(naked) MoveCostHook() {
  __asm {
   hookbegin(3);
   mov args[0], eax;
   mov args[4], edx;
-  call _critter_compute_ap_from_distance;
+  call critter_compute_ap_from_distance_
   mov args[8], eax;
   pushad;
   push 11;
@@ -605,14 +589,13 @@ end:
   retn;
  }
 }
-static const DWORD _obj_ai_blocking_at=0x48BA20;
 static void __declspec(naked) HexABlockingHook() {
  __asm {
   hookbegin(4);
   mov args[0], eax;
   mov args[4], edx;
   mov args[8], ebx;
-  call _obj_ai_blocking_at;
+  call obj_ai_blocking_at_
   mov args[12], eax;
   pushad;
   push 13;
@@ -626,14 +609,13 @@ end:
   retn;
  }
 }
-static const DWORD _obj_shoot_blocking_at=0x48B930;
 static void __declspec(naked) HexShootBlockingHook() {
  __asm {
   hookbegin(4);
   mov args[0], eax;
   mov args[4], edx;
   mov args[8], ebx;
-  call _obj_shoot_blocking_at;
+  call obj_shoot_blocking_at_
   mov args[12], eax;
   pushad;
   push 14;
@@ -647,14 +629,14 @@ end:
   retn;
  }
 }
-static const DWORD _obj_sight_blocking_at=0x48BB88;
+
 static void __declspec(naked) HexSightBlockingHook() {
  __asm {
   hookbegin(4);
   mov args[0], eax;
   mov args[4], edx;
   mov args[8], ebx;
-  call _obj_sight_blocking_at;
+  call obj_sight_blocking_at_
   mov args[12], eax;
   pushad;
   push 15;
@@ -699,7 +681,6 @@ end:
   retn;
  }
 }
-static const DWORD item_w_compute_ammo_cost_ = 0x4790AC; // signed int aWeapon<eax>, int *aRoundsSpent<edx>
 
 static void __declspec(naked) AmmoCostHook_internal() {
  __asm {
@@ -707,7 +688,7 @@ static void __declspec(naked) AmmoCostHook_internal() {
   mov args[0], eax; //weapon
   mov ebx, [edx]
   mov args[4], ebx; //rounds in attack
-  call item_w_compute_ammo_cost_;
+  call item_w_compute_ammo_cost_
   cmp eax, -1
   je fail
   mov ebx, [edx]
@@ -766,7 +747,6 @@ void _stdcall MouseClickHook(DWORD button, bool pressed) {
  EndHook();
 }
 
-static const DWORD skill_use_=0x4AAD08;
 static void __declspec(naked) UseSkillHook() {
  __asm {
   hookbegin(4);
@@ -785,14 +765,13 @@ static void __declspec(naked) UseSkillHook() {
   mov eax, rets[0];
   jmp end
 defaulthandler:
-  call skill_use_;
+  call skill_use_
 end:
   hookend;
   retn;
  }
 }
 
-static const DWORD skill_check_stealing_=0x4ABBE4;
 static void __declspec(naked) StealCheckHook() {
  __asm {
   hookbegin(4);
@@ -811,20 +790,19 @@ static void __declspec(naked) StealCheckHook() {
   mov eax, rets[0];
   jmp end
 defaulthandler:
-  call skill_check_stealing_;
+  call skill_check_stealing_
 end:
   hookend;
   retn;
  }
 }
 
-static const DWORD is_within_perception_=0x42BA04;
 static void __declspec(naked) PerceptionRangeHook() {
  __asm {
   hookbegin(3);
   mov args[0], eax; // watcher
   mov args[4], edx; // target
-  call is_within_perception_;
+  call is_within_perception_
   mov args[8], eax; // check result
   pushad;
   push 23;
@@ -880,7 +858,6 @@ static int __stdcall SwitchHandHook2(TGameObj* item, TGameObj* itemReplaced, DWO
  This hook is called every time an item is placed into either hand slot via inventory screen drag&drop
  If switch_hand_ function is not called, item is not placed anywhere (it remains in main inventory)
 */
-static const DWORD switch_hand_ = 0x4714E0;
 static void _declspec(naked) SwitchHandHook() {
  _asm {
   pushad;
@@ -894,7 +871,7 @@ static void _declspec(naked) SwitchHandHook() {
   cmp eax, -1;
   popad;
   jne skip;
-  call switch_hand_;
+  call switch_hand_
 skip:
   retn;
  }
@@ -902,7 +879,6 @@ skip:
 
 static const DWORD UseArmorHack_back = 0x4713A9; // normal operation
 static const DWORD UseArmorHack_skip = 0x471481; // skip code, prevent wearing armor
-static const DWORD* i_worn = (DWORD*)0x59E954; // item in armor slot
 // This hack is called when an armor is dropped into the armor slot at inventory screen
 static void _declspec(naked) UseArmorHack() {
  __asm {
@@ -912,8 +888,7 @@ static void _declspec(naked) UseArmorHack() {
   mov args[0], 3;
   mov eax, [esp+24]; // item
   mov args[4], eax;
-  mov eax, i_worn;
-  mov eax, [eax];
+  mov eax, ds:[_i_worn]
   mov args[8], eax;
   pushad;
   push 24;
@@ -932,7 +907,6 @@ skip:
  }
 }
 
-//static const DWORD drop_into_container_ = 0x476464;
 static void _declspec(naked) MoveInventoryHook() {
  __asm {
   hookbegin(3);
@@ -955,10 +929,8 @@ skipcall:
  }
 }
 
-//static const DWORD drop_ammo_into_weapon_ = 0x47650C;
 static const DWORD DropAmmoIntoWeaponHack_back = 0x47658D; // proceed with reloading
 static const DWORD DropAmmoIntoWeaponHack_return = 0x476643;
-static const DWORD item_w_can_reload_ = 0x478874;
 static void _declspec(naked) DropAmmoIntoWeaponHack() {
  __asm {
   hookbegin(3);
@@ -1219,4 +1191,3 @@ void _stdcall RunHookScriptsAtProc(DWORD procId) {
   }
  }
 }
-

@@ -19,6 +19,7 @@
 #include "main.h"
 
 #include "Define.h"
+#include "FalloutEngine.h"
 #include "version.h"
 
 static DWORD MainMenuYOffset;
@@ -42,7 +43,6 @@ static void __declspec(naked) MainMenuTextYHook() {
 }
 
 static const DWORD MainMenuTextRet=0x4817B0;
-static const DWORD _win_print=0x4D684C;
 static const char* VerString1 = "SFALL2 " VERSION_STRING;
 static DWORD OverrideColour;
 static void __declspec(naked) FontColour() {
@@ -67,7 +67,7 @@ static void __declspec(naked) MainMenuTextHook() {
   call FontColour;
   mov [esp+8], eax;
   pop eax;
-  call _win_print;
+  call win_print_
   call FontColour;
   push eax;//colour
   mov edx, VerString1;//msg
@@ -77,7 +77,7 @@ static void __declspec(naked) MainMenuTextHook() {
   add edi, 12;
   push edi; //ypos
   mov eax, dword ptr ds:[_main_window];//winptr
-  call _win_print;
+  call win_print_
   jmp MainMenuTextRet;
  }
 }

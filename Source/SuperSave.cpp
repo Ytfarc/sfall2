@@ -38,10 +38,10 @@ void SavePageOffsets() {
 
   char buffer[6];
 
-  strcpy_s(SavePath, MAX_PATH, *(char**)0x5193CC);
+  strcpy_s(SavePath, MAX_PATH, *(char**)_patches);
   strcat_s(SavePath, MAX_PATH, "savegame\\SLOTDAT.ini");
 
-  _itoa_s(*(DWORD*)0x5193B8, buffer, 10);
+  _itoa_s(*(DWORD*)_slot_cursor, buffer, 10);
   WritePrivateProfileString("POSITION", "ListNum", buffer, SavePath);
   _itoa_s(LSPageOffset, buffer, 10);
   WritePrivateProfileString("POSITION", "PageOffset", buffer, SavePath);
@@ -56,7 +56,7 @@ static void __declspec(naked) save_page_offsets(void) {
       //save last slot position values to file
    call SavePageOffsets
    //restore original code
-   mov eax, dword ptr ds:[0x6142C4]
+   mov eax, dword ptr ds:[_lsgwin]
       ret
   }
 
@@ -68,11 +68,11 @@ void LoadPageOffsets() {
 
   char LoadPath[MAX_PATH];
 
-  strcpy_s(LoadPath, MAX_PATH, *(char**)0x5193CC);
+  strcpy_s(LoadPath, MAX_PATH, *(char**)_patches);
   strcat_s(LoadPath, MAX_PATH, "savegame\\SLOTDAT.ini");
 
-  *(DWORD*)0x5193B8=GetPrivateProfileInt("POSITION", "ListNum", 0, LoadPath);
-  if(*(DWORD*)0x5193B8>9)*(DWORD*)0x5193B8=9;
+  *(DWORD*)_slot_cursor=GetPrivateProfileInt("POSITION", "ListNum", 0, LoadPath);
+  if(*(DWORD*)_slot_cursor>9)*(DWORD*)_slot_cursor=9;
 
   LSPageOffset=GetPrivateProfileInt("POSITION", "PageOffset", 0, LoadPath);
   if(LSPageOffset>9990)LSPageOffset=9990;
@@ -112,7 +112,7 @@ static void __declspec(naked) create_page_buttons(void) {
      mov ecx, 24//Width
      mov edx, 100//Xpos
      mov ebx, 56//Ypos
-     mov eax, dword ptr ds:[0x6142C4]//WinRef
+     mov eax, dword ptr ds:[_lsgwin]//WinRef
      call win_register_button_
      //left button -100
      push 32//ButType
@@ -127,7 +127,7 @@ static void __declspec(naked) create_page_buttons(void) {
      mov ecx, 24//Width
      mov edx, 68//Xpos
      mov ebx, 56//Ypos
-     mov eax, dword ptr ds:[0x6142C4]//WinRef
+     mov eax, dword ptr ds:[_lsgwin]//WinRef
      call win_register_button_              //create button function
      //right button +10
      push 32//ButType
@@ -142,7 +142,7 @@ static void __declspec(naked) create_page_buttons(void) {
      mov ecx, 24//Width
      mov edx, 216//Xpos
      mov ebx, 56//Ypos
-     mov eax, dword ptr ds:[0x6142C4]//WinRef
+     mov eax, dword ptr ds:[_lsgwin]//WinRef
      call win_register_button_              //create button function
      //right button +100
      push 32//ButType
@@ -157,7 +157,7 @@ static void __declspec(naked) create_page_buttons(void) {
      mov ecx, 24//Width
      mov edx, 248//Xpos
      mov ebx, 56//Ypos
-     mov eax, dword ptr ds:[0x6142C4]//WinRef
+     mov eax, dword ptr ds:[_lsgwin]//WinRef
      call win_register_button_              //create button function
   //Set Number button
      push 32//ButType
@@ -172,7 +172,7 @@ static void __declspec(naked) create_page_buttons(void) {
      mov ecx, 60//Width
      mov edx, 140//Xpos
      mov ebx, 56//Ypos
-     mov eax, dword ptr ds:[0x6142C4]//WinRef
+     mov eax, dword ptr ds:[_lsgwin]//WinRef
      call win_register_button_              //create button function
 
   //restore original code
@@ -185,12 +185,12 @@ static void __declspec(naked) create_page_buttons(void) {
 //------------------------------------------------------
 void SetPageNum() {
 
-  int WinRef=*(DWORD*)0x6142C4;//load/save winref
+  int WinRef=*(DWORD*)_lsgwin;//load/save winref
   if(WinRef==NULL)return;
   WINinfo *SaveLoadWin = GetWinStruct(WinRef);
   if(SaveLoadWin->surface==NULL)return;
 
-  BYTE ConsoleGold = *(BYTE*)0x6AB8BB;//palette offset stored in mem - text colour
+  BYTE ConsoleGold = *(BYTE*)_YellowColor;//palette offset stored in mem - text colour
 
   char TempText[32];
   unsigned int TxtMaxWidth=GetMaxCharWidth()*8;//GetTextWidth(TempText);
@@ -356,7 +356,7 @@ LastPage:
 //------------------------------------------
 void DrawPageText() {
 
-  int WinRef=*(DWORD*)0x6142C4;//load/save winref
+  int WinRef=*(DWORD*)_lsgwin;//load/save winref
   if(WinRef==NULL)return;
   WINinfo *SaveLoadWin = GetWinStruct(WinRef);
   if(SaveLoadWin->surface==NULL)return;
@@ -366,8 +366,8 @@ void DrawPageText() {
       memset(SaveLoadWin->surface+50+y, 0xCF, 240);
 
 
-  BYTE ConsoleGreen = *(BYTE*)0x6A3CB0;//palette offset stored in mem - text colour
-  BYTE ConsoleGold = *(BYTE*)0x6AB8BB;//palette offset stored in mem - text colour
+  BYTE ConsoleGreen = *(BYTE*)_GreenColor;//palette offset stored in mem - text colour
+  BYTE ConsoleGold = *(BYTE*)_YellowColor;//palette offset stored in mem - text colour
   BYTE Colour = ConsoleGreen;
 
   char TempText[32];

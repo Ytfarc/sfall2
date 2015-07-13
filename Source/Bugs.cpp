@@ -506,18 +506,6 @@ end:
  }
 }
 
-static void __declspec(naked) display_stats_hook() {
- __asm {
-  mov  edx, PERK_bonus_ranged_damage
-  mov  eax, dword ptr ds:[_stack]
-  call perk_level_
-  shl  eax, 1
-  add  dword ptr [esp+4*4], eax             // min_dmg
-  add  dword ptr [esp+4*5], eax             // max_dmg
-  jmp  sprintf_
- }
-}
-
 static void __declspec(naked) PipStatus_hook() {
  __asm {
   call AddHotLines_
@@ -547,6 +535,23 @@ static void __declspec(naked) item_m_turn_off_hook() {
  __asm {
   and  byte ptr [eax+0x25], 0xDF            // Сбросим флаг использованного предмета
   jmp  queue_remove_this_
+ }
+}
+
+static void __declspec(naked) perform_withdrawal_start_hook() {
+ __asm {
+  test eax, eax
+  jz   end
+  jmp  display_print_
+end:
+  retn
+ }
+}
+
+static const DWORD item_d_take_drug_hook1_End = 0x47A168;
+static void __declspec(naked) item_d_take_drug_hook1() {
+ __asm {
+  jmp  item_d_take_drug_hook1_End
  }
 }
 
@@ -622,9 +627,6 @@ void BugsInit() {
 // патронами
  HookCall(0x476598, &drop_ammo_into_weapon_hook);
 
-// Показывать изменения мин./макс. дамага у оружия если взят перк "Бонус урона на расст."
- HookCall(0x4722DD, &display_stats_hook);
-
  dlog("Applying black skilldex patch.", DL_INIT);
  HookCall(0x497D0F, &PipStatus_hook);
  dlogr(" Done", DL_INIT);
@@ -635,5 +637,13 @@ void BugsInit() {
  SafeWrite8(0x478138, 0xBA);
  MakeCall(0x474D22, &barter_attempt_transaction_hook1, true);
  HookCall(0x4798B1, &item_m_turn_off_hook);
+
+ dlog("Applying withdrawal perk description crash fix. ", DL_INIT);
+ HookCall(0x47A501, &perform_withdrawal_start_hook);
+ dlogr(" Done", DL_INIT);
+
+ dlog("Applying Jet Antidote fix.", DL_INIT);
+ MakeCall(0x47A013, &item_d_take_drug_hook1, true);
+ dlogr(" Done", DL_INIT);
 
 }

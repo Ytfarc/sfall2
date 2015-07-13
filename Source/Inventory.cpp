@@ -334,7 +334,7 @@ static const char* InvenFmt1="%s %d/%d  %s %d/%d";
 static const char* InvenFmt2="%s %d/%d";
 
 static const char* _stdcall GetInvenMsg() {
- const char* tmp=MsgSearch(35, 0x59E814);
+ const char* tmp=MsgSearch(35, _inventry_message_file);
  if(!tmp) return "S:";
  else return tmp;
 }
@@ -475,7 +475,6 @@ static void __declspec(naked) inven_ap_cost_hook() {
  }
 }
 
-static const DWORD item_w_compute_ammo_cost_ = 0x4790AC; // signed int aWeapon<eax>, int *aRoundsSpent<edx>
 static const DWORD add_check_for_item_ammo_cost_back = 0x4266EE;
 // adds check for weapons which require more than 1 ammo for single shot (super cattle prod & mega power fist)
 static void __declspec(naked) add_check_for_item_ammo_cost() {
@@ -623,7 +622,7 @@ itsWeapon:
   jmp  endReload
 inCombat:
 //  xor  ebx, ebx                             // is_secondary
-  add  edx, 6                               // edx = 6/7 - перезарядка оружия в левой/правой руке
+  add  edx, hit_left_weapon_reload          // edx = 6/7 - перезарядка оружия в левой/правой руке
   mov  eax, ds:[_obj_dude]
   push eax
   call item_mp_cost_
@@ -766,7 +765,7 @@ haveFid:
     and  ebx, 0x0FF0000
     sar  ebx, 0x10                          // ebx = ID2 (Animation code)
     xor  ecx, ecx                           // ecx = ID1 (Weapon code = None)
-    mov  eax, 1                             // eax = тип объекта (ObjType_Critter)
+    mov  eax, ObjType_Critter               // eax = тип объекта
     call art_id_
     mov  edx, eax
     call art_exists_
@@ -876,7 +875,7 @@ static void __declspec(naked) fontHeight() {
  __asm {
   push ebx
   mov  ebx, ds:[_curr_font_num]
-  mov  eax, 0x65
+  mov  eax, 101
   call text_font_
   call dword ptr ds:[_text_height]
   xchg ebx, eax
@@ -1166,7 +1165,7 @@ useOnPlayer:
   mov  edx, [esp+0x18]                      // item
   mov  eax, edx
   call item_get_type_
-  cmp  eax, 2                               // item_type_drug
+  cmp  eax, item_type_drug
   jne  end
   mov  eax, ds:[_stack]
   push eax

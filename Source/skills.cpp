@@ -20,6 +20,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include "Define.h"
 #include "FalloutEngine.h"
 #include "Knockback.h"
 #include "vector9x.cpp"
@@ -43,7 +44,7 @@ struct ChanceModifier {
 
 static vector<ChanceModifier> SkillMaxMods;
 static ChanceModifier BaseSkillMax;
-static BYTE skillCosts[512*18];
+static BYTE skillCosts[512*SKILL_count];
 static DWORD basedOnPoints;
 
 static int _stdcall SkillMaxHook2(int base, DWORD critter) {
@@ -163,7 +164,6 @@ static void __declspec(naked) GetStatBonusHook() {
 }
 
 static const DWORD SkillIncCostRet=0x4AA7C1;
-static const DWORD _skill_points=0x4AA680;
 static void __declspec(naked) SkillIncCostHook() {
  __asm {
   //eax - current skill level, ebx - current skill, ecx - num free skill points
@@ -172,7 +172,7 @@ static void __declspec(naked) SkillIncCostHook() {
   jz next;
   mov edx, ebx;
   mov eax, esi;
-  call _skill_points;
+  call skill_points_
 next:
   mov edx, ebx;
   shl edx, 9;
@@ -192,7 +192,7 @@ static void __declspec(naked) SkillDecCostHook() {
   jz next;
   mov edx, ebx;
   mov eax, edi;
-  call _skill_points;
+  call skill_points_
 next:
   lea ecx, [eax-1];
   mov edx, ebx;
@@ -223,13 +223,13 @@ void SkillsInit() {
 
  char buf[512], key[16], file[64];
  if(GetPrivateProfileStringA("Misc", "SkillsFile", "", buf, 62, ini)>0) {
-  SkillInfo *skills=(SkillInfo*)0x51D118;
+  SkillInfo *skills=(SkillInfo*)_skill_data;
 
   sprintf(file, ".\\%s", buf);
-  multipliers=new double[7*18];
-  memset(multipliers, 0, 7*18*sizeof(double));
+  multipliers=new double[7*SKILL_count];
+  memset(multipliers, 0, 7*SKILL_count*sizeof(double));
 
-  for(int i=0;i<18;i++) {
+  for(int i=0;i<SKILL_count;i++) {
    sprintf(key, "Skill%d", i);
    if(GetPrivateProfileStringA("Skills", key, "", buf, 64, file)) {
     char* tok=strtok(buf, "|");
@@ -289,7 +289,7 @@ void SkillsInit() {
   HookCall(0x4AA9E1, &SkillLevelCostHook);
   HookCall(0x4AA9F1, &SkillLevelCostHook);
   basedOnPoints=GetPrivateProfileIntA("Skills", "BasedOnPoints", 0, file);
-  if(basedOnPoints) HookCall(0x4AA9EC, (void*)0x4AA680);
+  if(basedOnPoints) HookCall(0x4AA9EC, (void*)skill_points_);
  }
 }
 

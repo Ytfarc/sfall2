@@ -41,7 +41,6 @@ static void __declspec(naked) ranged_attack_lighting_fix() {
 }
 
 // misc functions from the engine..
-static const DWORD register_object_play_sfx = 0x41541C;
 static const DWORD explosion_effect_hook_back = 0x411AB9;
 static DWORD explosion_effect_starting_dir = 0;
 static void __declspec(naked) explosion_effect_hook() {

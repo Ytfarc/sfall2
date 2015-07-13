@@ -47,12 +47,10 @@ static void __declspec(naked) SetDMModel() {
   push edx;
   push edi;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -60,8 +58,7 @@ static void __declspec(naked) SetDMModel() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push eax;
   push dmModelNamePtr;
   call strcpy_p;
@@ -80,12 +77,10 @@ static void __declspec(naked) SetDFModel() {
   push edx;
   push edi;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -93,8 +88,7 @@ static void __declspec(naked) SetDFModel() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push eax;
   push dfModelNamePtr;
   call strcpy_p;
@@ -114,20 +108,16 @@ static void __declspec(naked) SetMoviePath() {
   push edi;
   push esi;
   mov edi, eax;
-  mov ecx, 0x4674F0;
-  call ecx;
+  call interpretPopShort_
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x467500;
-  call ecx;
+  call interpretPopLong_
   mov esi, eax;
   mov eax, edi;
-  mov ecx, 0x4674F0;
-  call ecx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ecx, 0x467500;
-  call ecx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -141,8 +131,7 @@ next:
   jge end;
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push eax;
   mov eax, esi;
   mov esi, 65;
@@ -170,8 +159,7 @@ static void __declspec(naked) GetYear() {
   xor eax, eax;
   xor edx, edx;
   mov ebx, esp;
-  mov ecx, 0x004A3338;
-  call ecx;
+  call game_time_date_
   mov edx, [esp];
   mov eax, AddUnarmedStatToGetYear;
   test eax, eax;
@@ -179,12 +167,10 @@ static void __declspec(naked) GetYear() {
   add edx, ds:[0x51C3BC];
 end:
   mov eax, edi;
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, edi;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   add esp, 4;
   pop edi;
   pop edx;
@@ -204,12 +190,10 @@ static void __declspec(naked) GameLoaded() {
   mov edx, eax;
   pop eax;
   mov ecx, eax;
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -224,10 +208,10 @@ static void __declspec(naked) set_map_time_multi() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xa001;
   jz paramWasFloat;
   cmp dx, 0xc001;
@@ -253,12 +237,10 @@ static void __declspec(naked) SetPipBoyAvailable() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   cmp eax, 0;
@@ -283,29 +265,25 @@ static void __declspec(naked) GetKillCounter() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz fail;
   cmp eax, 19;
   jge fail;
-  mov edx, ds:[0x0056D780+eax*4];
+  mov edx, ds:[_pc_kill_counts+eax*4];
   jmp end;
 fail:
 
   xor edx, edx;
 end:
   mov eax, ecx
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -320,27 +298,23 @@ static void __declspec(naked) ModKillCounter() {
   push edi;
   push esi;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   mov edi, eax;
   mov eax, ecx;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   cmp si, 0xC001;
   jnz end;
   cmp eax, 19;
   jge end;
-  add ds:[0x0056D780+eax*4], edi;
+  add ds:[_pc_kill_counts+eax*4], edi;
 end:
   pop esi;
   pop edi;
@@ -356,28 +330,22 @@ static void __declspec(naked) SetKnockback() {
   sub esp, 0xc;
   mov ecx, eax;
   //Get args
-  mov ebx, 0x4674F0;
-  call ebx; //First arg type
+  call interpretPopShort_ //First arg type
   mov edi, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx; //First arg
+  call interpretPopLong_ //First arg
   mov [esp+8], eax;
   mov eax, ecx;
-  mov ebx, 0x4674F0;
-  call ebx; //Second arg type
+  call interpretPopShort_ //Second arg type
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx; //Second arg
+  call interpretPopLong_ //Second arg
   mov [esp+4], eax;
   mov eax, ecx;
-  mov ebx, 0x4674F0;
-  call ebx; //Third arg type
+  call interpretPopShort_ //Third arg type
   mov esi, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx; //Third arg
+  call interpretPopLong_ //Third arg
   mov [esp], eax;
   //Error check
   cmp di, 0xa001;
@@ -424,12 +392,10 @@ static void __declspec(naked) SetAttackerKnockback() {
 static void __declspec(naked) RemoveKnockback() {
  __asm {
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz fail;
   push eax;
@@ -469,28 +435,24 @@ static void __declspec(naked) GetKillCounter2() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz fail;
   cmp eax, 38;
   jge fail;
-  movzx edx, word ptr ds:[0x0056D780+eax*2];
+  movzx edx, word ptr ds:[_pc_kill_counts+eax*2];
   jmp end;
 fail:
   xor edx, edx;
 end:
   mov eax, ecx
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -505,27 +467,23 @@ static void __declspec(naked) ModKillCounter2() {
   push edi;
   push esi;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   mov edi, eax;
   mov eax, ecx;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   cmp si, 0xC001;
   jnz end;
   cmp eax, 38;
   jge end;
-  add word ptr ds:[0x0056D780+eax*2], di;
+  add word ptr ds:[_pc_kill_counts+eax*2], di;
 end:
   pop esi;
   pop edi;
@@ -542,13 +500,11 @@ static void __declspec(naked) GetActiveHand() {
   push ecx;
   push edx;
   mov ecx, eax;
-  mov edx, dword ptr ds:[0x518F78];
-  mov ebx, 0x4674DC;
-  call ebx;
+  mov edx, dword ptr ds:[_itemCurrentItem]
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   pop ebx;
@@ -571,12 +527,10 @@ static void __declspec(naked) EaxAvailable() {
   push edi;
   mov edi, eax;
   xor edx, edx
-  mov ebx, 0x4674DC;
-  call ebx;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, edi;
-  mov ebx, 0x46748C;
-  call ebx;
+  call interpretPushShort_
   pop edi;
   pop edx;
   pop ecx;
@@ -622,8 +576,7 @@ static void _stdcall IncNPCLevel2(char* npc) {
  SafeWrite8(0x00495BEB, 0xe9); //Replace the debug output with a jmp
  SafeWrite32(0x00495BEC, ((DWORD)&IncNPCLevel3) - 0x00495BF0);
  __asm {
-  mov eax, 0x00495B60;
-  call eax;
+  call partyMemberIncLevels_
  }
  SafeWrite16(0x00495C50, 0x840f);
  SafeWrite32(0x00495C52, 0x000001fb);
@@ -645,12 +598,10 @@ static void __declspec(naked) IncNPCLevel() {
   push edx;
   push edi;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -658,8 +609,7 @@ static void __declspec(naked) IncNPCLevel() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, GetStringVar;
-  call ecx;
+  call interpretGetString_
   push eax;
   call IncNPCLevel2;
 end:
@@ -705,10 +655,10 @@ static void __declspec(naked) get_npc_level() {
   push edx;
   push edi;
   mov edi, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -716,13 +666,13 @@ static void __declspec(naked) get_npc_level() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  call GetStringVar;
+  call interpretGetString_
   push eax;
-  push ds:[0x519DBC];
+  push ds:[_partyMemberLevelUpInfoList]
   push ds:[_partyMemberPidList]
-  push ds:[0x519DA8];
+  push ds:[_partyMemberList]
   push ds:[_partyMemberMaxCount]
-  push ds:[0x519DAC];
+  push ds:[_partyMemberCount]
   call get_npc_level2;
   mov edx, eax;
   jmp end;
@@ -730,10 +680,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, edi;
-  call SetResult;
+  call interpretPushLong_
   mov eax, edi;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop edi;
   pop edx;
   pop ecx;
@@ -779,12 +729,10 @@ static void __declspec(naked) GetIniSetting() {
   push edx;
   push edi;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -792,8 +740,7 @@ static void __declspec(naked) GetIniSetting() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push 0;
   push eax;
   call GetIniSetting2;
@@ -803,10 +750,10 @@ error:
   mov edx, -1;
 result:
   mov eax, edi;
-  call SetResult;
+  call interpretPushLong_
   mov edx, 0xC001;
   mov eax, edi;
-  call SetResultType;
+  call interpretPushShort_
   pop edi;
   pop edx;
   pop ecx;
@@ -821,12 +768,10 @@ static void __declspec(naked) GetIniString() {
   push edx;
   push edi;
   mov edi, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -834,14 +779,13 @@ static void __declspec(naked) GetIniString() {
 next:
   mov ebx, eax;
   mov eax, edi;
-  mov ecx, 0x4678E0;
-  call ecx;
+  call interpretGetString_
   push 1;
   push eax;
   call GetIniSetting2;
   mov edx, eax;
   mov eax, edi;
-  call CreateStringVar;
+  call interpretAddString_
   mov edx, eax;
   mov ebx, 0x9801;
   jmp result;
@@ -850,10 +794,10 @@ error:
   mov ebx, 0xc001
 result:
   mov eax, edi;
-  call SetResult;
+  call interpretPushLong_
   mov edx, ebx;
   mov eax, edi;
-  call SetResultType;
+  call interpretPushShort_
   pop edi;
   pop edx;
   pop ecx;
@@ -871,10 +815,10 @@ static void __declspec(naked) funcGetTickCount() {
   call GetTickCount2;
   mov edx, eax;
   mov eax, edi;
-  call SetResult;
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, edi;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -886,15 +830,13 @@ static void __declspec(naked) SetCarTown() {
   push edx;
   push edi;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
-  mov ds:[0x00672E68], eax;
+  mov ds:[_CarCurrArea], eax
 end:
   pop edi;
   pop edx;
@@ -910,10 +852,10 @@ static void __declspec(naked) SetLevelHPMod() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -933,26 +875,26 @@ static void __declspec(naked) GetBodypartHitModifier() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz fail;
   cmp eax, 9;
   jg fail;
   test eax, eax;
   jl fail;
-  mov edx, ds:[0x510954+eax*4];
+  mov edx, ds:[_hit_location_penalty+eax*4];
   jmp end;
 fail:
   xor edx, edx;
 end:
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   retn;
@@ -964,15 +906,15 @@ static void __declspec(naked) SetBodypartHitModifier() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   mov ebx, eax;
   mov eax, ecx;
-  call GetArgType;
+  call interpretPopShort_
   xchg eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   cmp cx, 0xC001;
@@ -981,7 +923,7 @@ static void __declspec(naked) SetBodypartHitModifier() {
   jg end;
   test eax, eax;
   jl end;
-  mov ds:[0x510954+eax*4], ebx;
+  mov ds:[_hit_location_penalty+eax*4], ebx;
 end:
   pop edx;
   pop ecx;
@@ -997,13 +939,13 @@ static void __declspec(naked) funcSetCriticalTable() {
   mov edx, 5;
 loops:
   mov eax, ecx;
-  call GetArgType;
+  call interpretPopShort_
   cmp ax, 0xc001;
   jz skip1;
   inc ebx;
 skip1:
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   push eax;
   dec dx;
   jnz loops;
@@ -1026,13 +968,13 @@ static void __declspec(naked) funcGetCriticalTable() {
   mov dl, 4;
 loops:
   mov eax, edi;
-  call GetArgType;
+  call interpretPopShort_
   cmp ax, 0xc001;
   jz skip1;
   inc ebx;
 skip1:
   mov eax, edi;
-  call GetArg;
+  call interpretPopLong_
   push eax;
   dec dx;
   jnz loops;
@@ -1046,10 +988,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, edi;
-  call SetResult;
+  call interpretPushLong_
   mov eax, edi;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -1062,13 +1004,13 @@ static void __declspec(naked) funcResetCriticalTable() {
   mov dl, 4;
 loops:
   mov eax, ecx;
-  call GetArgType;
+  call interpretPopShort_
   cmp ax, 0xc001;
   jz skip1;
   inc ebx;
 skip1:
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   push eax;
   dec dx;
   jnz loops;
@@ -1088,10 +1030,10 @@ static void __declspec(naked) SetApAcBonus() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xc001;
   jnz end;
   mov StandardApAcBonus, ax;
@@ -1107,10 +1049,10 @@ static void __declspec(naked) GetApAcBonus() {
   push edx;
   mov ecx, eax;
   movzx edx, StandardApAcBonus;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop edx;
   pop ecx;
   retn;
@@ -1121,10 +1063,10 @@ static void __declspec(naked) SetApAcEBonus() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xc001;
   jnz end;
   mov ExtraApAcBonus, ax;
@@ -1140,41 +1082,39 @@ static void __declspec(naked) GetApAcEBonus() {
   push edx;
   mov ecx, eax;
   movzx edx, ExtraApAcBonus;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType
+  call interpretPushShort_
   pop edx;
   pop ecx;
   retn;
  }
 }
 
-static const DWORD CopyPalette=0x493B48;
-static const DWORD LoadPalette=0x4C78E4;
 static void __declspec(naked) SetPalette() {
  __asm {
   push ebx;
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
   jnz end;
 next:
   mov ebx, eax;
-  //mov eax, 0x663FD0;
-  //call CopyPalette;
+  //mov eax, _black_palette
+  //call palette_set_to_
   mov eax, ecx;
-  call GetStringVar;
-  call LoadPalette;
-  mov eax, 0x51DF34;
-  call CopyPalette;
+  call interpretGetString_
+  call loadColorTable_
+  mov eax, _cmap
+  call palette_set_to_
 end:
   pop edx;
   pop ecx;
@@ -1192,10 +1132,10 @@ static void __declspec(naked) NBCreateChar() {
   mov edx, eax;
   pop eax;
   mov ecx, eax;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;*/
   retn;
  }
@@ -1206,16 +1146,16 @@ static void __declspec(naked) get_proto_data() {
   pushad;
   sub esp, 4;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   mov ecx, eax;
   mov eax, ebp;
-  call GetArgType;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz fail;
   cmp si, 0xc001;
@@ -1232,10 +1172,10 @@ fail:
   dec edx;
 end:
   mov eax, ebp;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   add esp, 4;
   popad;
   retn;
@@ -1246,21 +1186,21 @@ static void __declspec(naked) set_proto_data() {
   pushad;
   sub esp, 4;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   mov ecx, eax;
   mov eax, ebp;
-  call GetArgType;
+  call interpretPopShort_
   mov esi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   mov ebx, eax;
   mov eax, ebp;
-  call GetArgType;
+  call interpretPopShort_
   xchg eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   cmp si, 0xc001;
@@ -1288,12 +1228,10 @@ static void __declspec(naked) funcHeroSelectWin() {//for opening the appearance 
   push edx;
   push esi;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   push eax;
   cmp dx, 0xC001;
   jnz fail;
@@ -1316,12 +1254,10 @@ static void __declspec(naked) funcSetHeroStyle() {//for setting the hero style/a
   push edx;
   push esi;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   push eax;
   cmp dx, 0xC001;
   jnz fail;
@@ -1344,12 +1280,10 @@ static void __declspec(naked) funcSetHeroRace() {// for setting the hero race ta
   push edx;
   push esi;
   mov ecx, eax;
-  mov ebx, 0x4674F0;
-  call ebx;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  mov ebx, 0x467500;
-  call ebx;
+  call interpretPopLong_
   push eax;
   cmp dx, 0xC001;
   jnz fail;
@@ -1370,11 +1304,11 @@ static void __declspec(naked) get_light_level() {
  __asm {
   pushad;
   mov ecx, eax;
-  mov edx, ds:[0x51923C];
-  call SetResult
+  mov edx, ds:[_ambient_light]
+  call interpretPushLong_
   mov edx, 0xc001;
   mov eax, ecx;
-  call SetResultType
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -1396,11 +1330,11 @@ static void __declspec(naked) get_attack_type() {
   push edx;
   push ecx;
   mov ecx, eax;
-  mov edx, ds:[0x56d2b4];
-  call SetResult;
+  mov edx, ds:[_main_ctd + 4]
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop ecx;
   pop edx;
   retn;
@@ -1410,16 +1344,16 @@ static void __declspec(naked) play_sfall_sound() {
  __asm {
   pushad
   mov edi, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov ebx, eax;
   mov eax, edi;
-  call GetArg;
+  call interpretPopLong_
   mov esi, eax;
   mov eax, edi;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, edi;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0x9001;
   jz next;
   cmp dx, 0x9801;
@@ -1429,7 +1363,7 @@ next:
   jnz end;
   mov ebx, eax;
   mov eax, edi;
-  call GetStringVar;
+  call interpretGetString_
   push esi;
   push eax;
   mov eax, esi;
@@ -1437,10 +1371,10 @@ next:
   call PlaySfallSound;
   mov edx, eax;
   mov eax, edi;
-  call SetResult;
+  call interpretPushLong_
   mov eax, edi;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
 end:
   popad
   retn;
@@ -1450,10 +1384,10 @@ static void __declspec(naked) stop_sfall_sound() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz end;
   push eax;
@@ -1464,26 +1398,24 @@ end:
  }
 }
 
-static const DWORD _tile_coord=0x4B1674;
-static const DWORD _square_num=0x4B1F04;
 static void __declspec(naked) get_tile_pid() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz fail;
   sub esp, 8;
   lea edx, [esp];
   lea ebx, [esp+4];
-  call _tile_coord;
+  call tile_coord_
   mov eax, [esp];
   mov edx, [esp+4];
-  call _square_num;
-  mov edx, ds:[0x631E40];
+  call square_num_
+  mov edx, ds:[_square]
   movzx edx, word ptr ds:[edx+eax*4];
   add esp, 8;
   jmp end;
@@ -1491,10 +1423,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, ebp;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -1505,10 +1437,10 @@ static void __declspec(naked) modified_ini() {
   pushad;
   mov edx, modifiedIni;
   mov ebp, eax;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -1518,10 +1450,10 @@ static void __declspec(naked) force_aimed_shots() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -1537,10 +1469,10 @@ static void __declspec(naked) disable_aimed_shots() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -1556,17 +1488,17 @@ static void __declspec(naked) mark_movie_played() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   test eax, eax;
   jl end;
   cmp eax, 0x11;
   jge end;
-  mov byte ptr ds:[eax+0x596C78], 1;
+  mov byte ptr ds:[eax+_gmovie_played_list], 1;
 end:
   pop edx;
   pop ecx;
@@ -1577,10 +1509,10 @@ static void __declspec(naked) get_last_attacker() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz fail;
   push eax;
@@ -1591,10 +1523,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, ebp;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -1603,10 +1535,10 @@ static void __declspec(naked) get_last_target() {
  __asm {
   pushad;
   mov ebp, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edi, eax;
   mov eax, ebp;
-  call GetArg;
+  call interpretPopLong_
   cmp di, 0xc001;
   jnz fail;
   push eax;
@@ -1617,10 +1549,10 @@ fail:
   xor edx, edx;
 end:
   mov eax, ebp;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ebp;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   popad;
   retn;
  }
@@ -1629,10 +1561,10 @@ static void __declspec(naked) block_combat() {
  __asm {
   pushad;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -1642,8 +1574,6 @@ end:
   retn;
  }
 }
-static const DWORD _mouse_get_position=0x4CA9DC;
-static const DWORD _tile_num=0x4B1754;
 static void __declspec(naked) tile_under_cursor() {
  __asm {
   push edx;
@@ -1653,17 +1583,17 @@ static void __declspec(naked) tile_under_cursor() {
   sub esp, 8;
   lea edx, [esp];
   lea eax, [esp+4];
-  call _mouse_get_position;
+  call mouse_get_position_
   mov ebx, dword ptr ds:[_map_elevation]
   mov edx, [esp];
   mov eax, [esp+4];
-  call _tile_num;
+  call tile_num_
   mov edx, eax;
   mov eax, ecx;
-  call SetResult;
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   add esp, 8;
   pop ebx;
   pop ecx;
@@ -1676,11 +1606,11 @@ static void __declspec(naked) gdialog_get_barter_mod() {
   push edx;
   push ecx;
   mov ecx, eax;
-  mov edx, dword ptr ds:[0x51873C];
-  call SetResult;
+  mov edx, dword ptr ds:[_gdBarterMod]
+  call interpretPushLong_
   mov eax, ecx;
   mov edx, 0xc001;
-  call SetResultType;
+  call interpretPushShort_
   pop ecx;
   pop edx;
   retn;
@@ -1691,10 +1621,10 @@ static void __declspec(naked) set_inven_ap_cost() {
   push ecx;
   push edx;
   mov ecx, eax;
-  call GetArgType;
+  call interpretPopShort_
   mov edx, eax;
   mov eax, ecx;
-  call GetArg;
+  call interpretPopLong_
   cmp dx, 0xC001;
   jnz end;
   push eax;
@@ -1715,8 +1645,6 @@ static void __declspec(naked) op_sneak_success() {
  _OP_END
 }
 
-
-static const DWORD light_get_tile_ = 0x47A980; // aElev<eax>, aTilenum<edx>
 static void __declspec(naked) op_tile_light() {
  _OP_BEGIN(ebp)
  _GET_ARG_R32(ebp, ebx, edi)  // arg2 - tile

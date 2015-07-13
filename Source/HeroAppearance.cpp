@@ -48,7 +48,7 @@ struct sPath {
   sPath* next;
 };
 
-sPath **TempPathPtr=(sPath**)0x6B24D0;
+sPath **TempPathPtr=(sPath**)_paths;
 sPath *HeroPathPtr=NULL;
 sPath *RacePathPtr=NULL;
 
@@ -186,8 +186,6 @@ DWORD ByteSwap32 (DWORD num) {
 }
 */
 
-DWORD funcTemp=0;//temp var for holding fallout2 function addresses
-
 /////////////////////////////////////////////////////////////////FILE FUNCTIONS////////////////////////////////////////////////////////////////////////
 //--------------------------------------------------
 void* FOpenFile(char *FileName, char *flags) {
@@ -195,8 +193,7 @@ void* FOpenFile(char *FileName, char *flags) {
   __asm {
      mov edx, flags
      mov eax, FileName
-  mov funcTemp, 0x4DEE2C
-     call funcTemp
+     call xfopen_
      mov retVal, eax
   }
   return retVal;
@@ -215,7 +212,6 @@ int FCloseFile(void *FileStream) {
 }
 
 
-
 //--------------------------------------------------
 int Ffseek(void *FileStream, long fOffset, int origin) {
   int retVal;
@@ -223,8 +219,7 @@ int Ffseek(void *FileStream, long fOffset, int origin) {
      mov ebx, origin
      mov edx, fOffset
      mov eax, FileStream
-  mov funcTemp, 0x4DF5D8
-     call funcTemp
+     call xfseek_
      mov retVal, eax
   }
   return retVal;
@@ -237,8 +232,7 @@ int FReadByte(void *FileStream, BYTE *toMem) {
   __asm {
      mov edx, toMem
      mov eax, FileStream
-  mov funcTemp, 0x4C60E0
-     call funcTemp
+     call db_freadByte_
      mov retVal, eax
   }
   return retVal;
@@ -251,8 +245,7 @@ int FReadWord(void *FileStream, WORD *toMem) {
   __asm {
      mov edx, toMem
      mov eax, FileStream
-  mov funcTemp, 0x4C60F4
-     call funcTemp
+     call db_freadShort_
      mov retVal, eax
   }
   return retVal;
@@ -264,8 +257,7 @@ int FReadDword(void *FileStream, DWORD *toMem) {
   __asm {
      mov edx, toMem
      mov eax, FileStream
-  mov funcTemp, 0x4C614C
-     call funcTemp
+     call db_freadInt_
      mov retVal, eax
   }
   return retVal;
@@ -278,8 +270,7 @@ int FReadWordArray(void *FileStream, WORD *toMem, DWORD NumElements) {
      mov ebx, NumElements
      mov edx, toMem
      mov eax, FileStream
-  mov funcTemp, 0x4C6330
-     call funcTemp
+     call db_freadShortCount_
      mov retVal, eax
   }
   return retVal;
@@ -293,8 +284,7 @@ int FReadDwordArray(void *FileStream, DWORD *toMem, DWORD NumElements) {
      mov ebx, NumElements
      mov edx, toMem
      mov eax, FileStream
-  mov funcTemp, 0x4C63BC
-     call funcTemp
+     call db_freadIntCount_
      mov retVal, eax
   }
   return retVal;
@@ -309,8 +299,7 @@ int FReadString(void *FileStream, char *toMem, DWORD charLength, DWORD NumString
      mov ebx, NumStrings
      mov edx, charLength
      mov eax, toMem
-  mov funcTemp, 0x4C5FFC
-     call funcTemp
+     call db_fread_
      mov retVal, eax
   }
   return retVal;
@@ -324,8 +313,7 @@ int FWriteByte(void *FileStream, BYTE bVal) {
      xor edx, edx
   mov dl, bVal
      mov eax, FileStream
-  mov funcTemp, 0x4C61AC
-     call funcTemp
+     call db_fwriteByte_
      mov retVal, eax
   }
   return retVal;
@@ -338,8 +326,7 @@ int FWriteDword(void *FileStream, DWORD bVal) {
   __asm {
      mov edx, bVal
      mov eax, FileStream
-  mov funcTemp, 0x4C6214
-     call funcTemp
+     call db_fwriteInt_
      mov retVal, eax
   }
   return retVal;
@@ -354,8 +341,7 @@ int LoadMsgList(MSGList *MsgList, char *MsgFilePath) {
   __asm {
      mov edx, MsgFilePath
      mov eax, MsgList
-     mov funcTemp, 0x484AA4
-     call funcTemp
+     call message_load_
      mov retVal, eax
   }
   return retVal;
@@ -367,8 +353,7 @@ int DestroyMsgList(MSGList *MsgList) {
   int retVal;
   __asm {
      mov eax, MsgList
-     mov funcTemp, 0x484964
-     call funcTemp
+     call message_exit_
      mov retVal, eax
   }
   return retVal;
@@ -448,8 +433,7 @@ int SetMousePic(int picNum) {
 
   __asm {
      mov eax, picNum
-     mov funcTemp, 0x44C840
-     call funcTemp
+     call gmouse_set_cursor_
      mov picNum, eax
   }
 return picNum;//0 = success, -1 = fail
@@ -463,8 +447,7 @@ void GetMousePos(int *x_out, int *y_out) {
      push esi
      mov edx, y_out
      mov eax, x_out
-     mov funcTemp, 0x4CA9DC
-     call funcTemp
+     call mouse_get_position_
      pop esi
   }
 }
@@ -473,8 +456,7 @@ void GetMousePos(int *x_out, int *y_out) {
 void ShowMouse() {
 
   __asm {
-     mov funcTemp, 0x4CA34C
-     call funcTemp
+     call mouse_show_
   }
 
 }
@@ -484,8 +466,7 @@ void ShowMouse() {
 void HideMouse() {
 
   __asm {
-     mov funcTemp, 0x4CA534
-     call funcTemp
+     call mouse_hide_
   }
 }
 
@@ -493,7 +474,7 @@ void HideMouse() {
 //-------------------------------------------------------
 //returns 0 if mouse is hidden
 int IsMouseHidden() {
- return *(DWORD*)0x6AC790;
+ return *(DWORD*)_mouse_is_hidden;
 }
 
 
@@ -551,8 +532,7 @@ BYTE* GetFrmSurface2(DWORD FrmID, DWORD *FrmObj_out, DWORD *frmWidth_out, DWORD 
      mov ebx, frmWidth_out
      mov edx, FrmObj_out//0x518F4C
      mov eax, FrmID
-     mov funcTemp, 0x4191CC
-     call funcTemp
+     call art_lock_
      mov Surface,eax
   }
   return Surface;
@@ -565,8 +545,7 @@ FRMhead* GetFrm(DWORD FrmID, DWORD *FrmObj_out) {
   __asm {
      mov edx, FrmObj_out
      mov eax, FrmID
-     mov funcTemp, 0x419160
-     call funcTemp
+     call art_ptr_lock_
      mov Frm, eax
   }
   return Frm;
@@ -580,8 +559,7 @@ DWORD GetFrmFrameWidth(FRMhead* Frm, DWORD FrameNum, DWORD Ori) {
      mov ebx, Ori//0-5
      mov edx, FrameNum
      mov eax, Frm
-     mov funcTemp, 0x4197A0
-     call funcTemp
+     call art_frame_width_
      mov Width,eax
   }
   return Width;
@@ -596,8 +574,7 @@ DWORD GetFrmFrameHeight(FRMhead* Frm, DWORD FrameNum, DWORD Ori) {
      mov ebx, Ori//0-5
      mov edx, FrameNum
      mov eax, Frm
-     mov funcTemp, 0x4197B8
-     call funcTemp
+     call art_frame_length_
      mov Height,eax
   }
   return Height;
@@ -612,8 +589,7 @@ BYTE* GetFrmFrameSurface(FRMhead* Frm,  DWORD FrameNum, DWORD Ori) {
      mov ebx, Ori//0-5
      mov edx, FrameNum
      mov eax, Frm
-     mov funcTemp, 0x419870
-     call funcTemp
+     call art_frame_data_
      mov Surface,eax
   }
   return Surface;
@@ -722,8 +698,7 @@ int CreateWin(DWORD x, DWORD y, DWORD width, DWORD height, DWORD BGColourIndex, 
      mov ebx,width
      mov edx, y
      mov eax, x
-     mov funcTemp, 0x4D6238
-     call funcTemp
+     call win_add_
      mov WinRef, eax
   }
   return WinRef;
@@ -735,8 +710,7 @@ void DestroyWin(int WinRef) {
 
   __asm {
      mov eax, WinRef
-     mov funcTemp, 0x4D6468
-     call funcTemp
+     call win_delete_
   }
 }
 
@@ -748,8 +722,7 @@ WINinfo *GetWinStruct(int WinRef) {
   __asm {
      push edx
      mov eax, WinRef
-     mov funcTemp, 0x4D7888
-     call funcTemp
+     call GNW_find_
      mov winStruct, eax
      pop edx
   }
@@ -775,8 +748,7 @@ void ShowWin(int WinRef) {
 
   __asm {
      mov eax, WinRef
-     mov funcTemp, 0x4D6DAC
-     call funcTemp
+     call win_show_
   }
 }
 /*
@@ -785,8 +757,7 @@ void HideWin(int WinRef) {
 
   __asm {
      mov eax, WinRef
-     mov funcTemp, 0x4D6E64
-     call funcTemp
+     call win_hide_
   }
 }
 */
@@ -851,7 +822,7 @@ void SetFont(int ref) {
 
 //-----------------------
 int GetFont(void) {
-return *(DWORD*)0x51E3B0;
+return *(DWORD*)_curr_font_num;
 }
 
 
@@ -889,7 +860,7 @@ DWORD GetTextWidth(char *TextMsg) {
   DWORD TxtWidth;
   __asm {
      mov eax, TextMsg
-     call dword ptr ds:[0x51E3C0]//get text width
+     call dword ptr ds:[_text_width]//get text width
      mov TxtWidth, eax
   }
   return TxtWidth;
@@ -913,7 +884,7 @@ DWORD GetMaxTextWidth(char *TextMsg) {
   DWORD msgWidth;
  __asm {
     mov eax, TextMsg
-    call dword ptr ds:[0x51E3C8]
+    call dword ptr ds:[_text_mono_width]
     mov msgWidth, eax
  }
 return msgWidth;
@@ -924,7 +895,7 @@ return msgWidth;
 DWORD GetCharGapWidth() {
   DWORD gapWidth;
  __asm {
-    call dword ptr ds:[0x51E3CC]
+    call dword ptr ds:[_text_spacing]
     mov gapWidth, eax
  }
 return gapWidth;
@@ -935,7 +906,7 @@ return gapWidth;
 DWORD GetMaxCharWidth() {
   DWORD charWidth=0;
  __asm {
-    call dword ptr ds:[0x51E3D4]
+    call dword ptr ds:[_text_max]
     mov charWidth, eax
  }
 return charWidth;
@@ -950,8 +921,7 @@ void* LoadDat(char*FileName) {
   void *dat=NULL;
   __asm {
      mov eax, FileName
-  mov funcTemp, 0x4E4F58
-     call funcTemp
+     call dbase_open_
      mov dat, eax
   }
   return dat;
@@ -963,8 +933,7 @@ void UnloadDat(void *dat) {
 
   __asm {
      mov eax, dat
-  mov funcTemp, 0x4E5270
-     call funcTemp
+     call dbase_close_
   }
 }
 
@@ -984,8 +953,7 @@ void DrawLineX(int WinRef, DWORD XStartPos, DWORD XEndPos, DWORD Ypos, BYTE Colo
      mov edx, XStartPos
      mov eax, WinRef
 
-     mov funcTemp, 0x4D6B24
-     call funcTemp
+     call win_line_
   }
 }
 */
@@ -1008,8 +976,7 @@ void _stdcall RefreshArtCache(void)
 {
   __asm {
 
-     mov funcTemp, 0x41927C
-     call funcTemp
+     call art_flush_
   }
 }
 
@@ -1023,8 +990,7 @@ int retVal=0;
   __asm {
      mov edx, size_out
   mov eax, FileName
-  mov funcTemp, 0x4C5D68
-     call funcTemp
+     call db_dir_entry_
      mov retVal, eax
   }
   return retVal;
@@ -1038,7 +1004,7 @@ int retVal=0;
 char _stdcall GetSex(void) {
   char sex;
   __asm {
-     mov edx,0x22//sex stat ref
+     mov  edx, STAT_gender //sex stat ref
      mov eax,dword ptr ds:[_obj_dude]//hero state structure
      call stat_level_//get Player stat val
      test eax, eax //male=0, female=1
@@ -1079,7 +1045,7 @@ int _stdcall LoadHeroDat(unsigned int Race, unsigned int Style) {
   }
 
   TempPathPtr=&HeroPathPtr;//set path for selected appearance
-  HeroPathPtr->next = *(sPath**)0x6B24D0;
+  HeroPathPtr->next = *(sPath**)_paths;
 
   if(Style!=0){
   sprintf_s(RacePathPtr->path, 64, "Appearance\\h%cR%02dS%02d.dat\0", GetSex(), Race, 0);
@@ -1092,7 +1058,7 @@ int _stdcall LoadHeroDat(unsigned int Race, unsigned int Style) {
 
   if(GetFileAttributes(RacePathPtr->path)!=INVALID_FILE_ATTRIBUTES) {//check if folder/Dat exists for selected race base appearance
         HeroPathPtr->next = RacePathPtr;//set path for selected race base appearance
-        RacePathPtr->next = *(sPath**)0x6B24D0;
+        RacePathPtr->next = *(sPath**)_paths;
      }
   
   }
@@ -1108,7 +1074,7 @@ static void __declspec(naked) LoadNewHeroArt() {
   __asm {
   cmp byte ptr ds:[esi], 'r'
    je isReading
-     mov ecx, 0x6B24D0
+     mov ecx, _paths
    jmp setPath
    isReading:
      mov ecx, TempPathPtr
@@ -1146,7 +1112,7 @@ static void __declspec(naked) CheckHeroExist() {
   sub esp, 0x4
   lea ebx, [esp]
   push ebx
-     push 0x56C9E4//critter art file name address
+     push _art_name //critter art file name address
      //call CheckHeroFile//check if art file exists
   call CheckFile
   add esp, 0xC
@@ -1162,7 +1128,7 @@ static void __declspec(naked) CheckHeroExist() {
      jmp eax
   EndFunc:
   //popad
-     mov eax, 0x56C9E4
+     mov eax, _art_name
      ret
   }
 
@@ -1179,7 +1145,7 @@ static void __declspec(naked) AdjustHeroBaseArt() {
     // jg EndFunc
      add eax, critterListSize
 //EndFunc:
-     mov dword ptr ds:[0x5108A4],eax
+     mov dword ptr ds:[_art_vault_guy_num],eax
      ret
   }
 
@@ -1203,7 +1169,7 @@ static void __declspec(naked) AdjustHeroArmorArt() {
    jg EndFunc
      add eax, critterListSize//shift critter art index up into hero range
    EndFunc:
-     //mov dword ptr ds:[0x59E95C],eax
+     //mov dword ptr ds:[_i_fid],eax
      ret
   }
 
@@ -1255,8 +1221,7 @@ static void __declspec(naked) SavCritNumFix() {
      pop eax
 
      push ebx
-     mov ebx, 0x48D59C//save current hero state structure fuction
-     call ebx
+     call obj_save_dude_                    //save current hero state structure fuction
      pop ebx
 
      push eax
@@ -1364,8 +1329,7 @@ void DrawPC(void) {
     */
     lea edx, critRect//out critter RECT*
  mov eax, dword ptr ds:[_obj_dude]//dude critter struct
-    mov funcTemp, 0x48B66C//get critter rect func
-    call funcTemp
+    call obj_bound_ //get critter rect func
 
     mov edx, dword ptr ds:[_obj_dude]//dude critter struct
     lea eax, critRect//RECT*
@@ -1382,8 +1346,7 @@ void _stdcall RefreshPCArt() {
 //and setup matching FrmID for PC
  __asm{
 
-     mov ebx, 0x49F984//refresh PC base model art
-     call ebx
+     call proto_dude_update_gender_         //refresh PC base model art
 
 
     mov eax, dword ptr ds:[_obj_dude]//PC state struct
@@ -1398,9 +1361,9 @@ void _stdcall RefreshPCArt() {
     xor ebx,ebx//itemNum
 
 
-    mov dword ptr ds:[0x59E968],eax//item2
-    mov dword ptr ds:[0x59E954],eax//armor
-    mov dword ptr ds:[0x59E958],eax//item1
+    mov dword ptr ds:[_i_rhand],eax//item2
+    mov dword ptr ds:[_i_worn],eax//armor
+    mov dword ptr ds:[_i_lhand],eax//item1
  jmp LoopStart
 
  CheckNextItem:
@@ -1416,16 +1379,16 @@ void _stdcall RefreshPCArt() {
  jmp SetNextItem
 
  IsItem1:
-    mov dword ptr ds:[0x59E958],eax//set item1
+    mov dword ptr ds:[_i_lhand],eax//set item1
     test byte ptr ds:[eax+0x27],2//check if same item type also in item2 slot
  jz SetNextItem
 
  IsItem2:
-    mov dword ptr ds:[0x59E968],eax//set item2
+    mov dword ptr ds:[_i_rhand],eax//set item2
  jmp SetNextItem
 
  IsArmor:
-    mov dword ptr ds:[0x59E954],eax//set armor
+    mov dword ptr ds:[_i_worn],eax//set armor
 
  SetNextItem:
     inc ebx //itemNum++
@@ -1436,21 +1399,20 @@ void _stdcall RefreshPCArt() {
  JL CheckNextItem
 
 
-    //inventory function - setup pc FrmID and store at address 0x59E95C
-    mov esi, 0x4716E8
-    call esi
+    //inventory function - setup pc FrmID and store at address _i_fid
+    call adjust_fid_
 
     //copy new FrmID to hero state struct
-    mov edx, dword ptr ds:[0x59E95C]
+    mov edx, dword ptr ds:[_i_fid]
     mov eax, dword ptr ds:[_inven_dude]
     mov dword ptr ds:[eax+0x20],edx
   //  call obj_change_fid_
 
 
     xor eax,eax
-    mov dword ptr ds:[0x59E968],eax//item2
-    mov dword ptr ds:[0x59E954],eax//armor
-    mov dword ptr ds:[0x59E958],eax//item1
+    mov dword ptr ds:[_i_rhand],eax//item2
+    mov dword ptr ds:[_i_worn],eax//armor
+    mov dword ptr ds:[_i_lhand],eax//item1
  }
 
 
@@ -1630,7 +1592,7 @@ void DrawPCConsole() {
      else CharRotOri=0;
 
 
-     int WinRef=*(DWORD*)0x57060C;//char screen window ref
+     int WinRef=*(DWORD*)_edit_win;//char screen window ref
      //BYTE *WinSurface = GetWinSurface(WinRef);
      WINinfo *WinInfo=GetWinStruct(WinRef);
 
@@ -1639,8 +1601,8 @@ void DrawPCConsole() {
      sub_draw( 70, 102, 640, 480, 338, 78, CharScrnBackSurface, 70, 102, 0, 0, ConSurface, 0);
      //sub_draw( 70, 102, widthBG, heightBG, xPosBG, yPosBG, BGSurface, 70, 102, 0, 0, ConSurface, 0);
 
-     //DWORD CritNum = *(DWORD*)0x5108A4;//pointer to current base hero critter FrmId
-     DWORD CritNum = *(DWORD*)(*(DWORD*)0x6610B8+0x20);//pointer to current armored hero critter FrmId
+     //DWORD CritNum = *(DWORD*)_art_vault_guy_num;//pointer to current base hero critter FrmId
+     DWORD CritNum = *(DWORD*)(*(DWORD*)_obj_dude+0x20);//pointer to current armored hero critter FrmId
      DWORD CritFrmObj;
   FRMhead *CritFrm;
     // DWORD PcCritOri=0;
@@ -1655,13 +1617,13 @@ void DrawPCConsole() {
 
      sub_draw( CritWidth, CritHeight, CritWidth, CritHeight, 0, 0, CritSurface, 70, 102, 35-CritWidth/2, 51-CritHeight/2, ConSurface, 0);
 
-     BYTE ConsoleGreen = *(BYTE*)0x6A3CB0;//palette offset stored in mem - text colour
-     BYTE ConsoleGold = *(BYTE*)0x6AB8BB;//palette offset stored in mem - text colour
+     BYTE ConsoleGreen = *(BYTE*)_GreenColor;//palette offset stored in mem - text colour
+     BYTE ConsoleGold = *(BYTE*)_YellowColor;//palette offset stored in mem - text colour
 
      BYTE styleColour=ConsoleGreen, raceColour=ConsoleGreen;
-     if(*(DWORD*)0x5707D0==0x501)
+     if(*(DWORD*)_info_line==0x501)
         raceColour=ConsoleGold;
-     else if(*(DWORD*)0x5707D0==0x502)
+     else if(*(DWORD*)_info_line==0x502)
         styleColour=ConsoleGold;
 /*
      int oldFont = GetFont();//store current font
@@ -1784,7 +1746,7 @@ void DrawCharNote(bool Style, int WinRef, DWORD xPosWin, DWORD yPosWin, BYTE *BG
   WinInfo=NULL;
   SetFont(oldFont);//restore previous font
   DestroyMsgList(&MsgList);
-//RedrawWin(*(DWORD*)0x57060C);
+//RedrawWin(*(DWORD*)_edit_win);
 }
 
 
@@ -1792,12 +1754,11 @@ void DrawCharNote(bool Style, int WinRef, DWORD xPosWin, DWORD yPosWin, BYTE *BG
 void DrawCharNote(DWORD LstNum, char *TitleTxt, char *AltTitleTxt, char *Message) {
 
   __asm {
-    MOV ECX,Message//100//DWORD PTR DS:[0x5705CC]
-    MOV EBX,AltTitleTxt//DWORD PTR DS:[0x5705BC]
-    MOV EDX,TitleTxt//DWORD PTR DS:[0x5705B8]
-    MOV EAX,LstNum//11//LstNum//DWORD PTR DS:[0x5705B0]
-    mov esi, 0x43AAEC
-    CALL esi
+    MOV ECX,Message//100//DWORD PTR DS:[_folder_card_desc]
+    MOV EBX,AltTitleTxt//DWORD PTR DS:[_folder_card_title2]
+    MOV EDX,TitleTxt//DWORD PTR DS:[_folder_card_title]
+    MOV EAX,LstNum//11//LstNum//DWORD PTR DS:[_folder_card_fid]
+    CALL DrawCard_
   }
 
 }
@@ -1918,11 +1879,11 @@ if(!AppModEnabled)return;
 
   DWORD NewTick=0, OldTick=0;
 
-  textColour=*(BYTE*)0x6A3CB0;//ConsoleGreen colour -palette offset stored in mem
+  textColour=*(BYTE*)_GreenColor;//ConsoleGreen colour -palette offset stored in mem
   SetFont(0x65);
 
-  DWORD CritNum = *(DWORD*)0x5108A4;//pointer to current base hero critter FrmID
-  //DWORD CritNum = *(DWORD*)(*(DWORD*)0x6610B8+0x20);//pointer to current armored hero critter FrmID
+  DWORD CritNum = *(DWORD*)_art_vault_guy_num;//pointer to current base hero critter FrmID
+  //DWORD CritNum = *(DWORD*)(*(DWORD*)_obj_dude+0x20);//pointer to current armored hero critter FrmID
   FRMhead *CritFrm;
   DWORD CritFrmObj=0, CritOri=0, CritWidth=0, CritHeight=0;
   BYTE *CritSurface=NULL;
@@ -2072,32 +2033,26 @@ void FixTextHighLight() {
      mov eax,7
      xor ebx,ebx
      xor edx,edx
-     mov esi, 0x434B38
-     call esi
+     call PrintBasicStat_
      //redraw trait options text
-     mov esi, 0x43B8A8
-     call esi
+     call ListTraits_
      //redraw skills text
      xor eax,eax
      call ListSkills_
      //redraw level text
-     mov esi, 0x434920
-     call esi
+     call PrintLevelWin_
      //redraw perks, karma, kill text
-     mov esi, 0x43410C
-     call esi
+     call DrawFolder_
      //redraw hit points to crit chance text
-     mov esi, 0x43527C
-     call esi
+     call ListDrvdStats_
      //redraw note pad area text
-     //mov esi, 0x4365AC
-     //call esi
+     //call DrawInfoWin_
         }
 }
 
 //-------------------------------------------
 void _stdcall DrawCharNoteNewChar(bool Style) {
-  DrawCharNote(Style, *(DWORD*)0x57060C, 348, 272, CharScrnBackSurface, 348, 272, 640, 480);
+  DrawCharNote(Style, *(DWORD*)_edit_win, 348, 272, CharScrnBackSurface, 348, 272, 640, 480);
 }
 
 //-------------------------------------------------------------------
@@ -2110,25 +2065,25 @@ int _stdcall CheckCharButtons() {
 
   int drawFlag=-1;
 
-  if(*(DWORD*)0x5707D0==0x503)button=0x501;
-  else if(*(DWORD*)0x5707D0==0x504)button=0x502;
-  else if(*(DWORD*)0x5707D0==0x501 || *(DWORD*)0x5707D0==0x502) {
+  if(*(DWORD*)_info_line==0x503)button=0x501;
+  else if(*(DWORD*)_info_line==0x504)button=0x502;
+  else if(*(DWORD*)_info_line==0x501 || *(DWORD*)_info_line==0x502) {
      switch(button) {
         case 0x14B://button =left
         case 0x14D://button =right
            if(*(DWORD*)0x5709D0==1) {//if in char creation scrn
 
-            if(*(DWORD*)0x5707D0==0x501)
+            if(*(DWORD*)_info_line==0x501)
                button=button+0x3C6;
-            else if(*(DWORD*)0x5707D0==0x502)
+            else if(*(DWORD*)_info_line==0x502)
                button=button+0x3C6+1;
            }
         break;
         case 0x148://button =up
         case 0x150://button =down
-            if(*(DWORD*)0x5707D0==0x501)
+            if(*(DWORD*)_info_line==0x501)
                button=0x502;
-            else if(*(DWORD*)0x5707D0==0x502)
+            else if(*(DWORD*)_info_line==0x502)
                button=0x501;
         break;
         case 0x0D://button =return
@@ -2139,10 +2094,10 @@ int _stdcall CheckCharButtons() {
         case 0x1F6://button =cancel
         case 'c'://button =cancel
         case 'C'://button =cancel
-        if(*(DWORD*)0x5707D0==0x501)//for redrawing note when reentering char screen
-           *(DWORD*)0x5707D0=0x503;
+        if(*(DWORD*)_info_line==0x501)//for redrawing note when reentering char screen
+           *(DWORD*)_info_line=0x503;
         else
-           *(DWORD*)0x5707D0=0x504;
+           *(DWORD*)_info_line=0x504;
         break;
 
         default :
@@ -2153,7 +2108,7 @@ int _stdcall CheckCharButtons() {
 
   switch(button) {
      case 0x9://tab button pushed
-        if(*(DWORD*)0x5707D0>=0x3D && *(DWORD*)0x5707D0<0x4F)//if menu ref in last menu go to race
+        if(*(DWORD*)_info_line>=0x3D && *(DWORD*)_info_line<0x4F)//if menu ref in last menu go to race
            button=0x501,drawFlag=0;
      break;
      case 0x501://race button pushed
@@ -2215,20 +2170,20 @@ int _stdcall CheckCharButtons() {
 
   if(drawFlag==1) {
      PlayAcm("ib3p1xx1");
-     *(DWORD*)0x5707D0=0x502;
+     *(DWORD*)_info_line=0x502;
      FixTextHighLight();
      DrawCharNoteNewChar(1);
-     //DrawCharNote(1, *(DWORD*)0x57060C, 348, 272, CharScrnBackSurface, 348, 272, 640, 480);
+     //DrawCharNote(1, *(DWORD*)_edit_win, 348, 272, CharScrnBackSurface, 348, 272, 640, 480);
   }
   else if(drawFlag==0) {
      PlayAcm("ib3p1xx1");
-     *(DWORD*)0x5707D0=0x501;
+     *(DWORD*)_info_line=0x501;
      FixTextHighLight();
      DrawCharNoteNewChar(0);
-     //DrawCharNote(0, *(DWORD*)0x57060C, 348, 272, CharScrnBackSurface, 348, 272, 640, 480);
+     //DrawCharNote(0, *(DWORD*)_edit_win, 348, 272, CharScrnBackSurface, 348, 272, 640, 480);
   }
 
-  DrawPCConsole();//(*(DWORD*)0x57060C, 338, 78, CharScrnBackSurface, 338, 78, 640, 480);
+  DrawPCConsole();//(*(DWORD*)_edit_win, 338, 78, CharScrnBackSurface, 338, 78, 640, 480);
 
   return button;
 }
@@ -2265,7 +2220,7 @@ static void __declspec(naked) CharScrnEnd(void) {
   pushad
      call DeleteCharSurfaces
      popad
-     MOV EBP,DWORD PTR DS:[0x5707D0]
+     MOV EBP,DWORD PTR DS:[_info_line]
      retn
  }
 }
@@ -2276,13 +2231,12 @@ static void __declspec(naked) SexScrnEnd(void) {
 
   __asm {
      pushad
-     MOV EDX,0x22
+     MOV EDX, STAT_gender
      MOV EAX,DWORD PTR DS:[_obj_dude]
      CALL stat_level_
      mov ecx, eax
-     mov ebx, 0x437664
-     call ebx          //call gender selection window
-     MOV EDX,0x22
+     call SexWindow_          //call gender selection window
+     MOV EDX, STAT_gender
      MOV EAX,DWORD PTR DS:[_obj_dude]
      CALL stat_level_
      cmp ecx, eax      //check if gender has been changed
@@ -2295,13 +2249,13 @@ static void __declspec(naked) SexScrnEnd(void) {
 //NoVaultSuit:
      test eax, eax// check if male 0
   jnz IsFemale
-     mov eax,dword ptr ds:[ebx+0x5108A8]//base male model
+     mov eax,dword ptr ds:[ebx+_art_vault_person_nums]//base male model
   jmp ChangeSex
   IsFemale:
      mov eax,dword ptr ds:[ebx+0x5108AC]//base female model
   ChangeSex:
      call AdjustHeroBaseArt
-     //mov dword ptr ds:[0x5108A4],eax//current base dude model
+     //mov dword ptr ds:[_art_vault_guy_num],eax//current base dude model
      mov eax,dword ptr ds:[_obj_dude]//dude state structure
      call inven_worn_
      mov CurrentRaceVal, 0//reset race and style to defaults
@@ -2312,12 +2266,12 @@ static void __declspec(naked) SexScrnEnd(void) {
      call LoadHeroDat
      call RefreshPCArt
  //Check If Race or Style selected to redraw info note
-     cmp dword ptr ds:[0x5707D0], 0x501
+     cmp dword ptr ds:[_info_line], 0x501
   jne CheckIfStyle
       push 0
       call DrawCharNoteNewChar
   CheckIfStyle:
-      cmp dword ptr ds:[0x5707D0], 0x502
+      cmp dword ptr ds:[_info_line], 0x502
   jne EndFunc
       push 1
       call DrawCharNoteNewChar
@@ -2340,7 +2294,7 @@ static void __declspec(naked) AddCharScrnButtons(void) {
  }
 
     int WinRef;
-    WinRef=*(DWORD*)0x57060C;//char screen window ref
+    WinRef=*(DWORD*)_edit_win;//char screen window ref
 
     //race and style buttons
     CreateButton(WinRef, 332, 0, 82, 32, -1, -1, 0x501, -1, 0, 0, 0);
@@ -2547,11 +2501,10 @@ static void __declspec(naked) FixCharScrnSaveNPrint() {
 
   __asm {
      push TempPathPtr//store current path
-     mov eax, 0x6B24D0
+     mov eax, _paths
   mov TempPathPtr, eax//set path to normal
   push esi
-     mov esi, 0x437C08//call char-scrn menu function
-  call esi
+  call OptionWindow_                        //call char-scrn menu function
   pop esi
   pop TempPathPtr //restore stored path
 
@@ -2786,7 +2739,3 @@ void EnableHeroAppearanceMod()
   //SafeWrite32(0x423A93, 0x90909090);
 
 }
-
-
-
-
