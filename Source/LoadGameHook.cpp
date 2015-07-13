@@ -254,10 +254,7 @@ static void __declspec(naked) LoadSlot() {
   pushad;
   call LoadGame2_Before;
   popad;
-  push ebx;
-  call LoadSlot_
-  pop ebx;
-  retn;
+  jmp  LoadSlot_
  }
 }
 
@@ -313,23 +310,21 @@ static void NewGame2() {
 }
 static void __declspec(naked) NewGame() {
  __asm {
-  pushad;
-  call NewGame2;
-  popad;
-  call main_game_loop_
-  retn;
+  pushad
+  call NewGame2
+  popad
+  jmp  main_game_loop_
  }
 }
 
 static void __declspec(naked) MainMenu() {
  __asm {
-  pushad;
-  push 0;
-  call ResetState;
-  call LoadHeroAppearance;
-  popad;
-  call main_menu_loop_
-  retn;
+  pushad
+  push 0
+  call ResetState
+  call LoadHeroAppearance
+  popad
+  jmp  main_menu_loop_
  }
 }
 static void __declspec(naked) WorldMapHook() {

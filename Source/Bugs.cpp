@@ -68,8 +68,6 @@ skip:
  }
 }
 
-static const DWORD protinst_default_use_item_hook_End = 0x49C38B;
-static const DWORD protinst_default_use_item_hook_End1 = 0x49C3C5;
 static void __declspec(naked) protinst_default_use_item_hook() {
  __asm {
   mov  eax, dword ptr [edx+0x64]            // eax = target pid
@@ -83,13 +81,15 @@ itsCar:
   cmp  eax, -1
   jne  skip
 noCar:
-  jmp  protinst_default_use_item_hook_End   // "Это ничего не даст."
+  mov  eax, 0x49C38B
+  jmp  eax                                  // "Это ничего не даст."
 skip:
   test eax, eax
   jnz  end
   dec  eax
 end:
-  jmp  protinst_default_use_item_hook_End1
+  mov  esi, 0x49C3C5
+  jmp  esi
  }
 }
 
@@ -104,7 +104,6 @@ skip:
  }
 }
 
-static const DWORD item_d_check_addict_hook_End = 0x47A6A1;
 static void __declspec(naked) item_d_check_addict_hook() {
  __asm {
   mov  edx, 2                               // type = зависимость
@@ -126,7 +125,8 @@ skip:
   mov  eax, dword ptr ds:[_obj_dude]
   call queue_find_first_
 end:
-  jmp  item_d_check_addict_hook_End
+  mov  esi, 0x47A6A1
+  jmp  esi
  }
 }
 
@@ -145,7 +145,6 @@ end:
  }
 }
 
-static const DWORD item_d_take_drug_hook_End = 0x479FD1;
 static void __declspec(naked) item_d_take_drug_hook() {
  __asm {
   cmp  dword ptr [eax], 0                   // queue_addict.init
@@ -158,11 +157,11 @@ skip:
   mov  eax, 2                               // type = зависимость
   mov  edx, offset remove_jet_addict
   call queue_clear_type_
-  jmp  item_d_take_drug_hook_End
+  mov  eax, 0x479FD1
+  jmp  eax
  }
 }
 
-static const DWORD item_wd_process_hook_End = 0x47A3FB;
 static void __declspec(naked) item_wd_process_hook() {
  __asm {
   cmp  esi, PERK_add_jet
@@ -176,7 +175,8 @@ itsJet:
   mov  ecx, esi                             // ecx=perk
   mov  ebx, 2880                            // ebx=time
   call insert_withdrawal_
-  jmp  item_wd_process_hook_End
+  mov  eax, 0x47A3FB
+  jmp  eax
  }
 }
 
@@ -271,17 +271,17 @@ end:
  }
 }
 
-static const DWORD gdProcessUpdate_hook_End = 0x44702D;
-static const DWORD gdProcessUpdate_hook_End1 = 0x4470DB;
 static void __declspec(naked) gdProcessUpdate_hook() {
  __asm {
   add  eax, esi
   cmp  eax, dword ptr ds:[0x58ECCC]         // _optionRect.offy
   jge  skip
   add  eax, 2
-  jmp  gdProcessUpdate_hook_End
+  mov  esi, 0x44702D
+  jmp  esi
 skip:
-  jmp  gdProcessUpdate_hook_End1
+  mov  esi, 0x4470DB
+  jmp  esi
  }
 }
 
@@ -401,7 +401,6 @@ end:
  }
 }
 
-static const DWORD inven_pickup_hook_End = 0x470EC9;
 static void __declspec(naked) inven_pickup_hook() {
  __asm {
   mov  edx, ds:[_pud]
@@ -409,22 +408,21 @@ static void __declspec(naked) inven_pickup_hook() {
   dec  edx
   sub  edx, eax
   lea  edx, ds:0[edx*8]
-  jmp  inven_pickup_hook_End
+  mov  eax, 0x470EC9
+  jmp  eax
  }
 }
 
 static DWORD inven_pickup_loop=-1;
-static const DWORD inven_pickup_hook1_Fail = 0x47125C;
 static const DWORD inven_pickup_hook1_Loop = 0x471145;
-static const DWORD inven_pickup_hook1_End = 0x4711DF;
-static const DWORD inven_pickup_hook1_End1 = 0x471181;
 static void __declspec(naked) inven_pickup_hook1() {
  __asm {
   cmp  inven_pickup_loop, -1
   jne  inLoop
   test eax, eax
   jnz  startLoop
-  jmp  inven_pickup_hook1_Fail
+  mov  eax, 0x47125C
+  jmp  eax
 startLoop:
   xor  edx, edx
   mov  inven_pickup_loop, edx
@@ -457,12 +455,14 @@ foundRect:
   jle  inRange
 skip:
   pop  eax
-  jmp  inven_pickup_hook1_End
+  mov  ebx, 0x4711DF
+  jmp  ebx
 inRange:
   xchg edx, eax
   sub  edx, eax
   pop  eax
-  jmp  inven_pickup_hook1_End1
+  mov  ecx, 0x471181
+  jmp  ecx
  }
 }
 
@@ -515,8 +515,6 @@ static void __declspec(naked) PipStatus_hook() {
  }
 }
 
-static const DWORD barter_attempt_transaction_hook1_End = 0x474D39;
-static const DWORD barter_attempt_transaction_hook1_Cont = 0x474D17;
 static void __declspec(naked) barter_attempt_transaction_hook1() {
  __asm {
   cmp  dword ptr [eax+0x64], PID_ACTIVE_GEIGER_COUNTER
@@ -524,10 +522,12 @@ static void __declspec(naked) barter_attempt_transaction_hook1() {
   cmp  dword ptr [eax+0x64], PID_ACTIVE_STEALTH_BOY
   je   found
   inc  ecx
-  jmp  barter_attempt_transaction_hook1_End
+  mov  eax, 0x474D39
+  jmp  eax
 found:
   call item_m_turn_off_
-  jmp  barter_attempt_transaction_hook1_Cont// А есть ли ещё включённые предметы среди продаваемых?
+  mov  eax, 0x474D17
+  jmp  eax                                  // А есть ли ещё включённые предметы среди продаваемых?
  }
 }
 
@@ -548,10 +548,19 @@ end:
  }
 }
 
-static const DWORD item_d_take_drug_hook1_End = 0x47A168;
 static void __declspec(naked) item_d_take_drug_hook1() {
  __asm {
-  jmp  item_d_take_drug_hook1_End
+  mov  eax, 0x47A168
+  jmp  eax
+ }
+}
+
+// todo: проверить так ли уж это нужно
+static void __declspec(naked) op_wield_obj_critter_hook() {
+ __asm {
+  call adjust_ac_
+  xor  ecx, ecx
+  jmp  intface_update_ac_
  }
 }
 
@@ -644,6 +653,15 @@ void BugsInit() {
 
  dlog("Applying Jet Antidote fix.", DL_INIT);
  MakeCall(0x47A013, &item_d_take_drug_hook1, true);
+ dlogr(" Done", DL_INIT);
+
+ dlog("Applying shiv patch. ", DL_INIT);
+ SafeWrite8(0x477B2B, 0xEB);
+ dlogr(" Done", DL_INIT);
+
+ dlog("Applying wield_obj_critter fix.", DL_INIT);
+ SafeWrite8(0x456912, 0x1E);
+ HookCall(0x45697F, &op_wield_obj_critter_hook);
  dlogr(" Done", DL_INIT);
 
 }

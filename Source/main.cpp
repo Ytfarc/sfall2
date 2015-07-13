@@ -625,30 +625,6 @@ end:
  }
 }
 
-static const DWORD WieldObjCritterFixEnd = 0x456926;
-static void __declspec(naked) WieldObjCritterFix() {
- __asm {
-  xor ebp,ebp;    // Set ebp=0 to skip adjust_ac() processing (assume not armor)
-  test eax,eax;    // Did item_get_type() return item_type_armor?
-  jnz lexit;    // Skip ahead if no
-  mov eax,dword ptr ds:[_obj_dude];
-  call inven_worn_   // Otherwise, get stats of armor worn
-  mov dword ptr ss:[esp+0x14],eax; // Store pointer to armor worn (for adjust_ac())
-  inc ebp;    // Toggle flag to process adjust_ac() later in function
-lexit:
-  jmp WieldObjCritterFixEnd;
- }
-}
-
-static void __declspec(naked) WieldObjCritterFix2() {
- __asm {
-  call adjust_ac_
-  xor  ecx, ecx
-  call intface_update_ac_
-  retn
- }
-}
-
 static const DWORD NPCStage6Fix1End = 0x493D16;
 static const DWORD NPCStage6Fix2End = 0x49423A;
 static void __declspec(naked) NPCStage6Fix1() {
@@ -717,7 +693,6 @@ bjmp:
   jmp FastShotTraitFixEnd2;  // clean up and exit function item_w_called_shot
  }
 }
-
 
 static void __declspec(naked) DodgyDoorsFix() {//checks if an attacked object is a critter before attempting dodge animation
  __asm {
@@ -1794,12 +1769,6 @@ static void DllMain2() {
   dlogr(" Done", DL_INIT);
  }
 
- //if(GetPrivateProfileInt("Misc", "ShivPatch", 0, ini)) {
-  dlog("Applying shiv patch. ", DL_INIT);
-  SafeWrite8(0x477B2B, 0xeb);
-  dlogr(" Done", DL_INIT);
- //}
-
  //if(GetPrivateProfileInt("Misc", "ImportedProcedureFix", 0, ini)) {
   dlog("Applying imported procedure patch. ", DL_INIT);
   SafeWrite16(0x46B35B, 0x1c60);
@@ -1991,13 +1960,6 @@ static void DllMain2() {
  if((signed char)tmp>32) {
   dlog("Applying AnimationsAtOnceLimit patch.", DL_INIT);
   AnimationsAtOnceInit((signed char)tmp);
-  dlogr(" Done", DL_INIT);
- }
-
- if(GetPrivateProfileIntA("Misc", "WieldObjCritterFix", 1, ini)) {
-  dlog("Applying wield_obj_critter fix.", DL_INIT);
-  MakeCall(0x45690F, &WieldObjCritterFix, true);
-  HookCall(0x45697F, &WieldObjCritterFix2);
   dlogr(" Done", DL_INIT);
  }
 
