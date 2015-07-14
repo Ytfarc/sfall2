@@ -29,7 +29,6 @@ static void _stdcall ConsoleFilePrint(const char* msg) {
  consolefile << msg << endl;
 }
 
-static const DWORD ConsoleHookRet=0x431871;
 static void __declspec(naked) ConsoleHook() {
  __asm {
   pushad;
@@ -41,7 +40,8 @@ static void __declspec(naked) ConsoleHook() {
   push edx;
   push esi;
   push edi;
-  jmp ConsoleHookRet;
+  mov  ecx, 0x431871
+  jmp  ecx
  }
 }
 

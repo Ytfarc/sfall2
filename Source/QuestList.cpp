@@ -25,7 +25,6 @@ static DWORD zone_number = 0;
 static DWORD QuestsScrollButtonsX = 220;
 static DWORD QuestsScrollButtonsY = 229;
 
-static const DWORD StartPipboy_hook_End = 0x49754C;
 static void __declspec(naked) StartPipboy_hook() {
  __asm {
 // load new texture for first (up) button. I used memory address for texture from buttons at
@@ -169,11 +168,11 @@ noUpButton:
 noDownButton:
   popad
   cmp  dword ptr [esp+0x118], 1
-  jmp  StartPipboy_hook_End
+  mov  eax, 0x49754C
+  jmp  eax
  }
 }
 
-static const DWORD pipboy_hook_End = 0x49708D;
 static void __declspec(naked) pipboy_hook() {
  __asm {
   cmp  byte ptr ds:[_stat_flag], 0
@@ -210,14 +209,13 @@ noKey:
   xor  ebx, ebx
 end:
   mov  edx, _mouse_y
-  jmp  pipboy_hook_End
+  mov  eax, 0x49708D
+  jmp  eax
  }
 }
 
-static const DWORD pipboy_hook1_End = 0x4971B8;
 static void __declspec(naked) pipboy_hook1() {
  __asm {
-  push eax
   mov  edx, ds:[_crnt_func]
   test edx, edx
   jnz  end
@@ -230,8 +228,8 @@ static void __declspec(naked) pipboy_hook1() {
   je   end
   call win_enable_button_
 end:
-  pop  eax
-  jmp  pipboy_hook1_End
+  mov  eax, 0x4971B8
+  jmp  eax
  }
 }
 
@@ -329,8 +327,7 @@ end:
 static void __declspec(naked) ShowHoloDisk_hook() {
  __asm {
   call DownButton
-  call win_draw_
-  retn
+  jmp  win_draw_
  }       
 }
 
@@ -358,16 +355,14 @@ noDownButton:
 static void __declspec(naked) PipFunc_hook() {
  __asm {
   call DisableButtons
-  call NixHotLines_
-  retn
+  jmp  NixHotLines_
  }
 }
 
 static void __declspec(naked) PipAlarm_hook() {
  __asm {
   call DisableButtons
-  call critter_can_obj_dude_rest_
-  retn
+  jmp  critter_can_obj_dude_rest_
  }
 }
 

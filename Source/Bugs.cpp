@@ -515,29 +515,6 @@ static void __declspec(naked) PipStatus_hook() {
  }
 }
 
-static void __declspec(naked) barter_attempt_transaction_hook1() {
- __asm {
-  cmp  dword ptr [eax+0x64], PID_ACTIVE_GEIGER_COUNTER
-  je   found
-  cmp  dword ptr [eax+0x64], PID_ACTIVE_STEALTH_BOY
-  je   found
-  inc  ecx
-  mov  eax, 0x474D39
-  jmp  eax
-found:
-  call item_m_turn_off_
-  mov  eax, 0x474D17
-  jmp  eax                                  // А есть ли ещё включённые предметы среди продаваемых?
- }
-}
-
-static void __declspec(naked) item_m_turn_off_hook() {
- __asm {
-  and  byte ptr [eax+0x25], 0xDF            // Сбросим флаг использованного предмета
-  jmp  queue_remove_this_
- }
-}
-
 static void __declspec(naked) perform_withdrawal_start_hook() {
  __asm {
   test eax, eax
@@ -561,6 +538,23 @@ static void __declspec(naked) op_wield_obj_critter_hook() {
   call adjust_ac_
   xor  ecx, ecx
   jmp  intface_update_ac_
+ }
+}
+
+//checks if an attacked object is a critter before attempting dodge animation
+static void __declspec(naked) action_melee_hook() {
+ __asm {
+  mov  eax, [ebp+0x20]                      // (original code) objStruct ptr
+  mov  ebx, [eax+0x20]                      // objStruct->FID
+  and  ebx, 0x0F000000
+  sar  ebx, 0x18
+  cmp  ebx, ObjType_Critter                 // check if object FID type flag is set to critter
+  jne  end                                  // if object not a critter leave jump condition flags
+                                            // set to skip dodge animation
+  test byte ptr [eax+0x44], 3               // (original code) DAM_KNOCKED_OUT or DAM_KNOCKED_DOWN
+end:
+  mov  ebx, 0x4113DA
+  jmp  ebx
  }
 }
 
@@ -640,13 +634,6 @@ void BugsInit() {
  HookCall(0x497D0F, &PipStatus_hook);
  dlogr(" Done", DL_INIT);
 
-// Исправление невозможности продажи ранее использованных "Счетчик Гейгера"/"Невидимка"
-// SafeWrite8(0x4780F2, 0xBA);
- SafeWrite8(0x478115, 0xBA);
- SafeWrite8(0x478138, 0xBA);
- MakeCall(0x474D22, &barter_attempt_transaction_hook1, true);
- HookCall(0x4798B1, &item_m_turn_off_hook);
-
  dlog("Applying withdrawal perk description crash fix. ", DL_INIT);
  HookCall(0x47A501, &perform_withdrawal_start_hook);
  dlogr(" Done", DL_INIT);
@@ -662,6 +649,10 @@ void BugsInit() {
  dlog("Applying wield_obj_critter fix.", DL_INIT);
  SafeWrite8(0x456912, 0x1E);
  HookCall(0x45697F, &op_wield_obj_critter_hook);
+ dlogr(" Done", DL_INIT);
+
+ dlog("Applying Dodgy Door Fix.", DL_INIT);
+ MakeCall(0x4113D3, &action_melee_hook, true);
  dlogr(" Done", DL_INIT);
 
 }

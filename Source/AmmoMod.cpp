@@ -603,7 +603,6 @@ static void __declspec(naked) display_stats_hook() {
  }
 }
 
-static const DWORD display_stats_hook1_End = 0x472569;
 static void __declspec(naked) display_stats_hook1() {
  __asm {
   push eax
@@ -624,76 +623,46 @@ static void __declspec(naked) display_stats_hook1() {
   push eax
   call sprintf_
   add  esp, 4*5
-  jmp  display_stats_hook1_End
+  mov  eax, 0x472569
+  jmp  eax
  }
 }
 
-static const DWORD UnarmedAttacksFixEnd=0x423A0D;
-static void __declspec(naked) UnarmedAttacksFix() {
+static void __declspec(naked) compute_attack_hook() {
  __asm {
-  cmp edx,0x10;    // Power Kick
-  je PowKickHPunch;
-  cmp edx,0x9;    // Hammer Punch
-  jnz HKickJabCheck;
-PowKickHPunch:
-  mov edx,0x64;
-  mov eax,0x1;
+  mov  ecx, 5                               // 5% chance of critical hit
+  cmp  edx, hit_power_kick
+  je   check
+  cmp  edx, hit_hammer_punch
+  je   check
+  add  ecx, 5                               // 10% chance of critical hit
+  cmp  edx, hit_hook_kick
+  je   check
+  cmp  edx, hit_jab
+  je   check
+  add  ecx, 5                               // 15% chance of critical hit
+  cmp  edx, hit_haymaker
+  je   check
+  add  ecx, 5                               // 20% chance of critical hit
+  cmp  edx, hit_palm_strike
+  je   check
+  add  ecx, 20                              // 40% chance of critical hit
+  cmp  edx, hit_piercing_strike
+  je   check
+  add  ecx, 10                              // 50% chance of critical hit
+  cmp  edx, hit_piercing_kick
+  jne  end
+check:
+  mov  edx, 100
+  xor  eax, eax
+  inc  eax
   call roll_random_
-  cmp eax,0x5;    // 5% chance of critical hit
-  jle CriticalHit;
-  jmp end;
-HKickJabCheck:
-  mov eax,dword ptr ds:[esi+0x4];  // get hit_mode
-  cmp eax,0x12;    // Hook Kick
-  je HKickJab;
-  cmp eax,0xb;    // Jab
-  jnz Haymaker;
-HKickJab:
-  mov edx,0x64;
-  mov eax,0x1;
-  call roll_random_
-  cmp eax,0xa;    // 10% chance of critical hit
-  jle CriticalHit;
-  jmp end;
-Haymaker:
-  cmp dword ptr ds:[esi+0x4],0xa;  // Haymaker
-  jnz PalmStrike;
-  mov edx,0x64;
-  mov eax,0x1;
-  call roll_random_
-  cmp eax,0xf;    // 15% chance of critical hit
-  jle CriticalHit;
-  jmp end;
-PalmStrike:
-  cmp dword ptr ds:[esi+0x4],0xc;  // Palm Strike
-  jnz PiercingStrike;
-  mov edx,0x64;
-  mov eax,0x1;
-  call roll_random_
-  cmp eax,0x14;    // 20% chance of critical hit
-  jle CriticalHit;
-  jmp end;
-PiercingStrike:
-  cmp dword ptr ds:[esi+0x4],0xd;  // Piercing Strike
-  jnz PiercingKick;
-  mov edx,0x64;
-  mov eax,0x1;
-  call roll_random_
-  cmp eax,0x28;    // 40% chance of critical hit
-  jle CriticalHit;
-  jmp end;
-PiercingKick:
-  cmp dword ptr ds:[esi+0x4],0x13; // Piercing Kick
-  jnz end;
-  mov edx,0x64;
-  mov eax,0x1;
-  call roll_random_
-  cmp eax,0x32;    // 50% chance of critical hit
-  jg end;
-CriticalHit:
-  mov ebx,0x3;    // Upgrade to critical hit
+  cmp  eax, ecx
+  jg   end
+  mov  ebx, ROLL_CRITICAL_SUCCESS           // Upgrade to critical hit
 end:
-  jmp UnarmedAttacksFixEnd;
+  mov  eax, 0x423A0D
+  jmp  eax
  }
 }
 
@@ -740,10 +709,10 @@ void AmmoModInit() {
  }
 
  dlog("Applying Special Unarmed Attacks fix.", DL_INIT);
- MakeCall(0x42394D, &UnarmedAttacksFix, true);
+ MakeCall(0x42394D, &compute_attack_hook, true);
  dlogr(" Done", DL_INIT);
 
-// Показывать изменения мин./макс. дамага у оружия если взят перк "Бонус урона на расст."
+// ╧юърч√трЄ№ шчьхэхэш  ьшэ./ьръё. фрьрур є юЁєцш  хёыш тч Є яхЁъ "┴юэєё єЁюэр эр ЁрёёЄ."
  HookCall(0x4722DD, &display_stats_hook2);
 
 }

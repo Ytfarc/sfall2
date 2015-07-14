@@ -631,7 +631,6 @@ end:
  }
 }
 
-static const DWORD combat_input_hook_End = 0x4228A8;
 static void _declspec(naked) combat_input_hook() {
  __asm {
   cmp  ebx, 0x20                            // Space (окончание хода)?
@@ -639,7 +638,8 @@ static void _declspec(naked) combat_input_hook() {
 space:
   pop  ebx
   mov  ebx, 0x20                            // Space (окончание хода)
-  jmp  combat_input_hook_End
+  mov  edx, 0x4228A8
+  jmp  edx
 skip:
   cmp  IsControllingNPC, 0
   je   end
@@ -650,20 +650,20 @@ end:
  }
 }
 
-static const DWORD action_skill_use_hook_End = 0x4124F9;
 static void __declspec(naked) action_skill_use_hook() {
  __asm {
   cmp  eax, SKILL_SNEAK
-  jne  end
+  jne  skip
   xor  eax, eax
   cmp  IsControllingNPC, eax
-  jne  skip
-  retn
-skip:
+  je   end
   call PrintWarning
-end:
+skip:
   pop  eax                                  // Уничтожаем адрес возврата
-  jmp  action_skill_use_hook_End
+  xor  eax, eax
+  dec  eax
+end:
+  retn
  }
 }
 

@@ -90,6 +90,7 @@ const DWORD display_target_inventory_ = 0x47036C;
 const DWORD do_options_ = 0x48FC48;
 const DWORD do_optionsFunc_ = 0x48FC50;
 const DWORD do_prefscreen_ = 0x490798;
+const DWORD DOSCmdLineDestroy_ = 0x4E3D3C;
 const DWORD DrawCard_ = 0x43AAEC;
 const DWORD DrawFolder_ = 0x43410C;
 const DWORD DrawInfoWin_ = 0x4365AC;
@@ -379,8 +380,7 @@ void DisplayConsoleMessage(const char* msg) {
 }
 
 static DWORD mesg_buf[4] = {0, 0, 0, 0};
-const char* _stdcall GetMessageStr(DWORD fileAddr, DWORD messageId)
-{
+const char* _stdcall GetMessageStr(DWORD fileAddr, DWORD messageId) {
  DWORD buf = (DWORD)mesg_buf;
  const char* result;
  __asm {

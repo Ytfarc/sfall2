@@ -89,6 +89,7 @@ extern const DWORD display_target_inventory_;
 extern const DWORD do_options_;
 extern const DWORD do_optionsFunc_;
 extern const DWORD do_prefscreen_;
+extern const DWORD DOSCmdLineDestroy_;
 extern const DWORD DrawCard_;
 extern const DWORD DrawFolder_;
 extern const DWORD DrawInfoWin_;

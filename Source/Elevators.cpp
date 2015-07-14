@@ -75,33 +75,33 @@ static void __declspec(naked) elevator_select_hook2() {
  }
 }
 
-static const DWORD elevator_select_hook3_End = 0x43F064;
 static void __declspec(naked) elevator_select_hook3() {
  __asm {
   lea  esi, Menus
   mov  eax, [esi+edi*4]
   mov  eax, [_btncnt+eax*4]
-  jmp  elevator_select_hook3_End
+  mov  esi, 0x43F064
+  jmp  esi
  }
 }
 
-static const DWORD elevator_select_hook4_End = 0x43F18B;
 static void __declspec(naked) elevator_select_hook4() {
  __asm {
   lea  edx, Menus
   mov  eax, [edx+edi*4]
   mov  eax, [_btncnt+eax*4]
-  jmp  elevator_select_hook4_End
+  mov  edx, 0x43F18B
+  jmp  edx
  }
 }
 
-static const DWORD elevator_select_hook5_End = 0x43F1EB;
 static void __declspec(naked) elevator_select_hook5() {
  __asm {
   lea  eax, Menus
   mov  eax, [eax+edi*4]
   mov  eax, [_btncnt+eax*4]
-  jmp  elevator_select_hook5_End
+  mov  ebx, 0x43F1EB
+  jmp  ebx
  }
 }
 

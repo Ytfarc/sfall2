@@ -694,26 +694,12 @@ bjmp:
  }
 }
 
-static void __declspec(naked) DodgyDoorsFix() {//checks if an attacked object is a critter before attempting dodge animation
- __asm {
-  mov eax, dword ptr ss:[EBP+0x20] //(original code) objStruct ptr
-  mov ebx, dword ptr ss:[EAX+0x20] //objStruct->FID
-  and ebx, 0x0F000000
-  sar ebx, 0x18
-  cmp ebx, 1        //check if object FID type flag is set to critter
-   jne EndFunc      //if object not a critter leave jump condition flags set to skip dodge animation
-  test byte ptr ds:[eax+0x44], 0x03//(original code) check some flag?
-   EndFunc:
-  ret
- }
-}
-
 static const DWORD ScannerHookRet=0x41BC1D;
 static const DWORD ScannerHookFail=0x41BC65;
 static void __declspec(naked) ScannerAutomapHook() {
  __asm {
   mov eax, ds:[_obj_dude];
-  mov edx, 59;
+  mov edx, PID_MOTION_SENSOR
   call inven_pid_is_carried_ptr_
   test eax, eax;
   jz fail;
@@ -781,7 +767,6 @@ static void __declspec(naked) objCanSeeObj_ShootThru_Fix() {//(EAX *objStruct, E
 
 static byte XltTable[94];
 static byte XltKey = 4;                     // 4 = Scroll Lock, 2 = Caps Lock, 1 = Num Lock
-static const DWORD get_input_str_hook_End = 0x433F43;
 static void __declspec(naked) get_input_str_hook() {
  __asm {
   push ecx
@@ -793,11 +778,11 @@ static void __declspec(naked) get_input_str_hook() {
   mov  al, [ecx+eax-0x20]
 end:
   mov  byte ptr [esp+esi+4], al
-  jmp  get_input_str_hook_End
+  mov  eax, 0x433F43
+  jmp  eax
  }
 }
 
-static const DWORD get_input_str2_hook_End = 0x47F369;
 static void __declspec(naked) get_input_str2_hook() {
  __asm {
   push edx
@@ -809,11 +794,11 @@ static void __declspec(naked) get_input_str2_hook() {
   mov  al, [edx+eax-0x20]
 end:
   mov  byte ptr [esp+edi+4], al
-  jmp  get_input_str2_hook_End
+  mov  eax, 0x47F369
+  jmp  eax
  }
 }
 
-static const DWORD kb_next_ascii_English_US_hook_End = 0x4CC35D;
 static void __declspec(naked) kb_next_ascii_English_US_hook() {
  __asm {
   mov  dh, [eax]
@@ -831,7 +816,8 @@ static void __declspec(naked) kb_next_ascii_English_US_hook() {
   je   end
   cmp  dh, 0x30                             // DIK_B
 end:
-  jmp  kb_next_ascii_English_US_hook_End
+  mov  eax, 0x4CC35D
+  jmp  eax
  }
 }
 
@@ -929,7 +915,6 @@ end:
  }
 }
 
-static const DWORD check_move_hook_End = 0x4180A7;
 static void __declspec(naked) check_move_hook() {
  __asm {
   call FirstTurnAndNoEnemy
@@ -943,11 +928,11 @@ skip:
   dec  esi
 end:
   pop  eax                                  // Уничтожаем адрес возврата
-  jmp  check_move_hook_End
+  mov  eax, 0x4180A7
+  jmp  eax
  }
 }
 
-static const DWORD gmouse_bk_process_hook_End = 0x44B8C5;
 static void __declspec(naked) gmouse_bk_process_hook() {
  __asm {
   xchg edi, eax
@@ -960,7 +945,8 @@ static void __declspec(naked) gmouse_bk_process_hook() {
   retn
 end:
   pop  eax                                  // Уничтожаем адрес возврата
-  jmp  gmouse_bk_process_hook_End
+  mov  eax, 0x44B8C5
+  jmp  eax
  }
 }
 
@@ -1005,7 +991,6 @@ end:
  }
 }
 
-static const DWORD wmTownMapFunc_hook_End = 0x4C4976;
 static void __declspec(naked) wmTownMapFunc_hook() {
  __asm {
   cmp  edx, 0x31
@@ -1026,7 +1011,8 @@ static void __declspec(naked) wmTownMapFunc_hook() {
   retn
 end:
   pop  eax                                  // Уничтожаем адрес возврата
-  jmp  wmTownMapFunc_hook_End
+  mov  eax, 0x4C4976
+  jmp  eax
  }
 }
 
@@ -1055,8 +1041,6 @@ static void _stdcall createComment(char* bufstr) {
 }
 
 static DWORD AutoQuickSave = 0;
-static const DWORD SaveGame_hook_Next = 0x47B929;
-static const DWORD SaveGame_hook_End = 0x47B9A6;
 static void __declspec(naked) SaveGame_hook() {
  __asm {
   pushad
@@ -1085,7 +1069,8 @@ nextSlot:
   ja   firstSlot                            // Да
   mov  dword ptr ds:[_slot_cursor], ecx
   popad
-  jmp  SaveGame_hook_Next
+  mov  eax, 0x47B929
+  jmp  eax
 firstSlot:
   xor  ecx, ecx
 end:
@@ -1101,14 +1086,13 @@ end:
   xor  ebx, ebx
   inc  ebx
   mov  dword ptr ds:[_quick_done], ebx
-  dec  ebx
-  jmp  SaveGame_hook_End
+  mov  ebx, 0x47B9A4
+  jmp  ebx
  }
 }
 
 static char LvlMsg[6];
 static char extraFmt[16]="%d/%d  (%s: %d)";
-static const DWORD partyMemberCurLevel_End = 0x44909D;
 static void __declspec(naked) partyMemberCurLevel() {
  __asm {
   mov  ebx, eax                             // _dialog_target
@@ -1146,12 +1130,12 @@ skip:
   mov  al, byte ptr ds:[_RedColor]
 end:
   and  eax, 0xFF
-  jmp  partyMemberCurLevel_End
+  mov  ebx, 0x44909D
+  jmp  ebx
  }
 }
 
 static char AcMsg[6];
-static const DWORD partyMemberAC_End = 0x44923D;
 static void __declspec(naked) partyMemberAC() {
  __asm {
   mov  ecx, eax                             // _dialog_target
@@ -1172,7 +1156,8 @@ static void __declspec(naked) partyMemberAC() {
   call sprintf_
   add  esp, 6*4
   xor  eax, eax
-  jmp  partyMemberAC_End
+  mov  edx, 0x44923D
+  jmp  edx
  }
 }
 
@@ -1311,6 +1296,28 @@ noBonus:
   xor  eax, eax                             // Не учитываем эффект от наркотиков/радиации/etc
 end:
   retn
+ }
+}
+
+static void __declspec(naked) barter_attempt_transaction_hook() {
+ __asm {
+  cmp  dword ptr [eax+0x64], PID_ACTIVE_GEIGER_COUNTER
+  je   found
+  cmp  dword ptr [eax+0x64], PID_ACTIVE_STEALTH_BOY
+  je   found
+  mov  eax, 0x474D34
+  jmp  eax
+found:
+  call item_m_turn_off_
+  mov  eax, 0x474D17
+  jmp  eax                                  // А есть ли ещё включённые предметы среди продаваемых?
+ }
+}
+
+static void __declspec(naked) item_m_turn_off_hook() {
+ __asm {
+  and  byte ptr [eax+0x25], 0xDF            // Сбросим флаг использованного предмета
+  jmp  queue_remove_this_
  }
 }
 
@@ -2019,11 +2026,6 @@ static void DllMain2() {
   break;
  }
 
- dlog("Applying Dodgy Door Fix.", DL_INIT);
- SafeWrite16(0x4113D3, 0x9090);
- MakeCall(0x4113D5, &DodgyDoorsFix, false);
- dlogr(" Done", DL_INIT);
-
  if(GetPrivateProfileIntA("Misc", "BoostScriptDialogLimit", 0, ini)) {
   const int scriptDialogCount=10000;
   dlog("Applying script dialog limit patch.", DL_INIT);
@@ -2203,6 +2205,14 @@ static void DllMain2() {
  BugsInit();
  dlogr(" Done", DL_INIT);
 
+// Исправление невозможности продажи ранее использованных "Счетчик Гейгера"/"Невидимка"
+ if (GetPrivateProfileIntA("Misc", "CanSellUsedGeiger", 0, ini)) {
+  SafeWrite8(0x478115, 0xBA);
+  SafeWrite8(0x478138, 0xBA);
+  MakeCall(0x474D22, &barter_attempt_transaction_hook, true);
+  HookCall(0x4798B1, &item_m_turn_off_hook);
+ }
+
  dlogr("Leave DllMain2", DL_MAIN);
 }
 
@@ -2213,13 +2223,12 @@ static void _stdcall OnExit() {
  //SoundExit();
 }
 
-static const DWORD OnExitRet=0x4E3D3C;
 static void __declspec(naked) OnExitFunc() {
  __asm {
-  pushad;
-  call OnExit;
-  popad;
-  jmp OnExitRet;
+  pushad
+  call OnExit
+  popad
+  jmp  DOSCmdLineDestroy_
  }
 }
 

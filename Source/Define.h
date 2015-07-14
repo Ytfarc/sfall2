@@ -424,3 +424,8 @@
 #define hit_hip_kick               (17)
 #define hit_hook_kick              (18)
 #define hit_piercing_kick          (19)
+
+#define ROLL_CRITICAL_FAILURE (0)
+#define ROLL_FAILURE          (1)
+#define ROLL_SUCCESS          (2)
+#define ROLL_CRITICAL_SUCCESS (3)

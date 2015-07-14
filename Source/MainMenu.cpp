@@ -25,13 +25,13 @@
 static DWORD MainMenuYOffset;
 static DWORD MainMenuTextOffset;
 
-static const DWORD MainMenuButtonYHookRet=0x48184A;
 static void __declspec(naked) MainMenuButtonYHook() {
  __asm {
   xor edi, edi;
   xor esi, esi;
   mov ebp, MainMenuYOffset;
-  jmp MainMenuButtonYHookRet;
+  mov  eax, 0x48184A
+  jmp  eax
  }
 }
 
@@ -42,7 +42,6 @@ static void __declspec(naked) MainMenuTextYHook() {
  }
 }
 
-static const DWORD MainMenuTextRet=0x4817B0;
 static const char* VerString1 = "SFALL2 " VERSION_STRING;
 static DWORD OverrideColour;
 static void __declspec(naked) FontColour() {
@@ -57,6 +56,7 @@ skip:
   retn;
  }
 }
+
 static void __declspec(naked) MainMenuTextHook() {
  __asm {
   mov edi, [esp];
@@ -78,7 +78,8 @@ static void __declspec(naked) MainMenuTextHook() {
   push edi; //ypos
   mov eax, dword ptr ds:[_main_window];//winptr
   call win_print_
-  jmp MainMenuTextRet;
+  mov  eax, 0x4817B0
+  jmp  eax
  }
 }
 

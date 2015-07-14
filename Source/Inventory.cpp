@@ -538,7 +538,6 @@ skip:
  }
 }
 
-static const DWORD ReloadActiveHand_play_sfx_ = 0x460B85;
 static void __declspec(naked) ReloadActiveHand() {
  __asm {
 // esi=-1 если не перезарядили неактивную руку или смещение неактивной руки
@@ -580,7 +579,8 @@ useActiveHand:
   mov  ebx, 2
   xor  ecx, ecx
   mov  edx, ds:[_itemButtonItems][eax]
-  jmp  ReloadActiveHand_play_sfx_
+  mov  eax, 0x460B85
+  jmp  eax
 end:
   pop  edx
   pop  ecx
@@ -820,8 +820,6 @@ end:
  }
 }
 
-static const DWORD ControlWeapon_hook_End = 0x4494FA;
-static const DWORD ControlWeapon_hook_End1 = 0x44952E;
 static void __declspec(naked) ControlWeapon_hook() {
  __asm {
   mov  edx, ds:[_dialog_target]
@@ -830,11 +828,13 @@ static void __declspec(naked) ControlWeapon_hook() {
   test eax, eax
   mov  eax, edx                             // _dialog_target
   jnz  haveWeapon
-  jmp  ControlWeapon_hook_End
+  mov  edx, 0x4494FA
+  jmp  edx
 haveWeapon:
   mov  edx, 1                               // правая рука
   call inven_unwield_
-  jmp  ControlWeapon_hook_End1
+  mov  edx, 0x44952E
+  jmp  edx
  }
 }
 
@@ -959,7 +959,6 @@ noWeight:
  }
 }
 
-static const DWORD display_inventory_hook_End = 0x4700C5;
 static void __declspec(naked) display_inventory_hook() {
  __asm {
   call fontHeight
@@ -976,11 +975,11 @@ static void __declspec(naked) display_inventory_hook() {
   xor  esi, esi
   call printFreeMaxWeight
   popad
-  jmp  display_inventory_hook_End
+  mov  ecx, 0x4700C5
+  jmp  ecx
  }
 }
 
-static const DWORD display_target_inventory_hook_End = 0x470468;
 static void __declspec(naked) display_target_inventory_hook() {
  __asm {
   call fontHeight
@@ -997,7 +996,8 @@ static void __declspec(naked) display_target_inventory_hook() {
   mov  esi, WeightOnBody                    // Учитываем вес одетой на цели брони и оружия
   call printFreeMaxWeight
   popad
-  jmp  display_target_inventory_hook_End
+  mov  eax, 0x470468
+  jmp  eax
  }
 }
 
@@ -1012,7 +1012,6 @@ static void __declspec(naked) display_table_inventories_hook() {
  }
 }
 
-static const DWORD display_table_inventories_hook1_End = 0x47548C;
 static void __declspec(naked) display_table_inventories_hook1() {
  __asm {
   add  dword ptr [esp+8], 20
@@ -1028,7 +1027,8 @@ static void __declspec(naked) display_table_inventories_hook1() {
   mov  edi, 10*480+169+32                   // Xpos=169, Ypos=10, max text width/2=32
   call printFreeMaxWeight
   popad
-  jmp  display_table_inventories_hook1_End
+  mov  eax, 0x47548C
+  jmp  eax
  }
 }
 
@@ -1040,7 +1040,6 @@ static void __declspec(naked) display_table_inventories_hook2() {
  }
 }
 
-static const DWORD display_table_inventories_hook3_End = 0x475612;
 static void __declspec(naked) display_table_inventories_hook3() {
  __asm {
   add  dword ptr [esp+8], 20
@@ -1064,7 +1063,8 @@ static void __declspec(naked) display_table_inventories_hook3() {
 #ifndef TRACE
 end:
 #endif
-  jmp  display_table_inventories_hook3_End
+  mov  edx, 0x475612
+  jmp  edx
  }
 }
 
@@ -1123,13 +1123,13 @@ end:
  }
 }
 
-static const DWORD inven_action_cursor_hook_End = 0x4736CB;
 static void __declspec(naked) inven_action_cursor_hook() {
  __asm {
   mov  edx, [esp+0x1C]
   call SetDefaultAmmo
   cmp  dword ptr [esp+0x18], 0
-  jmp  inven_action_cursor_hook_End
+  mov  eax, 0x4736CB
+  jmp  eax
  }
 }
 
@@ -1140,8 +1140,6 @@ static void __declspec(naked) item_add_mult_hook() {
  }
 }
 
-static const DWORD inven_pickup_hook2_End = 0x47146A;
-static const DWORD inven_pickup_hook2_End1 = 0x471481;
 static void __declspec(naked) inven_pickup_hook2() {
  __asm {
   mov  eax, 246                             // x_start
@@ -1158,7 +1156,8 @@ static void __declspec(naked) inven_pickup_hook2() {
   mov  edx, ds:[_curr_stack]
   test edx, edx
   jz   useOnPlayer
-  jmp  inven_pickup_hook2_End
+  mov  ecx, 0x47146A
+  jmp  ecx
 useOnPlayer:
   cmp  edi, 1006                            // Руки?
   jge  end                                  // Да
@@ -1192,7 +1191,8 @@ notUsed:
   mov  eax, 1
   call intface_update_hit_points_
 end:
-  jmp  inven_pickup_hook2_End1
+  mov  eax, 0x471481
+  jmp  eax
  }
 }
 
@@ -1265,20 +1265,19 @@ noButton:
 }
 
 static char OverloadedDrop[48];
-static const DWORD drop_all_End = 0x4740DB;
-static const DWORD drop_all_End1 = 0x4741B2;
-static const DWORD drop_all_End2 = 0x474435;
 static void __declspec(naked) drop_all_() {
  __asm {
   cmp  esi, 'a'
   jne  skip
-  jmp  drop_all_End
+  mov  ebx, 0x4740DB
+  jmp  ebx
 skip:
   cmp  esi, 'D'
   je   dropKey
   cmp  esi, 'd'
   je   dropKey
-  jmp  drop_all_End1
+  mov  ebx, 0x4741B2
+  jmp  ebx
 dropKey:
   pushad
   cmp  dword ptr ds:[_gIsSteal], 0
@@ -1358,7 +1357,8 @@ cantDrop:
   call dialog_out_
 end:
   popad
-  jmp  drop_all_End2
+  mov  ebx, 0x474435
+  jmp  ebx
  }
 }
 
