@@ -345,7 +345,7 @@ static void __declspec(naked) PlayerHasPerkHook() {
   mov ecx, eax;
   xor ebx, ebx;
 oloop:
-  mov eax, ds:[_obj_dude];
+  mov eax, ds:[_obj_dude]
   mov edx, ebx;
   call perk_level_
   test eax, eax;
@@ -609,7 +609,7 @@ lower:
 void _stdcall ApplyHeaveHoFix() {
  SafeWrite8(0x478AC4, 0xe9);
  HookCall(0x478AC4, HeaveHoHook);
- Perks[0x23].Str=0;
+ Perks[PERK_heave_ho].Str=0;
 }
 
 static DWORD Educated, Lifegiver, Tag_, Mutate_;
@@ -722,7 +722,7 @@ static void PerkSetup() {
 
  memset(Name, 0, sizeof(Name));
  memset(Desc, 0, sizeof(Desc));
- memcpy(Perks, (void*)0x519DCC, sizeof(PerkStruct)*PERK_count);
+ memcpy(Perks, (void*)_perk_data, sizeof(PerkStruct)*PERK_count);
 
  SafeWrite32(0x00496669, (DWORD)Perks);
  SafeWrite32(0x00496837, (DWORD)Perks);
@@ -820,7 +820,7 @@ static int _stdcall stat_get_base_direct(DWORD statID) {
  DWORD result;
  __asm {
   mov edx, statID;
-  mov eax, dword ptr ds:[_obj_dude];
+  mov eax, dword ptr ds:[_obj_dude]
   call stat_get_base_direct_
   mov result, eax;
  }
@@ -935,7 +935,7 @@ static void TraitSetup() {
 
  memset(tName, 0, sizeof(tName));
  memset(tDesc, 0, sizeof(tDesc));
- memcpy(Traits, (void*)0x51DB84, sizeof(TraitStruct)*TRAIT_count);
+ memcpy(Traits, (void*)_trait_data, sizeof(TraitStruct)*TRAIT_count);
  memset(TraitStatBonuses, 0, sizeof(TraitStatBonuses));
  memset(TraitSkillBonuses, 0, sizeof(TraitSkillBonuses));
 

@@ -19,7 +19,6 @@
 #include "main.h"
 
 #include <stdio.h>
-#include "Define.h"
 #include "Elevators.h"
 #include "FalloutEngine.h"
 

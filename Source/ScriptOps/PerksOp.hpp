@@ -20,7 +20,6 @@
 
 #include "main.h"
 
-#include "Define.h"
 #include "Perks.h"
 #include "ScriptExtender.h"
 

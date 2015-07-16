@@ -18,7 +18,7 @@
 
 #include "main.h"
 
-#include "Define.h"
+#include "FalloutEngine.h"
 #include "version.h"
 
 static int usingExtraKillTypes;

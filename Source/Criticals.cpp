@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "Criticals.h"
-#include "Define.h"
+#include "FalloutEngine.h"
 #include "Logging.h"
 
 static const DWORD CritTableCount=2*19+1;              //Number of species in new critical table

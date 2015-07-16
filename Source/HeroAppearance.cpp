@@ -1282,7 +1282,7 @@ static void __declspec(naked) AddHeroCritNames() {
 
   __asm {
      call FixCritList//insert names for hero critters
-     MOV EAX,DWORD PTR DS:[0x510774]
+     MOV EAX,DWORD PTR DS:[_art + 0x3C]
      ret
   }
 
@@ -2243,7 +2243,7 @@ static void __declspec(naked) SexScrnEnd(void) {
   je EndFunc
 
      xor ebx, ebx
-//     cmp byte ptr ds:[0x596C7B],1//check if wearing vault suit
+//     cmp byte ptr ds:[_gmovie_played_list + 0x3],1//check if wearing vault suit
 //     jne NoVaultSuit
 //     mov ebx, 0x8
 //NoVaultSuit:
@@ -2362,7 +2362,7 @@ static void __declspec(naked) AddCharScrnButtons(void) {
 static void __declspec(naked) FixCharScrnBack(void) {
 //00432B92  |. A3 A4075700    MOV DWORD PTR DS:[5707A4],EAX
   __asm {
-  MOV DWORD PTR DS:[0x5707A4],EAX//surface ptr for char scrn back
+  MOV DWORD PTR DS:[_bckgnd],EAX//surface ptr for char scrn back
   test eax, eax//check if frm loaded ok
   je EndFunc
 
@@ -2378,9 +2378,9 @@ static void __declspec(naked) FixCharScrnBack(void) {
        CharScrnBackSurface = new BYTE [640*480];
 
        BYTE *OldCharScrnBackSurface;
-       OldCharScrnBackSurface = *(BYTE**)0x5707A4;//char screen background frm surface
+       OldCharScrnBackSurface = *(BYTE**)_bckgnd;//char screen background frm surface
 
-       //CharScrnBackSurface=*(BYTE**)0x5707A4;//char screen background frm surface
+       //CharScrnBackSurface=*(BYTE**)_bckgnd;//char screen background frm surface
 
        //copy old charscrn surface to new
        sub_draw(640, 480, 640, 480, 0, 0, OldCharScrnBackSurface, 640, 480, 0, 0, CharScrnBackSurface, 0);
@@ -2469,7 +2469,7 @@ static void __declspec(naked) FixCharScrnBack(void) {
      pop      ebp
      mov eax, CharScrnBackSurface
   EndFunc:
-  MOV DWORD PTR DS:[0x5707A4],EAX//surface ptr for char scrn back
+  MOV DWORD PTR DS:[_bckgnd],EAX//surface ptr for char scrn back
      retn
  }
 
@@ -2488,7 +2488,7 @@ static void __declspec(naked) FixPcSFX() {
   ExitFunc:
   //restore original code
   mov eax, ebx
-  cmp dword ptr ds:[0x518E30], 0
+  cmp dword ptr ds:[_gsound_initialized], 0
      ret
   }
 

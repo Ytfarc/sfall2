@@ -49,7 +49,7 @@ static void __declspec(naked) GetCurrentStatHook2() {
  __asm {
   shl esi, 2;
   mov eax, cCritter;
-  cmp eax, dword ptr ds:[_obj_dude];
+  cmp eax, dword ptr ds:[_obj_dude]
   je pc;
   cmp ecx, StatMinimumsNPC[esi];
   jg npc1;
@@ -83,7 +83,7 @@ end:
 
 static void __declspec(naked) SetCurrentStatHook() {
  __asm {
-  cmp esi, dword ptr ds:[_obj_dude];
+  cmp esi, dword ptr ds:[_obj_dude]
   je pc;
   cmp ebx, StatMinimumsNPC[ecx*4];
   jl fail;

@@ -1,7 +1,6 @@
 #include "main.h"
 
 //#include <vector>
-#include "Define.h"
 #include "FalloutEngine.h"
 
 static char attackerSnd[8];

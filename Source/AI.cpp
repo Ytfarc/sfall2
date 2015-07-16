@@ -20,7 +20,6 @@
 
 #include <hash_map>
 #include "AI.h"
-#include "Define.h"
 #include "FalloutEngine.h"
 #include "SafeWrite.h"
 

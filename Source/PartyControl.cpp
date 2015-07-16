@@ -61,7 +61,7 @@ static void __declspec(naked) isRealParty() {
   push ebx
   mov  ecx, dword ptr ds:[_partyMemberMaxCount]
   dec  ecx
-  jecxz skip                                // Только игрок
+  jecxz skip                                // ╥юы№ъю шуЁюъ
   mov  edx, dword ptr ds:[_partyMemberPidList]
   mov  ebx, dword ptr [eax+0x64]            // pid
 loopPid:
@@ -88,8 +88,8 @@ static void __declspec(naked) CanUseWeapon() {
   push ebx
   mov  edi, eax
   call item_get_type_
-  cmp  eax, item_type_weapon                // Это item_type_weapon?
-  jne  canUse                               // Нет
+  cmp  eax, item_type_weapon
+  jne  canUse                               // ═хЄ
   mov  eax, edi                             // eax=item
   mov  edx, hit_right_weapon_primary
   call item_w_anim_code_
@@ -224,8 +224,8 @@ skipPerks:
 loopDrug:
   mov  eax, dword ptr [edx]                 // eax = drug_pid
   call item_d_check_addict_
-  test eax, eax                             // Есть зависимость?
-  jz   noAddict                             // Нет
+  test eax, eax                             // ┼ёЄ№ чртшёшьюёЄ№?
+  jz   noAddict                             // ═хЄ
   xor  eax, eax
   inc  eax
 noAddict:
@@ -233,8 +233,8 @@ noAddict:
   add  edx, 12
   add  edi, 4
   loop loopDrug
-  test eax, eax                             // Есть зависимость к алкоголю (пиво)?
-  jnz  skipBooze                            // Да
+  test eax, eax                             // ┼ёЄ№ чртшёшьюёЄ№ ъ рыъюуюы■ (яштю)?
+  jnz  skipBooze                            // ─р
   mov  eax, dword ptr [edx]                 // PID_BOOZE
   call item_d_check_addict_
   mov  dword ptr [edi-4], eax               // GVAR_ALCOHOL_ADDICT
@@ -275,43 +275,43 @@ skip:
   mov  edx, dword ptr [ebx+0x20]            // fid
   and  edx, 0x0F000
   sar  edx, 0xC                             // edx = current weapon anim code as seen in hands
-  xor  ecx, ecx                             // Левая рука
+  xor  ecx, ecx                             // ╦хтр  Ёєър
   mov  eax, ebx
   call inven_right_hand_
-  test eax, eax                             // Есть вещь в правой руке?
-  jz   setActiveHand                        // Нет
+  test eax, eax                             // ┼ёЄ№ тх∙№ т яЁртющ Ёєъх?
+  jz   setActiveHand                        // ═хЄ
   push eax
   call item_get_type_
-  cmp  eax, item_type_weapon                // Это item_type_weapon?
+  cmp  eax, item_type_weapon
   pop  eax
-  jne  setActiveHand                        // Нет
+  jne  setActiveHand                        // ═хЄ
   call item_w_anim_code_
-  cmp  eax, edx                             // Анимация одинаковая?
-  jne  setActiveHand                        // Нет
-  inc  ecx                                  // Правая рука
+  cmp  eax, edx                             // └эшьрЎш  юфшэръютр ?
+  jne  setActiveHand                        // ═хЄ
+  inc  ecx                                  // ╧Ёртр  Ёєър
 setActiveHand:
   mov  dword ptr ds:[_itemCurrentItem], ecx
   mov  eax, ebx
   call inven_right_hand_
-  test eax, eax                             // Есть вещь в правой руке?
-  jz   noRightHand                          // Нет
+  test eax, eax                             // ┼ёЄ№ тх∙№ т яЁртющ Ёєъх?
+  jz   noRightHand                          // ═хЄ
   push eax
   call CanUseWeapon
   test eax, eax
   pop  eax
   jnz  noRightHand
-  and  byte ptr [eax+0x27], 0xFD            // Сбрасываем флаг вещи в правой руке
+  and  byte ptr [eax+0x27], 0xFD            // ╤сЁрё√трхь Їыру тх∙ш т яЁртющ Ёєъх
 noRightHand:
   xchg ebx, eax
   call inven_left_hand_
-  test eax, eax                             // Есть вещь в левой руке?
-  jz   noLeftHand                           // Нет
+  test eax, eax                             // ┼ёЄ№ тх∙№ т ыхтющ Ёєъх?
+  jz   noLeftHand                           // ═хЄ
   push eax
   call CanUseWeapon
   test eax, eax
   pop  eax
   jnz  noLeftHand
-  and  byte ptr [eax+0x27], 0xFE            // Сбрасываем флаг вещи в левой руке
+  and  byte ptr [eax+0x27], 0xFE            // ╤сЁрё√трхь Їыру тх∙ш т ыхтющ Ёєъх
 noLeftHand:
   pop  ebx
   pop  ecx
@@ -407,7 +407,7 @@ skip:
  }
 }
 
-sMessage cantdo = {675, 0, 0, 0};       // 'Я не могу этого сделать.'
+sMessage cantdo = {675, 0, 0, 0};       // '▀ эх ьюує ¤Єюую ёфхырЄ№.'
 static void __declspec(naked) PrintWarning() {
  __asm {
   push edx
@@ -456,7 +456,7 @@ static void _declspec(naked) CombatWrapper_v2() {
   jne  skip
   xor  edx, edx
   cmp  dword ptr ds:[_combatNumTurns], edx
-  je   skipControl                          // Это первый ход
+  je   skipControl                          // ▌Єю яхЁт√щ їюф
   mov  eax, dword ptr [eax+0x4]             // tile_num
   add  edx, 2
   call tile_scroll_to_
@@ -495,10 +495,10 @@ npcControl:
   call RestoreDudeState
   call intface_redraw_
 skipRestore:
-  test ecx, ecx                             // Нормальное завершение хода?
+  test ecx, ecx                             // ═юЁьры№эюх чртхЁ°хэшх їюфр?
   popad
-  jz   end                                  // Да
-// выход/загрузка/побег/смерть
+  jz   end                                  // ─р
+// т√їюф/чруЁєчър/яюсху/ёьхЁЄ№
   test byte ptr [eax+0x44], 0x80            // DAM_DEAD
   jnz  end
   xor  eax, eax
@@ -554,8 +554,8 @@ end:
 static void _declspec(naked) inven_pickup_hook() {
  __asm {
   call item_get_type_
-  test eax, eax                             // Это item_type_armor?
-  jnz  end                                  // Нет
+  test eax, eax                             // ▌Єю item_type_armor?
+  jnz  end                                  // ═хЄ
   cmp  IsControllingNPC, eax
   je   end
   call PrintWarning
@@ -585,7 +585,7 @@ nextArmor:
   call inven_worn_
   test eax, eax
   jz   noArmor
-  and  byte ptr [eax+0x27], 0xFB            // Сбрасываем флаг одетой брони
+  and  byte ptr [eax+0x27], 0xFB            // ╤сЁрё√трхь Їыру юфхЄющ сЁюэш
   jmp  nextArmor
 noArmor:
   popad
@@ -602,7 +602,7 @@ static void _declspec(naked) handle_inventory_hook1() {
   mov  edx, HiddenArmor
   test edx, edx
   jz   skip
-  or   byte ptr [edx+0x27], 4               // Устанавливаем флаг одетой брони
+  or   byte ptr [edx+0x27], 4               // ╙ёЄрэртыштрхь Їыру юфхЄющ сЁюэш
   mov  ebx, 1
   call item_add_force_
   xor  edx, edx
@@ -617,13 +617,13 @@ end:
 static void _declspec(naked) display_stats_hook() {
  __asm {
   call item_total_weight_
-  xchg edx, eax                             // edx = вес вещей
+  xchg edx, eax                             // edx = тхё тх∙хщ
   xor  eax, eax
-  cmp  IsControllingNPC, eax                // Контролируемый персонаж?
-  je   end                                  // Нет
+  cmp  IsControllingNPC, eax                // ╩юэЄЁюышЁєхь√щ яхЁёюэрц?
+  je   end                                  // ═хЄ
   mov  eax, HiddenArmor
-  test eax, eax                             // У него есть броня?
-  jz   end                                  // Нет
+  test eax, eax                             // ╙ эхую хёЄ№ сЁюэ ?
+  jz   end                                  // ═хЄ
   call item_weight_
 end:
   add  eax, edx
@@ -633,18 +633,18 @@ end:
 
 static void _declspec(naked) combat_input_hook() {
  __asm {
-  cmp  ebx, 0x20                            // Space (окончание хода)?
+  cmp  ebx, 0x20                            // Space (юъюэўрэшх їюфр)?
   jne  skip
 space:
   pop  ebx
-  mov  ebx, 0x20                            // Space (окончание хода)
+  mov  ebx, 0x20                            // Space (юъюэўрэшх їюфр)
   mov  edx, 0x4228A8
   jmp  edx
 skip:
   cmp  IsControllingNPC, 0
   je   end
-  cmp  ebx, 0xD                             // Enter (завершение боя)?
-  je   space                                // Да
+  cmp  ebx, 0xD                             // Enter (чртхЁ°хэшх сю )?
+  je   space                                // ─р
 end:  
   retn
  }
@@ -659,7 +659,7 @@ static void __declspec(naked) action_skill_use_hook() {
   je   end
   call PrintWarning
 skip:
-  pop  eax                                  // Уничтожаем адрес возврата
+  pop  eax                                  // ╙эшўЄюцрхь рфЁхё тючтЁрЄр
   xor  eax, eax
   dec  eax
 end:
@@ -706,7 +706,7 @@ void PartyControlInit() {
   HookCall(0x47139C, &inven_pickup_hook);
   HookCall(0x46E8BA, &handle_inventory_hook);
   HookCall(0x46EC0A, &handle_inventory_hook1);
-  SafeWrite32(0x471E48, 152);               // Ширина текста 152, а не 80 
+  SafeWrite32(0x471E48, 152);               // ╪шЁшэр ЄхъёЄр 152, р эх 80 
   HookCall(0x4725F0, &display_stats_hook);
   MakeCall(0x422879, &combat_input_hook, false);
   MakeCall(0x4124E0, &action_skill_use_hook, false);

@@ -274,7 +274,7 @@ end:
 static void __declspec(naked) gdProcessUpdate_hook() {
  __asm {
   add  eax, esi
-  cmp  eax, dword ptr ds:[0x58ECCC]         // _optionRect.offy
+  cmp  eax, dword ptr ds:[_optionRect + 12] // _optionRect.offy
   jge  skip
   add  eax, 2
   mov  esi, 0x44702D

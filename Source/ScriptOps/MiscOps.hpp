@@ -164,7 +164,7 @@ static void __declspec(naked) GetYear() {
   mov eax, AddUnarmedStatToGetYear;
   test eax, eax;
   jz end;
-  add edx, ds:[0x51C3BC];
+  add edx, ds:[_pc_proto + 0x4C]
 end:
   mov eax, edi;
   call interpretPushLong_
@@ -247,7 +247,7 @@ static void __declspec(naked) SetPipBoyAvailable() {
   jl end;
   cmp eax, 1;
   jg end;
-  mov byte ptr ds:[0x00596C7B], al;
+  mov byte ptr ds:[_gmovie_played_list + 0x3], al;
 end:
   pop edx;
   pop ecx;
@@ -1498,7 +1498,7 @@ static void __declspec(naked) mark_movie_played() {
   jl end;
   cmp eax, 0x11;
   jge end;
-  mov byte ptr ds:[eax+_gmovie_played_list], 1;
+  mov byte ptr ds:[eax + _gmovie_played_list], 1;
 end:
   pop edx;
   pop ecx;

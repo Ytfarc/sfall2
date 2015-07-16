@@ -1471,7 +1471,7 @@ static void RunGlobalScripts1() {
     if(MotionSensorMode&4) {
      DWORD scanner;
      __asm {
-      mov eax, ds:[_obj_dude];
+      mov eax, ds:[_obj_dude]
       mov edx, PID_MOTION_SENSOR
       call inven_pid_is_carried_ptr_
       mov scanner, eax;

@@ -20,7 +20,6 @@
 
 #include <string>
 #include <vector>
-#include "Define.h"
 #include "FalloutEngine.h"
 #include "HookScripts.h"
 #include "Inventory.h"

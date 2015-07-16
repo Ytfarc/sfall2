@@ -161,7 +161,7 @@ static __declspec(naked) void GetDateWrapper() {
   push esi;
   push ebx;
   call game_time_date_
-  mov ecx, ds:[0x51C3BC];
+  mov ecx, ds:[_pc_proto + 0x4C]
   pop esi;
   test esi, esi;
   jz end;
@@ -175,19 +175,13 @@ end:
 }
 static void TimerReset() {
  *((DWORD*)_fallout_game_time)=0;
- *((DWORD*)0x51C3BC)+=13;
+ *((DWORD*)_pc_proto + 0x4C)+=13;
 }
 
 static double TickFrac=0;
 static double MapMulti=1;
 static double MapMulti2=1;
 void _stdcall SetMapMulti(float d) { MapMulti2=d; }
-static __declspec(naked) void PathfinderFix3() {
- __asm {
-  xor eax, eax;
-  retn;
- }
-}
 static DWORD _stdcall PathfinderFix2(DWORD perkLevel, DWORD ticks) {
  double d = MapMulti*MapMulti2;
  if(perkLevel==1) d*=0.75;
@@ -199,23 +193,19 @@ static DWORD _stdcall PathfinderFix2(DWORD perkLevel, DWORD ticks) {
 }
 static __declspec(naked) void PathfinderFix() {
  __asm {
-  push ebx;
   push eax;
-  mov eax, ds:[_obj_dude];
+  mov eax, ds:[_obj_dude]
   mov edx, PERK_pathfinder
   call perk_level_
   push eax;
   call PathfinderFix2;
-  call inc_game_time_
-  pop ebx;
-  retn;
+  jmp  inc_game_time_
  }
 }
 
 static double FadeMulti;
 static __declspec(naked) void FadeHook() {
  __asm {
-  push ecx;
   pushf;
   push ebx;
   fild [esp];
@@ -223,9 +213,7 @@ static __declspec(naked) void FadeHook() {
   fistp [esp];
   pop ebx;
   popf;
-  call fadeSystemPalette_
-  pop ecx;
-  retn;
+  jmp  fadeSystemPalette_
  }
 }
 
@@ -332,9 +320,7 @@ jmp2:
 
 end_cppf:
   pop eax;
-  call stat_level_
-
-  retn;
+  jmp  stat_level_
  }
 }
 static double wm_nexttick;
@@ -367,8 +353,7 @@ static void __declspec(naked) WorldMapSpeedPatch2() {
   pushad;
   call WorldMapSpeedPatch3;
   popad;
-  call get_input_
-  retn;
+  jmp  get_input_
  }
 }
 static void __declspec(naked) WorldMapSpeedPatch() {
@@ -382,8 +367,7 @@ ls:
   mov eax, eax;
   loop ls;
   pop ecx;
-  call get_input_
-  retn;
+  jmp  get_input_
  }
 }
 //Only used if the world map speed patch is disabled, so that world map scripts are still run
@@ -392,8 +376,7 @@ static void WorldMapHook() {
   pushad;
   call RunGlobalScripts3;
   popad;
-  call get_input_
-  retn;
+  jmp  get_input_
  }
 }
 
@@ -698,7 +681,7 @@ static const DWORD ScannerHookRet=0x41BC1D;
 static const DWORD ScannerHookFail=0x41BC65;
 static void __declspec(naked) ScannerAutomapHook() {
  __asm {
-  mov eax, ds:[_obj_dude];
+  mov eax, ds:[_obj_dude]
   mov edx, PID_MOTION_SENSOR
   call inven_pid_is_carried_ptr_
   test eax, eax;
@@ -1501,7 +1484,7 @@ static void DllMain2() {
 
  //if(GetPrivateProfileIntA("Misc", "PathfinderFix", 0, ini)) {
   dlog("Applying pathfinder patch.", DL_INIT);
-  SafeWrite32(0x004C1FF2, ((DWORD)&PathfinderFix3) - 0x004c1ff6);
+  SafeWrite8(0x4C1FF7, 0xC0);               // sub eax, eax
   SafeWrite32(0x004C1C79, ((DWORD)&PathfinderFix) - 0x004c1c7d);
   MapMulti=(double)GetPrivateProfileIntA("Misc", "WorldMapTimeMod", 100, ini)/100.0;
   dlogr(" Done", DL_INIT);

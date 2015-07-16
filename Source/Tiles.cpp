@@ -20,7 +20,6 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "Define.h"
 #include "FalloutEngine.h"
 #include "FileSystem.h"
 #include "Tiles.h"

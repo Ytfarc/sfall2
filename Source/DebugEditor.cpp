@@ -21,7 +21,6 @@
 #include <vector>
 #include "Arrays.h"
 #include "DebugEditor.h"
-#include "Define.h"
 #include "FalloutEngine.h"
 #include "ScriptExtender.h"
 

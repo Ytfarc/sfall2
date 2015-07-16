@@ -171,7 +171,7 @@ static const DWORD ObjPickupEnd=0x49B6F8;
 static const DWORD size_limit;
 static __declspec(naked) void  ObjPickupHook() {
  __asm {
-  cmp edi, ds:[_obj_dude];
+  cmp edi, ds:[_obj_dude]
   jnz end;
 end:
   lea edx, [esp+0x10];
@@ -187,7 +187,7 @@ static __declspec(naked) int CritterCheck() {
   sub esp, 4;
   mov ebx, eax;
 
-  cmp eax, dword ptr ds:[_obj_dude];
+  cmp eax, dword ptr ds:[_obj_dude]
   je single;
   test mode, 3;
   jnz run;
@@ -558,7 +558,7 @@ reloadItem:
   inc  ecx
   jmp  reloadItem
 endReloadItem:
-  cmp  dword ptr ds:[0x597108][ebx], 5      // mode
+  cmp  dword ptr ds:[_itemButtonItems + 0x10][ebx], 5// mode
   jne  skip_toggle_item_state
   call intface_toggle_item_state_
 skip_toggle_item_state:
@@ -611,7 +611,7 @@ ourKey:
   je   endReload
   mov  edx, ds:[_itemCurrentItem]
   imul eax, edx, 24
-  cmp  byte ptr ds:[0x5970FD][eax], bl      // itsWeapon
+  cmp  byte ptr ds:[_itemButtonItems + 0x5][eax], bl// itsWeapon
   jne  itsWeapon                            // Да
   call intface_use_item_
   jmp  endReload
@@ -683,7 +683,7 @@ reloadOffhand:
   inc  ecx
   jmp  reloadOffhand
 endReloadOffhand:
-  cmp  dword ptr ds:[0x597108][ebx], 5      // mode
+  cmp  dword ptr ds:[_itemButtonItems + 0x10][ebx], 5// mode
   jne  skip_toggle_item_state
   call intface_toggle_item_state_
 skip_toggle_item_state:
