@@ -523,36 +523,38 @@ really_end:
  }
 }
 
-static DWORD RetryCombatLastAP;
 static DWORD RetryCombatMinAP;
-static void __declspec(naked) RetryCombatHook() {
+static void __declspec(naked) combat_turn_hook() {
  __asm {
-  mov RetryCombatLastAP, 0;
+  xor  eax, eax
 retry:
-  mov eax, esi;
+  xchg ecx, eax
+  mov  eax, esi
   push edx
   call combat_ai_
   pop  edx
 process:
-  cmp dword ptr ds:[_combat_turn_running], 0
-  jle next;
+  cmp  dword ptr ds:[_combat_turn_running], 0
+  jle  next
   call process_bk_
-  jmp process;
+  jmp  process
 next:
-  mov eax, [esi+0x40];
-  cmp eax, RetryCombatMinAP;
-  jl end;
-  cmp eax, RetryCombatLastAP;
-  je end;
-  mov RetryCombatLastAP, eax;
-  jmp retry;
+  mov  eax, [esi+0x40]                      // curr_mp
+  cmp  eax, RetryCombatMinAP
+  jl   end
+  cmp  eax, ecx
+  jne  retry
 end:
-  retn;
+  retn
  }
 }
-static const DWORD IntfaceRotateNumbersRet = 0x460BA0;
-static void __declspec(naked) IntfaceRotateNumbersHook() {
+
+static void __declspec(naked) intface_rotate_numbers_hook() {
  __asm {
+// ebx=old value, ecx=new value
+  push edi
+  push ebp
+  sub  esp, 0x54
   cmp  ebx, ecx
   je   end
   mov  ebx, ecx
@@ -567,7 +569,8 @@ greater:
 skip:
   dec  ebx
 end:
-  jmp  IntfaceRotateNumbersRet
+  mov  esi, 0x460BA6
+  jmp  esi
  }
 }
 
@@ -609,7 +612,6 @@ end:
 }
 
 static const DWORD NPCStage6Fix1End = 0x493D16;
-static const DWORD NPCStage6Fix2End = 0x49423A;
 static void __declspec(naked) NPCStage6Fix1() {
  __asm {
   mov eax,0xcc;    // set record size to 204 bytes
@@ -622,6 +624,7 @@ static void __declspec(naked) NPCStage6Fix1() {
  }
 }
 
+static const DWORD NPCStage6Fix2End = 0x49423A;
 static void __declspec(naked) NPCStage6Fix2() {
  __asm {
   mov eax,0xcc;    // record size is 204 bytes
@@ -631,29 +634,15 @@ static void __declspec(naked) NPCStage6Fix2() {
  }
 }
 
-static const DWORD MultiHexFix1End = 0x429024;
-static const DWORD MultiHexFix2End = 0x429175;
-static void __declspec(naked) MultiHexFix1() {
+static void __declspec(naked) MultiHexFix() {
  __asm {
-  xor ecx,ecx;    // argument value for make_path_func: ecx=0 (unknown arg)
-  test byte ptr ds:[ebx+0x25],0x08; // is target multihex?
-  mov ebx,dword ptr ds:[ebx+0x4];  // argument value for make_path_func: target's tilenum (end_tile)
-  je end;     // skip if not multihex
-  inc ebx;    // otherwise, increase tilenum by 1
+  xor  ecx, ecx
+  test byte ptr [ebx+0x25], 0x8             // is target multihex?
+  mov  ebx, dword ptr [ebx+0x4]             // ebx = pud.tile_num (target's tilenum)
+  jz   end                                  // skip if not multihex
+  inc  ebx                                  // otherwise, increase tilenum by 1
 end:
-  jmp MultiHexFix1End;   // call make_path_func
- }
-}
-
-static void __declspec(naked) MultiHexFix2() {
- __asm {
-  xor ecx,ecx;    // argument for make_path_func: ecx=0 (unknown arg)
-  test byte ptr ds:[ebx+0x25],0x08; // is target multihex?
-  mov ebx,dword ptr ds:[ebx+0x4];  // argument for make_path_func: target's tilenum (end_tile)
-  je end;     // skip if not multihex
-  inc ebx;    // otherwise, increase tilenum by 1
-end:
-  jmp MultiHexFix2End;   // call make_path_func
+  retn
  }
 }
 
@@ -1796,18 +1785,16 @@ static void DllMain2() {
   dlogr(" Done", DL_INIT);
  }
 
- if(GetPrivateProfileIntA("Misc", "SkipOpeningMovies", 0, ini)) {
+ if (GetPrivateProfileIntA("Misc", "SkipOpeningMovies", 0, ini)) {
   dlog("Blocking opening movies. ", DL_INIT);
-  BlockCall(0x4809CB);
-  BlockCall(0x4809D4);
-  BlockCall(0x4809E0);
+  SafeWrite16(0x4809C7, 0x1CEB);            // jmps 0x4809E5
   dlogr(" Done", DL_INIT);
  }
 
- RetryCombatMinAP=GetPrivateProfileIntA("Misc", "NPCsTryToSpendExtraAP", 0, ini);
- if(RetryCombatMinAP) {
+ RetryCombatMinAP = GetPrivateProfileIntA("Misc", "NPCsTryToSpendExtraAP", 0, ini);
+ if (RetryCombatMinAP) {
   dlog("Applying retry combat patch. ", DL_INIT);
-  HookCall(0x422B94, &RetryCombatHook);
+  HookCall(0x422B94, &combat_turn_hook);
   dlogr(" Done", DL_INIT);
  }
 
@@ -1889,9 +1876,7 @@ static void DllMain2() {
 
  if(GetPrivateProfileIntA("Misc", "SpeedInterfaceCounterAnims", 0, ini)) {
   dlog("Applying SpeedInterfaceCounterAnims patch.", DL_INIT);
-  HookCall(0x45ED63, IntfaceRotateNumbersHook);
-  HookCall(0x45ED86, IntfaceRotateNumbersHook);
-  HookCall(0x45EDFA, IntfaceRotateNumbersHook);
+  MakeCall(0x460BA1, &intface_rotate_numbers_hook, true);
   dlogr(" Done", DL_INIT);
  }
 
@@ -1945,7 +1930,6 @@ static void DllMain2() {
  dlogr("Patching out ereg call.", DL_INIT);
  BlockCall(0x4425E6);
 
-
  tmp=GetPrivateProfileIntA("Misc", "AnimationsAtOnceLimit", 32, ini);
  if((signed char)tmp>32) {
   dlog("Applying AnimationsAtOnceLimit patch.", DL_INIT);
@@ -1953,12 +1937,11 @@ static void DllMain2() {
   dlogr(" Done", DL_INIT);
  }
 
- if(GetPrivateProfileIntA("Misc", "RemoveCriticalTimelimits", 0, ini)) {
+ if (GetPrivateProfileIntA("Misc", "RemoveCriticalTimelimits", 0, ini)) {
   dlog("Removing critical time limits.", DL_INIT);
-  SafeWrite8(0x42412B, 0x90);
-  BlockCall(0x42412C);
-  SafeWrite16(0x4A3052, 0x9090);
-  SafeWrite16(0x4A3093, 0x9090);
+  SafeWrite8(0x424118, 0xEB);
+  SafeWrite8(0x4A3053, 0x0);
+  SafeWrite8(0x4A3094, 0x0);
   dlogr(" Done", DL_INIT);
  }
 
@@ -1980,10 +1963,10 @@ static void DllMain2() {
   dlogr(" Done", DL_INIT);
  }
 
- if(GetPrivateProfileIntA("Misc", "MultiHexPathingFix", 1, ini)) {
+ if (GetPrivateProfileIntA("Misc", "MultiHexPathingFix", 1, ini)) {
   dlog("Applying MultiHex Pathing Fix.", DL_INIT);
-  MakeCall(0x42901F, &MultiHexFix1, true);
-  MakeCall(0x429170, &MultiHexFix2, true);
+  MakeCall(0x42901F, &MultiHexFix, false);
+  MakeCall(0x429170, &MultiHexFix, false);
   dlogr(" Done", DL_INIT);
  }
 
