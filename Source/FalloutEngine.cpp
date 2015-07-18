@@ -315,6 +315,7 @@ const DWORD square_num_ = 0x4B1F04;
 const DWORD stat_get_base_direct_ = 0x4AF408;
 const DWORD stat_get_bonus_ = 0x4AF474;
 const DWORD stat_level_ = 0x4AEF48;
+const DWORD stat_pc_add_experience_ = 0x4AFAA8;
 const DWORD stat_pc_get_ = 0x4AF8FC;
 const DWORD stat_pc_set_ = 0x4AF910;
 const DWORD strncpy_ = 0x4F014F;

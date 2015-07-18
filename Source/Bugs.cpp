@@ -532,11 +532,10 @@ static void __declspec(naked) item_d_take_drug_hook1() {
  }
 }
 
-// todo: проверить так ли уж это нужно
 static void __declspec(naked) op_wield_obj_critter_hook() {
  __asm {
   call adjust_ac_
-  xor  ecx, ecx
+  xor  ecx, ecx                             // todo: проверить так ли уж это нужно
   jmp  intface_update_ac_
  }
 }
@@ -555,6 +554,63 @@ static void __declspec(naked) action_melee_hook() {
 end:
   mov  ebx, 0x4113DA
   jmp  ebx
+ }
+}
+
+static DWORD XPWithSwiftLearner;
+static void __declspec(naked) statPCAddExperienceCheckPMs_hook() {
+ __asm {
+  mov  XPWithSwiftLearner, edi
+  mov  eax, ds:[_Experience_]
+  retn
+ }
+}
+
+static void __declspec(naked) combat_give_exps_hook() {
+ __asm {
+  call stat_pc_add_experience_
+  mov  ebx, XPWithSwiftLearner
+  retn
+ }
+}
+
+static void __declspec(naked) loot_container_hook1() {
+ __asm {
+  mov  edx, [esp+0x138]
+  xchg edx, eax
+  call stat_pc_add_experience_
+  cmp  edx, 1
+  jne  skip
+  push XPWithSwiftLearner
+  mov  ebx, [esp+0xE8]
+  push ebx
+  lea  eax, [esp+0x8]
+  push eax
+  call sprintf_
+  add  esp, 0xC
+  mov  eax, esp
+  call display_print_
+skip:
+  mov  ebx, 0x4745E3
+  jmp  ebx
+ }
+}
+
+static void __declspec(naked) wmRndEncounterOccurred_hook() {
+ __asm {
+  call stat_pc_add_experience_
+  cmp  ecx, 110
+  jnb  skip
+  push XPWithSwiftLearner
+  push edx
+  lea  eax, [esp+0x8+0x4]
+  push eax
+  call sprintf_
+  add  esp, 0xC
+  lea  eax, [esp+0x4]
+  call display_print_
+skip:
+  retn
  }
 }
 
@@ -654,5 +710,12 @@ void BugsInit() {
  dlog("Applying Dodgy Door Fix.", DL_INIT);
  MakeCall(0x4113D3, &action_melee_hook, true);
  dlogr(" Done", DL_INIT);
+
+// При выводе количества полученных очков опыта учитывать перк 'Прилежный ученик'
+ MakeCall(0x4AFAEF, &statPCAddExperienceCheckPMs_hook, false);
+ HookCall(0x4221E2, &combat_give_exps_hook);
+ MakeCall(0x4745AE, &loot_container_hook1, true);
+ SafeWrite16(0x4C0AB1, 0x23EB);             // jmps 0x4C0AD6
+ HookCall(0x4C0AEB, &wmRndEncounterOccurred_hook);
 
 }
