@@ -677,6 +677,32 @@ static void __declspec(naked) critter_wake_clear_hook1() {
  }
 }
 
+static void __declspec(naked) obj_load_func_hook() {
+ __asm {
+  mov  edi, 0x488EF9
+  test byte ptr [eax+0x25], 0x4             // Temp_
+  jnz  end
+  mov  edi, [eax+0x64]
+  shr  edi, 0x18
+  cmp  edi, ObjType_Critter
+  jne  skip
+  test byte ptr [eax+0x44], 0x2             // DAM_KNOCKED_DOWN
+  jz   skip
+  pushad
+  xor  ecx, ecx
+  inc  ecx
+  xor  ebx, ebx
+  xor  edx, edx
+  xchg edx, eax
+  call queue_add_
+  popad
+skip:
+  mov  edi, 0x488F14
+end:
+  jmp  edi
+ }
+}
+
 void BugsInit() {
 
  dlog("Applying sharpshooter patch.", DL_INIT);
@@ -786,5 +812,6 @@ void BugsInit() {
  SafeWrite16(0x42E44F, 0x03EB);             // jmps 0x42E454
  MakeCall(0x42E476, &critter_wake_clear_hook, false);
  MakeCall(0x42E4BA, &critter_wake_clear_hook1, true);
+ MakeCall(0x488EF3, &obj_load_func_hook, true);
 
 }

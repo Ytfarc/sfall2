@@ -266,6 +266,7 @@ extern const DWORD proto_dude_update_gender_;
 extern const DWORD proto_ptr_;
 extern const DWORD pushLongStack_;
 extern const DWORD qsort_;
+extern const DWORD queue_add_;
 extern const DWORD queue_clear_type_;
 extern const DWORD queue_find_;
 extern const DWORD queue_find_first_;

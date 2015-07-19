@@ -267,6 +267,7 @@ const DWORD proto_dude_update_gender_ = 0x49F984;
 const DWORD proto_ptr_ = 0x4A2108;
 const DWORD pushLongStack_ = 0x46736C;
 const DWORD qsort_ = 0x4F05B6;
+const DWORD queue_add_ = 0x4A258C;
 const DWORD queue_clear_type_ = 0x4A2790;
 const DWORD queue_find_ = 0x4A26A8;
 const DWORD queue_find_first_ = 0x4A295C;
