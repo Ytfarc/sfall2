@@ -131,7 +131,7 @@ static void __declspec(naked) ApplyApAcBonus() {
   xor edi, edi;
   jmp standard;
 h2hEvade:
-  mov edx, PERK_hth_evade_perk
+  mov edx, PERK_hth_evade
   mov eax, dword ptr ds:[_obj_dude]
   call perk_level_
   imul ax, ExtraApAcBonus;

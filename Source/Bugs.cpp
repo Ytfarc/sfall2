@@ -614,6 +614,69 @@ skip:
  }
 }
 
+static void __declspec(naked) set_new_results_hook() {
+ __asm {
+  mov  ecx, 0x424FC6
+  test ah, 0x3                              // DAM_KNOCKED_OUT or DAM_KNOCKED_DOWN
+  jz   end                                  // В сознании и на ногах
+  xor  edx, edx
+  inc  edx                                  // type = отключка
+  test ah, 0x1                              // DAM_KNOCKED_OUT
+  jnz  knocked_out                          // Без сознания
+  mov  eax, esi
+  call queue_find_
+  test eax, eax                             // Есть отключка в очереди?
+  jnz  end                                  // Да
+  mov  ecx, 0x424FAD
+  xchg edx, eax
+  jmp  ecx
+knocked_out:
+  mov  dword ptr ds:[_critterClearObj], esi
+  mov  eax, critterClearObjDrugs_
+  xchg edx, eax
+  call queue_clear_type_
+  mov  ecx, 0x424F93
+end:
+  jmp  ecx
+ }
+}
+
+static void __declspec(naked) critter_wake_clear_hook() {
+ __asm {
+  test dl, 0x80                             // DAM_DEAD
+  jnz  skip                                 // Это трупик
+  push eax
+  mov  eax, esi
+  call isPartyMember_
+  test eax, eax                             // Это сопартиец?
+  pop  eax
+  jnz  end                                  // Да
+  and  dl, 0xFE                             // Сбрасываем DAM_KNOCKED_OUT
+  or   dl, 0x2                              // Устанавливаем DAM_KNOCKED_DOWN
+  mov  [esi+0x44], dl
+skip:
+  pop  eax                                  // Уничтожаем адрес возврата
+  xor  eax, eax
+  inc  eax
+  pop  esi
+  pop  ecx
+  pop  ebx
+end:
+  retn
+ }
+}
+
+static void __declspec(naked) critter_wake_clear_hook1() {
+ __asm {
+  xor  eax, eax
+  inc  eax
+  pop  esi
+  pop  ecx
+  pop  ebx
+  retn
+ }
+}
+
 void BugsInit() {
 
  dlog("Applying sharpshooter patch.", DL_INIT);
@@ -717,5 +780,11 @@ void BugsInit() {
  MakeCall(0x4745AE, &loot_container_hook1, true);
  SafeWrite16(0x4C0AB1, 0x23EB);             // jmps 0x4C0AD6
  HookCall(0x4C0AEB, &wmRndEncounterOccurred_hook);
+
+// Исправление "NPC turns into a container"
+ MakeCall(0x424F8E, &set_new_results_hook, true);
+ SafeWrite16(0x42E44F, 0x03EB);             // jmps 0x42E454
+ MakeCall(0x42E476, &critter_wake_clear_hook, false);
+ MakeCall(0x42E4BA, &critter_wake_clear_hook1, true);
 
 }
