@@ -94,6 +94,7 @@ const DWORD DOSCmdLineDestroy_ = 0x4E3D3C;
 const DWORD DrawCard_ = 0x43AAEC;
 const DWORD DrawFolder_ = 0x43410C;
 const DWORD DrawInfoWin_ = 0x4365AC;
+const DWORD dude_stand_ = 0x418378;
 const DWORD editor_design_ = 0x431DF8;
 const DWORD elapsed_time_ = 0x4C93E0;
 const DWORD elevator_end_ = 0x43F6D0;

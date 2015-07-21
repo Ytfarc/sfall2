@@ -616,58 +616,31 @@ skip:
 
 static void __declspec(naked) set_new_results_hook() {
  __asm {
-  mov  ecx, 0x424FC6
-  test ah, 0x3                              // DAM_KNOCKED_OUT or DAM_KNOCKED_DOWN
-  jz   end                                  // В сознании и на ногах
-  xor  edx, edx
-  inc  edx                                  // type = отключка
-  test ah, 0x1                              // DAM_KNOCKED_OUT
-  jnz  knocked_out                          // Без сознания
-  mov  eax, esi
-  call queue_find_
-  test eax, eax                             // Есть отключка в очереди?
-  jnz  end                                  // Да
-  mov  ecx, 0x424FAD
-  xchg edx, eax
-  jmp  ecx
-knocked_out:
+  test ah, 0x1                              // DAM_KNOCKED_OUT?
+  jz   end                                  // Нет
   mov  dword ptr ds:[_critterClearObj], esi
-  mov  eax, critterClearObjDrugs_
-  xchg edx, eax
-  call queue_clear_type_
-  mov  ecx, 0x424F93
+  mov  edx, critterClearObjDrugs_
+  xor  eax, eax
+  inc  eax                                  // type = отключка
+  call queue_clear_type_                    // Удаляем отключку из очереди (если отключка там есть)
+  retn
 end:
-  jmp  ecx
+  pop  eax                                  // Уничтожаем адрес возврата
+  mov  eax, 0x424FC6
+  jmp  eax
  }
 }
 
 static void __declspec(naked) critter_wake_clear_hook() {
  __asm {
-  test dl, 0x80                             // DAM_DEAD
-  jnz  skip                                 // Это трупик
-  push eax
-  mov  eax, esi
-  call isPartyMember_
-  test eax, eax                             // Это сопартиец?
-  pop  eax
-  jnz  end                                  // Да
+  jne  end                                  // Это не персонаж
+  mov  dl, [esi+0x44]
+  test dl, 0x80                             // DAM_DEAD?
+  jnz  end                                  // Это трупик
   and  dl, 0xFE                             // Сбрасываем DAM_KNOCKED_OUT
   or   dl, 0x2                              // Устанавливаем DAM_KNOCKED_DOWN
   mov  [esi+0x44], dl
-skip:
-  pop  eax                                  // Уничтожаем адрес возврата
-  xor  eax, eax
-  inc  eax
-  pop  esi
-  pop  ecx
-  pop  ebx
 end:
-  retn
- }
-}
-
-static void __declspec(naked) critter_wake_clear_hook1() {
- __asm {
   xor  eax, eax
   inc  eax
   pop  esi
@@ -686,8 +659,8 @@ static void __declspec(naked) obj_load_func_hook() {
   shr  edi, 0x18
   cmp  edi, ObjType_Critter
   jne  skip
-  test byte ptr [eax+0x44], 0x2             // DAM_KNOCKED_DOWN
-  jz   skip
+  test byte ptr [eax+0x44], 0x2             // DAM_KNOCKED_DOWN?
+  jz   clear                                // Нет
   pushad
   xor  ecx, ecx
   inc  ecx
@@ -696,10 +669,19 @@ static void __declspec(naked) obj_load_func_hook() {
   xchg edx, eax
   call queue_add_
   popad
+clear:
+  and  word ptr [eax+0x44], 0x7FFD          // not (DAM_LOSE_TURN or DAM_KNOCKED_DOWN)
 skip:
   mov  edi, 0x488F14
 end:
   jmp  edi
+ }
+}
+
+static void __declspec(naked) partyMemberPrepLoadInstance_hook() {
+ __asm {
+  and  word ptr [eax+0x44], 0x7FFD          // not (DAM_LOSE_TURN or DAM_KNOCKED_DOWN)
+  jmp  dude_stand_
  }
 }
 
@@ -808,10 +790,9 @@ void BugsInit() {
  HookCall(0x4C0AEB, &wmRndEncounterOccurred_hook);
 
 // Исправление "NPC turns into a container"
- MakeCall(0x424F8E, &set_new_results_hook, true);
- SafeWrite16(0x42E44F, 0x03EB);             // jmps 0x42E454
- MakeCall(0x42E476, &critter_wake_clear_hook, false);
- MakeCall(0x42E4BA, &critter_wake_clear_hook1, true);
+ MakeCall(0x424F8E, &set_new_results_hook, false);
+ MakeCall(0x42E46E, &critter_wake_clear_hook, true);
  MakeCall(0x488EF3, &obj_load_func_hook, true);
+ HookCall(0x4949B2, &partyMemberPrepLoadInstance_hook);
 
 }

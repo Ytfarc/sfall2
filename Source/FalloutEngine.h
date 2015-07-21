@@ -93,6 +93,7 @@ extern const DWORD DOSCmdLineDestroy_;
 extern const DWORD DrawCard_;
 extern const DWORD DrawFolder_;
 extern const DWORD DrawInfoWin_;
+extern const DWORD dude_stand_;
 extern const DWORD editor_design_;
 extern const DWORD elapsed_time_;
 extern const DWORD elevator_end_;

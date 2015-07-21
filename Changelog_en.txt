@@ -1,0 +1,179 @@
+
+Change log:
+
+v1.4
+* From ddraw.ini in F2 version deleted 'WieldObjCritterFix', because it is just like any other pure fix that needs to be turned on all the time, for example, BlackSkilldexFix.
+* Added an ini setting 'CanSellUsedGeiger' to control the way buying/selling of used Geiger counter or a stealth boy is handled.
+! Made possible text window messages that correctly display the amount of xp given after taking Swift learner perk. Works for combat and skill usage xp.
+! Fixed infamous "NPC turns into a container" bug.
+
+v1.3
++ Added "NoCredits" setting to the [Debugging] section of the ddraw.ini; when enabled it turns off the sfall-specific credits displayed under Credits in main menu.
+! Now you can sell used Geiger Counter or stealth boy.
+
+v1.2
+* Deleted ini settings - BlackSkilldexFix, JetAntidoteFix, SpecialUnarmedAttacksFix è DodgyDoorsFix - from ddraw.ini. These are pure engine fixes which cause no side effects, so it's pointless to disable them.
+* Added a section [Frms] with Image0..Image23 variables to Elevators.ini. It can be used to change the number of a frm that was applied to a specific elevator.
++ Fixed a bug that was causing power cells to be consumed even if your car is fully charged.
+
+v1.1
+! Fixed a bug of incorrectly displaying random negative numbers under the Skills button. Now they always show 0 if the character skill is in the negative.
++ Now, if the 'bonus ranged damage' perk was taken, the engine will correctly show added bonus in the character and inventory interface screens.
+* Adjusted the BonusHtHDamageFix, so that now it shows the added min damage bonus (if BonusHtHDamageFix=1) and max unarmed/melee damage in the character and inventory interface screens, if you've taken the 'bonus unarmed damage' perk.
+
+01/07/15
+* The [DebugMode] was added to the release sfall build, so it functions just like in debug dll.
+* Now the ini setting 'ExtraCRC' can accept multiple crc values.
+! Fixed "Unlimited Ammo bug". (Give an NPC several identical empty guns and appropriate ammo. Remove/trade other guns or ammo so they won't be selected. Set the NPC's combat choice to ranged. Make them use the best weapon and then click on 'Talk'. Talk about the gear and tell them to put their weapon away. Select 'Trade' and then manually unload their weapons. They now have more ammo than they started with. Repeat.)
+
+28/06/15
+! Fixed an engine bug that prevented using 9 reply lines in NPC dialog window.
+
+27/06/15
+! Fixed a bug of wrong companion NPC stats, if he/she was drugged at the moment he/she hit a new level. NPCs leveling up while under drug influence don't end up with correct stats - it checks the current stats and not base stats.
+! If a companion had the same suit of armor in the inventory as the one he/she had equipped, then after hitting a new level AC stat would drop equal to the said armor amount. This was fixed.
++ In random encounters message window no longer will show two lines describing the encounter, now it's only one.
+
+26/06/15
++ Added an ability to use line break (\n) in pro_*.msg files (TEXT/ENGLISH/GAME folder).
+
+25/06/15
+! Fixed a bug that was causing crashes if you try to murder perfectly healthy critter by using a lot of superstimpacks and leaving the map.
+
+24/06/15
+* 'ControlCombat' was tweaked so that perks and traits of the PC were not being applied to the controlled companions. Also turned off the ability to put on the armor in the inventory or saving the game. Pressing 'Enter' (end combat) recognized as 'Space' (end turn). Can't use sneak ability as well.
+! Fixed an exploit that you could use to gain too high of stats from drug use - use drug twice, save and load and you can use drugs to raise your stats even more.
+
+20/06/15
+! Fixed a bug of determining the addictions of NPCs according to PC stats.
+! Fixed a bug of using jet drug on the companions and inability to cure its addiction effects by the jet antidote. NPCs hooked on jet becomes utterly useless - stuck with 1 AP.
++ Now the color of the hit points in the party control window changes from green to red if your buddy has a drug addiction.
+
+10/06/15
+* Now to the current HP and AP amounts abbreviations 'Lvl' and 'AC' were added in the party control window. They can be translated in the sfall translation ini.
+
+02/06/15
+* Added an extra check for the power-cells-on-scenery bug. Now it also includes the trunk besides the car itself.
+
+01/06/15
+! Fixed a bug of using power cells on any scenery object to refuel the car.
+
+30/05/15
++ Added ini setting 'DontTurnOffSneakIfYouRun'. If it's on, when you engage a running mode of PC critter without having a 'Silent Running' perk, the Sneak interface tab would not be turned off and you would only walk.
+
+29/05/15
++ Added ini setting 'AutoQuickSave' to use more than one save slot for quick saving (F6) and without picking a slot beforehand. The number assigned is a number of save slots (1..10) to use for quick saving, cycling from the top one down and over to the earliest one.
+
+25/05/15
+* Fixed 'SpeedInterfaceCounterAnims' in the moment you die (negative value), when, for example, it showed "-993" instead of "-007".
++ Added ini setting 'EnableMusicInDialogue' that allows to leave the music playing in dialog mode with talking heads, just like with non-talking heads; volume is decreased in half.
+
+16/05/15
++ Added ini setting 'DisableHotkeysForUnknownAreasInCity'. It disables the usage of hotkeys to pick the town area to visit, that you've never been to.
+
+11/05/15
++ Changed the distance of engaging the walk from 5 to 1 hex, when you're trying to use something on the object, pick up, steal, or use a skill.
++ Added ini setting 'FakeCombatFix' to prevent 'A' button combat exploit. You can pick up items, open containers and use something on someone if the target is in the adjacent hex. Only after the picking an aggressive action (a shot, unarmed/melee hit) your character will be able to move.
+
+10/05/15
++ Added ini setting 'TurnHighlightContainers' to [Input] section. Turns on and off the highlighting of the containers while using 'ToggleItemHighlightsKey'.
+
+05/05/15
+* Expanded the way 'ToggleItemHighlightsKey' functions; now it highlights not only the items on the ground, but containers as well. With different color. Combined hotkey item highlight with mouse item highlight to avoid a situation when an item gets highlighted by pointing a mouse cursor on it, then hotkey gets pressed and after releasing the key highlighting under the mouse cursor vanishes. So, to make it easier to see the highlight color was changed from yellow to pink when mouse cursor hovers over an item.
+* Fixed an exploit (because perks don't disappear anymore if not picked before next one comes up) that prevents picking multi-level perks earlier than intended. For example, if you don't pick a perk at character level 9 and at character level 12 pick up two levels of the same perk, while in vanilla game, that perk is only available at levels 12 and 15.
+
+02/05/15
++ Added an interface button 'Give all' in the barter window for trading with a container. Also, the hotkeys 'd' or 'D' can be used. The art for the button was borrowed from 'drop an item' mouse icon.
++ And for the button 'Take all' hotkeys 'A' and 'a' were assigned.
+
+22/04/15
++ Now after opening the inventory, you can drag stimpacks or other consumables onto a character picture to use them.
+
+20/04/15
++ Rewrote the original 'SharpshooterFix' (wasn't working as intended in its description) according to suggestions posted by Slider2k on NMA forums. http://www.nma-fallout.com/showthread.php?178390-FO2-Engine-Tweaks&p=4050162&viewfull=1#post4050162
+* The ini setting 'ReloadReserve' can also be -1, in this case when you reload by dragging the ammo stack onto a weapon, the original behavior will be used with an annoying window to choose the ammo amount.
+
+19/04/15
+* Added ini setting 'ReloadReserve' (to get rid of the annoying 'pick an ammo stack count' window), that changes the way weapon reloading works when you drop the ammo onto a gun picture in the inventory: 0 = use all the ammo packs to reload; 1 or more = (reserves extra magazines) if the amount of ammo mags is more than the reserve, all the mags are used minus the specified reserve amount. And if the amount of ammo mags in the inventory is less or equal to the reserve, then only one mag is used.
+
+18/04/15
+! Fixed a bug occurring during a weapon reload in the inventory. If the weapon for reloading is the only copy and sits above the ammo mags, then only one ammunition stack is applied, even if you've picked to use all.
+
+17/04/15
++ Disabled a ammo count window that suggest to pick an amount of mags to use for reloading in the inventory. If you got enough ammo, weapon gets fully reloaded.
+* Now the hotkey for reloading (ReloadWeaponKey) besides actually doing that, also works as a 'Use' button for non-weapons.
++ Adjusted the min and max values for the Chosen One's age during custom character creation from 16-35 to 8-60.
+* If DrugExploitFix=1, then the effects of drug abuse are off to prevent skill, books and perk gain exploits.
+
+14/04/15
+! Fixed two bugs occurring with player's inventory use, which allows now weapon reloading, besides 'put weapon into a hand, and then drag the ammo from the inventory onto the weapon in hand' method, with 'dragging the ammo from the inventory onto a weapon in the inventory' method.
+! Fixed a bug affecting the reload method aka 'drag ammo from inventory onto weapon in the inventory', if the High Resolution Patch is installed and the setting IFACE_BAR_MODE from f2_res.ini equals 1. (breaks the count of the slot where the item was dragged to).
+
+08/04/15
+! Fixed the dreaded "Too Many Items Bug" - "If all of a sudden you can't enter a certain map because the game hangs with a black screen, then it's definitely it" (c).
+
+05/04/15
++ Added ini setting 'StackEmptyWeapons' for stacking the same type of unloaded weapons. Fixes the problem of having two stacks of same weapons, but with different ammo, after unloading one of them.
++ Added ini setting 'RiflescopePenalty' for changing the distance penalty of the Weapon Scope Range perk, which is applied to the Scoped hunting rifle.
+
+03/04/15
+* Changed the color of the text from white to green for showing the remaining free weight (FreeWeight=1).
+! Added a debug version of the dll.
+
+01/04/15
+* Finished with the option of showing unused weight in the item exchange window, FreeWeight=1. Now the remaining free weight is displayed for the item swapping between containers (boxes, car's trunk, etc) and for the stealing or trading (free weight is not showed for merchants, since you can sell them any amount of stuff even if it's more than they can carry). The format is "free weight/max weight" for critters and "free volume/max volume" for containers. The setting 'FreeWeight' is ignored though (= 0) if CritterInvSizeLimitMode not equals 0.
+* In the pipboy window, if UseScrollingQuestsList=1, then you can see more than one page by clicking the page number on top (1 out of 2), just like the multi-page holodiscs.
+
+24/03/15
+* Disabled the max limit of quests per page (10) if UseScrollingQuestsList=1. Now it displays as many as the pipboy screen allows.
+
+22/03/15
++ Added ini settings 'QuestsScrollButtonsX (0-618)' and 'QuestsScrollButtonsY (0-434)' which can be used to change quest scroll button positions.
+
+19/03/15
+! Switched to the v3.6.7.346 sources of the original sfall for Fallout 2. Same as the release version of dll, but with SkipSizeCheck and ExtraCRC in [Debugging].
+- Deleted the ini setting 'ReloadWeaponHotKey', since in the original sfall there was a similar 'ReloadWeaponKey'.
+
+17/03/15
++ Almost completely rewrote and expanded the way quest scrolling buttons work (UseScrollingQuestsList=1) in the pipboy window: bigger size of the buttons, new location, disabled mode when there is nothing to scroll; navigation is the same as the holodisc viewing. And the buttons can be used for holodisc pages as well.
++ Added hotkeys for the pipboy control buttons - '1' for "Status", '3' for "Maps", '4' for "Archives" and '2' for the alarm.
+! Fixed two bugs of mousing clicking in pipboy.
+* The perk selecting window for the character screen was raised a bit higher.
+* Disabled certain perk gaining when under the drug influence if DrugExploitFix=1.
+
+08/03/15
++ Added ini setting 'DrugExploitFix' for turning off the negative effects abuse (drug use, radiation, etc) to prevent book reading exploit.
+* Finished tweaking a feature that prevents a non-chosen perk from disappearing after gaining a new level with perk selection window.
+
+28/02/15
++ Added an ability to use Russian language encoding for character and savegame names. Different localizations use different encodings (Fargus/LevCorp - 866, 1C -1251), that's why there is an option now controlled by 'XltTable'. In the game the switch to Russian language is handled by a key, which was assigned by an ini setting 'XltKey' (by default, Scroll Lock).
+* If the setting 'FreeWeight' is on, the color of the text changes to red when someone is overloaded.
+
+24/02/15
+* Now the value for 'ReloadWeaponHotKey' is a scancode of the hotkey, and the setting was moved from [Misc] section to [Input].
+
+19/02/15
++ Added ini setting 'ArmorFile' for the engine version of the "NPC armor mod". The difference from the scripted version is in the immediate outfit change in the party member control window as well as the game.
++ Now under AP line in the party member control window there is an Armor Class value of the companion NPC displayed in brackets.
++ Perk that wasn't selected right away doesn't disappear forever after gaining a new perk-giving level. It's now possible to stockpile perks.
+
+14/02/15
++ Added ini setting 'EquipArmor' for automatically equipping the best armor from the party member's inventory after closing the barter window.
+! Fixed a bug that caused multiple dearmoring of the party member through dialog, if he/she had the same type of armor in his/her inventory.
++ Expanded the functionality of the buttons "Best weapon" and "Best armor" in the party member window. If weapon or armor is equipped, pressing the corresponding button unequips it.
+
+10/02/15
++ Added ini setting 'FreeWeight' for displaying free weight left instead of the weight of the items while trading with the companion NPC.
+! Fixed a bug occurring when the weight count of the critter wasn't correct during stealing or bartering. Wielded weapon or armor of the critter were not accounted for.
++ In the party member control window added a current companion's level next to the HP.
+
+07/02/15
+* Now, if AutoReloadWeapon=1, player character will automatically reload weapons in both hands after the combat.
+
+01/02/15
++ Added ini setting 'ReloadWeaponHotKey' to assign a hotkey for the active hand weapon reloading (w|W).
+
+31/01/15
+* Expanded the function of custom books in Books.ini; added an option to raise other skills besides vanilla ones while reading books.
++ Added ini setting 'AutoReloadWeapon' for the automatic weapon reloading placed in the active hand after the combat ends.
+! Used the v3.5.7.317 sources of the original sfall2 for compiling.
