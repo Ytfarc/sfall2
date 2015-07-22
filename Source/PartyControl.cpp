@@ -37,6 +37,7 @@ static DWORD real_free_perk;
 static DWORD real_unspent_skill_points;
 static DWORD real_map_elevation;
 static DWORD real_sneak_working;
+static DWORD real_sneak_queue_time;
 static DWORD real_dude;
 static DWORD real_hand;
 static DWORD real_trait;
@@ -170,6 +171,23 @@ saveLevel:
   mov  eax, dword ptr ds:[_sneak_working]
   mov  real_sneak_working, eax
   mov  eax, dword ptr ds:[_obj_dude]
+  push eax
+  mov  edx, 10
+  call queue_find_first_
+  test edx, edx
+  jz   noSneak
+  mov  edx, [edx]
+  mov  eax, ds:[_fallout_game_time]
+  sub  edx, eax
+  pop  eax
+  push eax
+  push edx
+  mov  edx, 10
+  call queue_remove_this_
+  pop  edx
+noSneak:
+  mov  real_sneak_queue_time, edx
+  pop  eax
   mov  real_dude, eax
   mov  eax, dword ptr ds:[_itemCurrentItem]
   mov  real_hand, eax
@@ -325,11 +343,7 @@ noLeftHand:
 // restore dude state
 static void __declspec(naked) RestoreDudeState() {
  __asm {
-  push edi
-  push esi
-  push edx
-  push ecx
-  push eax
+  pushad
   mov  eax, offset real_pc_name
   call critter_pc_set_name_
   mov  eax, real_last_level
@@ -367,6 +381,7 @@ static void __declspec(naked) RestoreDudeState() {
   call skill_set_tags_
   mov  eax, dword ptr ds:[_obj_dude]
   mov  ecx, real_dude
+  push ecx
   mov  dword ptr ds:[_obj_dude], ecx
   mov  dword ptr ds:[_inven_dude], ecx
   mov  esi, dword ptr [ecx+0x64]
@@ -398,11 +413,15 @@ skipPerks:
 unsetAddict:
   call pc_flag_off_
 skip:
-  pop  eax
-  pop  ecx
   pop  edx
-  pop  esi
-  pop  edi
+  mov  eax, real_sneak_queue_time
+  test eax, eax
+  jz   end
+  mov  ecx, 10
+  xor  ebx, ebx
+  call queue_add_
+end:
+  popad
   retn
  }
 }

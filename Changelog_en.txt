@@ -1,5 +1,6 @@
+Made by Crafty, English translation by Drobovik
 
-Change log:
+Changelog:
 
 v1.4
 * From ddraw.ini in F2 version deleted 'WieldObjCritterFix', because it is just like any other pure fix that needs to be turned on all the time, for example, BlackSkilldexFix.

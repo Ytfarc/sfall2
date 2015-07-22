@@ -638,7 +638,7 @@ static void __declspec(naked) MultiHexFix() {
  __asm {
   xor  ecx, ecx
   test byte ptr [ebx+0x25], 0x8             // is target multihex?
-  mov  ebx, dword ptr [ebx+0x4]             // ebx = pud.tile_num (target's tilenum)
+  mov  ebx, dword ptr [ebx+0x4]             // ebx = pobj.tile_num (target's tilenum)
   jz   end                                  // skip if not multihex
   inc  ebx                                  // otherwise, increase tilenum by 1
 end:
@@ -646,23 +646,21 @@ end:
  }
 }
 
-static const DWORD FastShotTraitFixEnd1 = 0x478E7F;
-static const DWORD FastShotTraitFixEnd2 = 0x478E7B;
-static void __declspec(naked) FastShotTraitFix() {
+static void __declspec(naked) item_w_called_shot_hook() {
  __asm {
-  test eax,eax;    // does player have Fast Shot trait?
-  je ajmp;    // skip ahead if no
-  mov edx,ecx;    // argument for item_w_range: hit_mode
-  mov eax,ebx;    // argument for item_w_range: pointer to source_obj (always dude_obj due to code path)
-  call item_w_range_   // get weapon's range
-  cmp eax,0x2;    // is weapon range less than or equal 2 (i.e. melee/unarmed attack)?
-  jle ajmp;    // skip ahead if yes
-  xor eax,eax;    // otherwise, disallow called shot attempt
-  jmp bjmp;
-ajmp:
-  jmp FastShotTraitFixEnd1;  // continue processing called shot attempt
-bjmp:
-  jmp FastShotTraitFixEnd2;  // clean up and exit function item_w_called_shot
+  mov  edx, 0x478E7F
+  test eax, eax                             // does player have Fast Shot trait?
+  jz   end                                  // skip ahead if no
+  push edx
+  mov  edx, ecx                             // hit_mode
+  mov  eax, ebx                             // who
+  call item_w_range_                        // get weapon's range
+  pop  edx
+  cmp  eax, 2                               // is weapon range less than or equal 2 (i.e. melee/unarmed attack)?
+  jle  end                                  // skip ahead if yes
+  mov  edx, 0x478E9B                        // otherwise, disallow called shot attempt
+end:
+  jmp  edx
  }
 }
 
@@ -1970,17 +1968,17 @@ static void DllMain2() {
   dlogr(" Done", DL_INIT);
  }
 
- switch(GetPrivateProfileIntA("Misc", "FastShotFix", 1, ini)) {
+ switch (GetPrivateProfileIntA("Misc", "FastShotFix", 1, ini)) {
  case 1:
   dlog("Applying Fast Shot Trait Fix.", DL_INIT);
-  MakeCall(0x478E75, &FastShotTraitFix, true);
+  MakeCall(0x478E75, &item_w_called_shot_hook, true);
   dlogr(" Done", DL_INIT);
   break;
  case 2:
   dlog("Applying Fast Shot Trait Fix. (Fallout 1 version)", DL_INIT);
-  SafeWrite16(0x478C9F, 0x9090);
+  SafeWrite8(0x478CA0, 0x0);
 #define hook(a) SafeWrite32(a+1, 0x478C7D - (a+5))
-  hook(0x478C2f);
+  hook(0x478C2F);
   hook(0x478C08);
   hook(0x478BF9);
   hook(0x478BEA);

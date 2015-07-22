@@ -649,9 +649,9 @@ static void __declspec(naked) compute_attack_hook() {
   add  ecx, 20                              // 40% chance of critical hit
   cmp  edx, hit_piercing_strike
   je   check
-  add  ecx, 10                              // 50% chance of critical hit
   cmp  edx, hit_piercing_kick
   jne  end
+  add  ecx, 10                              // 50% chance of critical hit
 check:
   mov  edx, 100
   xor  eax, eax

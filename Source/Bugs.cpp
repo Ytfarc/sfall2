@@ -246,9 +246,9 @@ static void __declspec(naked) partyMemberIncLevels_hook() {
   cmp  eax, -1
   je   end
   pushad
-  mov  dword ptr ds:[_critterClearObj], ebx
-  mov  edx, critterClearObjDrugs_
-  call queue_clear_type_
+  mov  edx, ebx
+  xchg edx, eax                             // eax=who, edx=type
+  call queue_remove_this_
   mov  ecx, 8
   mov  edi, _drugInfoList
   mov  esi, ebx
@@ -634,11 +634,10 @@ static void __declspec(naked) set_new_results_hook() {
  __asm {
   test ah, 0x1                              // DAM_KNOCKED_OUT?
   jz   end                                  // Нет
-  mov  dword ptr ds:[_critterClearObj], esi
-  mov  edx, critterClearObjDrugs_
-  xor  eax, eax
-  inc  eax                                  // type = отключка
-  call queue_clear_type_                    // Удаляем отключку из очереди (если отключка там есть)
+  mov  eax, esi
+  xor  edx, edx
+  inc  edx                                  // type = отключка
+  call queue_remove_this_                   // Удаляем отключку из очереди (если отключка там есть)
   retn
 end:
   pop  eax                                  // Уничтожаем адрес возврата
