@@ -116,11 +116,9 @@ static const char* _stdcall GetOpArgStr(int num) {
 #include "ScriptOps\AnimOps.hpp"
 #include "ScriptOps\MiscOps.hpp"
 
-
 typedef void (_stdcall *regOpcodeProc)(WORD opcode,void* ptr);
 
 static DWORD highlightingToggled=0;
-static DWORD MotionSensorMode;
 static BYTE toggleHighlightsKey;
 static DWORD TurnHighlightContainers = 0;
 static int idle;
@@ -848,9 +846,9 @@ static void __declspec(naked) obj_outline_all_items_on_() {
   pushad
   mov  eax, dword ptr ds:[_map_elevation]
   call obj_find_first_at_
+loopObject:
   test eax, eax
   jz   end
-loopObject:
   cmp  eax, ds:[_outlined_object]
   je   nextObject
   xchg ecx, eax
@@ -873,8 +871,7 @@ NoHighlight:
   mov  [ecx+0x74], edx
 nextObject:
   call obj_find_next_at_
-  test eax, eax
-  jnz  loopObject
+  jmp  loopObject
 end:
   call tile_refresh_display_
   popad
@@ -887,24 +884,23 @@ static void __declspec(naked) obj_outline_all_items_off_() {
   pushad
   mov  eax, dword ptr ds:[_map_elevation]
   call obj_find_first_at_
+loopObject:
   test eax, eax
   jz   end
-loopObject:
   cmp  eax, ds:[_outlined_object]
   je   nextObject
-  xchg ebx, eax
-  mov  eax, [ebx+0x20]
+  xchg ecx, eax
+  mov  eax, [ecx+0x20]
   and  eax, 0xF000000
   sar  eax, 0x18
   test eax, eax                             // Это ObjType_Item?
   jnz  nextObject                           // Нет
-  cmp  dword ptr [ebx+0x7C], eax            // Кому-то принадлежит?
+  cmp  dword ptr [ecx+0x7C], eax            // Кому-то принадлежит?
   jnz  nextObject                           // Да
-  mov  dword ptr [ebx+0x74], eax
+  mov  dword ptr [ecx+0x74], eax
 nextObject:
   call obj_find_next_at_
-  test eax, eax
-  jnz  loopObject
+  jmp  loopObject
 end:
   call tile_refresh_display_
   popad
@@ -947,7 +943,6 @@ void ScriptExtenderSetup() {
 #endif
  toggleHighlightsKey=GetPrivateProfileIntA("Input", "ToggleItemHighlightsKey", 0, ini);
  if (toggleHighlightsKey) {
-  MotionSensorMode=GetPrivateProfileIntA("Misc", "MotionScannerFlags", 1, ini);
   HookCall(0x44B9BA, &gmouse_bk_process_hook);
   HookCall(0x44BD1C, &obj_remove_outline_hook);
   HookCall(0x44E559, &obj_remove_outline_hook);
@@ -1468,7 +1463,7 @@ static void RunGlobalScripts1() {
   //0x48C294 to toggle
   if(KeyDown(toggleHighlightsKey)) {
    if(!highlightingToggled) {
-    if(MotionSensorMode&4) {
+    if(MotionSensorFlags&4) {
      DWORD scanner;
      __asm {
       mov eax, ds:[_obj_dude]
@@ -1477,7 +1472,7 @@ static void RunGlobalScripts1() {
       mov scanner, eax;
      }
      if(scanner) {
-      if(MotionSensorMode&2) {
+      if(MotionSensorFlags&2) {
        __asm {
         mov eax, scanner;
         call item_m_dec_charges_ //Returns -1 if the item has no charges

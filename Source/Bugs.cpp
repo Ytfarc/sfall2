@@ -700,6 +700,20 @@ static void __declspec(naked) partyMemberPrepLoadInstance_hook() {
  }
 }
 
+static void __declspec(naked) combat_ctd_init_hook() {
+ __asm {
+  mov  [esi+0x24], eax                      // ctd.targetTile
+  mov  eax, [ebx+0x54]                      // pobj.who_hit_me
+  inc  eax
+  test eax, eax
+  jnz  end
+  mov  [ebx+0x54], eax                      // pobj.who_hit_me
+end:
+  mov  eax, 0x422F11
+  jmp  eax
+ }
+}
+
 void BugsInit() {
 
  dlog("Applying sharpshooter patch.", DL_INIT);
@@ -810,5 +824,9 @@ void BugsInit() {
  MakeCall(0x42E46E, &critter_wake_clear_hook, true);
  MakeCall(0x488EF3, &obj_load_func_hook, true);
  HookCall(0x4949B2, &partyMemberPrepLoadInstance_hook);
+
+// Fix explosives crash
+ MakeCall(0x422F05, &combat_ctd_init_hook, true);
+ SafeWrite8(0x489405, 0x0);
 
 }

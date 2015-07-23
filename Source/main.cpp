@@ -81,6 +81,8 @@ static const char* musicOverridePath="data\\sound\\music\\";
 
 bool npcautolevel;
 
+DWORD MotionSensorFlags;
+
 static int* scriptDialog;
 
 static const DWORD AgeMin[] = {
@@ -483,43 +485,31 @@ static void __declspec(naked) ReloadHook() {
  }
 }
 
-static const DWORD CorpseHitFix2_continue_loop1 = 0x48B99B;
-static void __declspec(naked) CorpseHitFix2() {
+static void __declspec(naked) obj_shoot_blocking_at_hook() {
  __asm {
-  push eax;
-  mov eax, [eax];
-  call critter_is_dead_ // found some object, check if it's a dead critter
-  test eax, eax;
-  pop eax;
-  jz really_end; // if not, allow breaking the loop (will return this object)
-  jmp CorpseHitFix2_continue_loop1; // otherwise continue searching
-
-really_end:
-  mov     eax, [eax];
-  pop     ebp;
-  pop     edi;
-  pop     esi;
-  pop     ecx;
-  retn;
+  je   itsCritter
+  cmp  edx, ObjType_Wall
+  retn
+itsCritter:
+  xchg edi, eax
+  call critter_is_dead_                     // check if it's a dead critter
+  xchg edi, eax
+  test edi, edi
+  retn
  }
 }
-static const DWORD CorpseHitFix2_continue_loop2 = 0x48BA0B; 
-// same logic as above, for different loop
-static void __declspec(naked) CorpseHitFix2b() {
- __asm {
-  mov eax, [edx];
-  call critter_is_dead_
-  test eax, eax;
-  jz really_end; 
-  jmp CorpseHitFix2_continue_loop2;
 
-really_end:
-  mov     eax, [edx];
-  pop     ebp;
-  pop     edi;
-  pop     esi;
-  pop     ecx;
-  retn;
+// same logic as above, for different loop
+static void __declspec(naked) obj_shoot_blocking_at_hook1() {
+ __asm {
+  je   itsCritter
+  cmp  eax, ObjType_Wall
+  retn
+itsCritter:
+  mov  eax, [edx]
+  call critter_is_dead_
+  test eax, eax
+  retn
  }
 }
 
@@ -664,56 +654,10 @@ end:
  }
 }
 
-static const DWORD ScannerHookRet=0x41BC1D;
-static const DWORD ScannerHookFail=0x41BC65;
-static void __declspec(naked) ScannerAutomapHook() {
+static void __declspec(naked) automap_hook() {
  __asm {
-  mov eax, ds:[_obj_dude]
-  mov edx, PID_MOTION_SENSOR
-  call inven_pid_is_carried_ptr_
-  test eax, eax;
-  jz fail;
-  mov edx, eax;
-  jmp ScannerHookRet;
-fail:
-  jmp ScannerHookFail;
- }
-}
-
-static void _stdcall explosion_crash_fix_hook2() {
- if(InCombat()) return;
- for(int elv=0;elv<3;elv++) {
-  for(int tile=0;tile<40000;tile++) {
-   DWORD* obj;
-   __asm {
-    mov edx, tile;
-    mov eax, elv;
-    call obj_find_first_at_tile_
-    mov obj, eax;
-   }
-   while(obj) {
-    DWORD otype = obj[25];
-    otype = (otype&0xff000000) >> 24;
-    if(otype==1) {
-     obj[0x12]=0;
-     obj[0x15]=0;
-     obj[0x10]=0;
-    }
-    __asm {
-     call obj_find_next_at_tile_
-     mov obj, eax;
-    }
-   }
-  }
- }
-}
-
-static void __declspec(naked) explosion_crash_fix_hook() {
- __asm {
-  pushad;
-  call explosion_crash_fix_hook2;
-  popad;
-  jmp  report_explosion_
+  mov  edx, PID_MOTION_SENSOR
+  jmp  inven_pid_is_carried_ptr_
  }
 }
 
@@ -1771,9 +1715,8 @@ static void DllMain2() {
 
  if (GetPrivateProfileInt("Misc", "CorpseLineOfFireFix", 0, ini)) {
   dlog("Applying corpse line of fire patch. ", DL_INIT);
-
-  MakeCall(0x48B994, CorpseHitFix2, true);
-  MakeCall(0x48BA04, CorpseHitFix2b, true);
+  MakeCall(0x48B98D, obj_shoot_blocking_at_hook, false);
+  MakeCall(0x48B9FD, obj_shoot_blocking_at_hook1, false);
   dlogr(" Done", DL_INIT);
  }
 
@@ -2015,10 +1958,11 @@ static void DllMain2() {
  InventoryInit();
  dlogr(" Done", DL_INIT);
 
- if(tmp=GetPrivateProfileIntA("Misc", "MotionScannerFlags", 1, ini)) {
+ MotionSensorFlags = GetPrivateProfileIntA("Misc", "MotionScannerFlags", 1, ini);
+ if (MotionSensorFlags != 0) {
   dlog("Applying MotionScannerFlags patch.", DL_INIT);
-  if(tmp&1) MakeCall(0x41BBE9, &ScannerAutomapHook, true);
-  if(tmp&2) BlockCall(0x41BC3C);
+  if (MotionSensorFlags&1) MakeCall(0x41BBEE, &automap_hook, true);
+  if (MotionSensorFlags&2) BlockCall(0x41BC3C);
   dlogr(" Done", DL_INIT);
  }
 
@@ -2054,9 +1998,6 @@ static void DllMain2() {
  dlog("Initing AI control.", DL_INIT);
  PartyControlInit();
  dlogr(" Done", DL_INIT);
-
- HookCall(0x413105, explosion_crash_fix_hook);//test for explosives
- SafeWrite32(0x413034, (DWORD)&explosion_crash_fix_hook);
 
  if (GetPrivateProfileIntA("Misc", "ObjCanSeeObj_ShootThru_Fix", 0, ini)) {
   dlog("Applying ObjCanSeeObj ShootThru Fix.", DL_INIT);
