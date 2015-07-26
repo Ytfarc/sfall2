@@ -222,6 +222,7 @@ const DWORD obj_find_first_at_ = 0x48B48C;
 const DWORD obj_find_first_at_tile_ = 0x48B5A8;
 const DWORD obj_find_next_at_ = 0x48B510;
 const DWORD obj_find_next_at_tile_ = 0x48B608;
+const DWORD obj_fix_combat_cid_for_dude_ = 0x48909C;
 const DWORD obj_new_sid_inst_ = 0x49AAC0;
 const DWORD obj_outline_object_ = 0x48C2B4;
 const DWORD obj_pid_new_ = 0x489C9C;

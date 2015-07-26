@@ -714,6 +714,47 @@ end:
  }
 }
 
+static void __declspec(naked) map_fix_critter_combat_data_hook() {
+ __asm {
+  inc  ebx
+  xchg ebx, eax
+  test eax, eax
+  jz   skip
+  cmp  ebx, ds:[_obj_dude]
+  je   end
+  xchg ebx, ds:[_obj_dude]
+  call obj_fix_combat_cid_for_dude_
+  xchg ebx, ds:[_obj_dude]
+  jmp  end
+skip:
+  mov  [ebx+0x54], eax                      // pobj.who_hit_me
+end:
+  mov  ebx, 0x4837B1
+  jmp  ebx
+ }
+}
+
+static void __declspec(naked) action_explode_hook() {
+ __asm {
+  mov  edx, destroy_p_proc
+  mov  eax, [esi+0x78]                      // pobj.sid
+  call exec_script_proc_
+  xor  edx, edx
+  dec  edx
+  retn
+ }
+}
+
+static void __declspec(naked) action_explode_hook1() {
+ __asm {
+  push esi
+  mov  esi, [esi+0x40]                      // ctd.target#
+  call action_explode_hook
+  pop  esi
+  retn
+ }
+}
+
 void BugsInit() {
 
  dlog("Applying sharpshooter patch.", DL_INIT);
@@ -825,8 +866,11 @@ void BugsInit() {
  MakeCall(0x488EF3, &obj_load_func_hook, true);
  HookCall(0x4949B2, &partyMemberPrepLoadInstance_hook);
 
-// Fix explosives crash
+// Fix explosives bugs
  MakeCall(0x422F05, &combat_ctd_init_hook, true);
- SafeWrite8(0x489405, 0x0);
+ SafeWrite8(0x482DE1, 0x0);
+ MakeCall(0x4837A2, &map_fix_critter_combat_data_hook, true);
+ MakeCall(0x4130C3, &action_explode_hook, false);
+ MakeCall(0x4130E5, &action_explode_hook1, false);
 
 }

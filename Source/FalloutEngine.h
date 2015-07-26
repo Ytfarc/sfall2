@@ -221,6 +221,7 @@ extern const DWORD obj_find_first_at_;
 extern const DWORD obj_find_first_at_tile_;
 extern const DWORD obj_find_next_at_;
 extern const DWORD obj_find_next_at_tile_;
+extern const DWORD obj_fix_combat_cid_for_dude_;
 extern const DWORD obj_new_sid_inst_;
 extern const DWORD obj_outline_object_;
 extern const DWORD obj_pid_new_;
